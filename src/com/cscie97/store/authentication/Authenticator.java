@@ -13,7 +13,7 @@ public class Authenticator implements StoreAuthenticationService
     private int suggestedId = 0;
     private HashSet<String> authTokenIdsUsed;
     private LinkedHashMap<String, User> users;
-    LinkedHashMap<String, String[]> tmpUserPermissions;
+    LinkedHashMap<String, HashSet<String>> tmpUserPermissions;
    
     /* Constructor */
     
@@ -81,15 +81,29 @@ public class Authenticator implements StoreAuthenticationService
         rRole3.addBaseRole(role4);
         rRole1.addBaseRole(rRole3);
         
-        LinkedHashMap<String, String[]> initiatorPermissions = getUserPermissions(initiator);
+        LinkedHashMap<String, HashSet<String>> initiatorPermissions = getUserPermissions(initiator);
+        
+        // TODO: Debugging
+        System.out.println();
+        for (Entry<String, HashSet<String>> permissionEntry : initiatorPermissions.entrySet())
+        {
+            System.out.print(permissionEntry.getKey() + " :");
+            for (String resourceId : permissionEntry.getValue())
+            {
+                System.out.print(" " + resourceId);
+            }
+            
+            if (permissionEntry.getValue().size() == 0)
+                System.out.print(" empty");
+            
+            System.out.println();
+        }
     }
     
-    public LinkedHashMap<String, String[]> getUserPermissions(User user)
+    public LinkedHashMap<String, HashSet<String>> getUserPermissions(User user)
     {
-        // TODO: Get all the Permission id's of user and any associated ResourceRole resources
-        
-        tmpUserPermissions = new LinkedHashMap<String, String[]>();
-        
+        // Get all the Permission id's of user and any associated ResourceRole resources        
+        tmpUserPermissions = new LinkedHashMap<String, HashSet<String>>();        
         for (Entry<String, Entitlement> entitlementEntry : user.getEntitlements().entrySet())
         {
             ArrayList<String> tmpResourceIds = new ArrayList<String>();
@@ -124,17 +138,34 @@ public class Authenticator implements StoreAuthenticationService
         
         if (entitlement.getClass().getName().endsWith(".Permission"))
         {
-            System.out.print(entitlement.getId() + " :");
+            // TODO: Debugging
+            System.out.print(entitlement.getId() + " :");          
             
-            // TODO: Create a new ArrayList for permission's resources
-            ArrayList<String> permissionResources;
+            // Create HashSet pointer (for any resource id's associated with permission)
+            HashSet<String> resourceIds;
             
+            // If permission id encountered previously, get its HashSet
+            if (tmpUserPermissions.containsKey(entitlement.getId()))            
+                resourceIds = tmpUserPermissions.get(entitlement.getId());            
+            
+            // Else create a new HashSet for permission
+            else            
+                resourceIds = new HashSet<String>();            
+            
+            // Add resourceId to HashSet
             for (String resourceId : resourceIdListToPass)
-            {                       
-                System.out.print(" " + resourceId);             
+            {             
+                // TODO: Debugging
+                System.out.print(" " + resourceId);
+                
+                resourceIds.add(resourceId);
             }
             
+            // TODO: Debugging
             System.out.println();
+            
+            // Add permission id and HashSet to tmpUserPermissions
+            tmpUserPermissions.put(entitlement.getId(), resourceIds);
         }
         
         if (entitlement.getClass().getName().endsWith(".Role"))
