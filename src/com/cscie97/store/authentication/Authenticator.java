@@ -13,8 +13,8 @@ public class Authenticator implements StoreAuthenticationService
     private int suggestedId = 0;
     private HashSet<String> authTokenIdsUsed;
     private LinkedHashMap<String, User> users;
-    private Boolean hasPermission;
-    
+    LinkedHashMap<String, String[]> tmpUserPermissions;
+   
     /* Constructor */
     
     public Authenticator()
@@ -59,17 +59,21 @@ public class Authenticator implements StoreAuthenticationService
         Role role4 = new Role("roleId4", "name", "description");
         
         Resource store1 = new Resource("store1", "description");
+        Resource store2 = new Resource("store2", "description");
         
         ResourceRole rRole1 = new ResourceRole("rRoleId1", "name", "description", store1, role3);
         ResourceRole rRole2 = new ResourceRole("rRoleId2", "name", "description", store1, role1);
         ResourceRole rRole3 = new ResourceRole("rRoleId3", "name", "description", store1, role4);
+        ResourceRole rRole4 = new ResourceRole("rRoleId4", "name", "description", store2, role2);
         
         role1.addEntitlement(permission1);
         role1.addEntitlement(permission5);
         rRole2.addBaseRole(role1);
         role.addEntitlement(rRole2);
         role2.addEntitlement(permission2);
-        role.addEntitlement(role2);
+        role2.addEntitlement(permission1);
+        rRole4.addBaseRole(role2);
+        role.addEntitlement(rRole4);
         role3.addEntitlement(permission3);
         rRole1.addBaseRole(role3);
         initiator.addEntitlement(rRole1);
@@ -77,18 +81,25 @@ public class Authenticator implements StoreAuthenticationService
         rRole3.addBaseRole(role4);
         rRole1.addBaseRole(rRole3);
         
-        // TODO: Testing -- Print all the Permission id's for initiator User
-        hasPermission = false;
-        for (Entry<String, Entitlement> entitlementEntry : initiator.getEntitlements().entrySet())
+        LinkedHashMap<String, String[]> initiatorPermissions = getUserPermissions(initiator);
+    }
+    
+    public LinkedHashMap<String, String[]> getUserPermissions(User user)
+    {
+        // TODO: Get all the Permission id's of user and any associated ResourceRole resources
+        
+        tmpUserPermissions = new LinkedHashMap<String, String[]>();
+        
+        for (Entry<String, Entitlement> entitlementEntry : user.getEntitlements().entrySet())
         {
             ArrayList<String> tmpResourceIds = new ArrayList<String>();
-            traverseTree(entitlementEntry.getValue(), "AuthenticatorApiUserRole", tmpResourceIds);
-        }
+            traverseTree(entitlementEntry.getValue(), tmpResourceIds);
+        }   
         
-        System.out.println(hasPermission);
-    }    
+        return tmpUserPermissions;
+    }
     
-    public void traverseTree(Entitlement entitlement, String permissionId, ArrayList<String> resourceIdList)
+    public void traverseTree(Entitlement entitlement, ArrayList<String> resourceIdList)
     {
         // Create pointer for default Resource list to pass
         ArrayList<String> resourceIdListToPass = resourceIdList;
@@ -111,16 +122,20 @@ public class Authenticator implements StoreAuthenticationService
             resourceIdListToPass = newResourceIdList;
         }
         
-        System.out.print(entitlement.getId() + " :");
-        for (String resourceId : resourceIdListToPass)
-        {                       
-            System.out.print(" " + resourceId);             
+        if (entitlement.getClass().getName().endsWith(".Permission"))
+        {
+            System.out.print(entitlement.getId() + " :");
+            
+            // TODO: Create a new ArrayList for permission's resources
+            ArrayList<String> permissionResources;
+            
+            for (String resourceId : resourceIdListToPass)
+            {                       
+                System.out.print(" " + resourceId);             
+            }
+            
+            System.out.println();
         }
-        
-        System.out.println();
-        
-        if (entitlement.getId().equals(permissionId))
-            hasPermission = true;
         
         if (entitlement.getClass().getName().endsWith(".Role"))
         {
@@ -128,7 +143,7 @@ public class Authenticator implements StoreAuthenticationService
             LinkedHashMap<String, Entitlement> entitlements = role.getEntitlements();
             for (Entry<String, Entitlement> entitlementEntry : entitlements.entrySet())
             {
-                traverseTree(entitlementEntry.getValue(), permissionId, resourceIdListToPass);
+                traverseTree(entitlementEntry.getValue(), resourceIdListToPass);
             }
         }
         
@@ -138,7 +153,7 @@ public class Authenticator implements StoreAuthenticationService
             LinkedHashMap<String, BaseRole> baseRoles = rRole.getBaseRoles();
             for (Entry<String, BaseRole> rRoleEntry : baseRoles.entrySet())
             {
-                traverseTree(rRoleEntry.getValue(), permissionId, resourceIdListToPass);
+                traverseTree(rRoleEntry.getValue(), resourceIdListToPass);
             }
         }
     }
