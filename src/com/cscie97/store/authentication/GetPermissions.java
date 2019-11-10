@@ -3,90 +3,103 @@ package com.cscie97.store.authentication;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
-import java.util.Map.Entry;
 
 public class GetPermissions implements EntitlementVisitor
 {
     /* VARIABLES */
-    
-    // Stores all the Permission id's of user and any associated ResourceRole resources 
-    private LinkedHashMap<String, HashSet<String>> userPermissions;
-    private ArrayList<String> resourceIds;
+         
+    private LinkedHashMap<String, HashSet<String>> userPermissionIds; // Stores Permission id's of user and any associated ResourceRole resources
+    private ArrayList<String> tmpResourceIds;
     
     /* CONSTRUCTOR */
     
     public GetPermissions()
     {
-        userPermissions = new LinkedHashMap<String, HashSet<String>>();
+        userPermissionIds = new LinkedHashMap<String, HashSet<String>>();
     }
     
     /* API METHODS */
 
     @Override
+    public void visitRole(Role role)
+    {        
+        // No action needed
+    }
+    
+    @Override
     public void visitResourceRole(ResourceRole rRole)
     {
-        // TODO Auto-generated method stub
-        
         // Create new Resource list and copy old Resource list to new one
-        ArrayList<String> newResourceIds = new ArrayList<String>();
-        for (String resourceId : resourceIds)
+        ArrayList<String> newTmpResourceIds = new ArrayList<String>();
+        for (String resourceId : tmpResourceIds)
         {
-            newResourceIds.add(resourceId);
+            newTmpResourceIds.add(resourceId);
         }
         
         // Add new Resource to new Resource list
-        newResourceIds.add(rRole.getResource().getId());    
+        newTmpResourceIds.add(rRole.getResource().getId());    
         
-        // Change resourceIds to new list
-        resourceIds = newResourceIds;   
+        // Change tmpResourceIds to new list
+        tmpResourceIds = newTmpResourceIds;   
     }
 
     @Override
     public void visitPermission(Permission permission)
     {
-        // TODO Auto-generated method stub
-        
         // TODO: Debugging
         System.out.print(permission.getId() + " :");
         
         // Create HashSet pointer (for any resource id's associated with permission)
         HashSet<String> resourceIds;
         
-        // If permission id encountered previously, get its HashSet
-        if (userPermissions.containsKey(permission.getId()))            
-            resourceIds = userPermissions.get(permission.getId());            
+        // If Permission id encountered previously, get its HashSet
+        if (userPermissionIds.containsKey(permission.getId()))            
+            resourceIds = userPermissionIds.get(permission.getId());            
         
-        // Else create a new HashSet for permission
+        // Else create a new HashSet for Permission id
         else            
             resourceIds = new HashSet<String>();            
         
-        // Add resourceId to HashSet
-        for (String resourceId : this.resourceIds)
+        // Add Resource id to HashSet
+        for (String tmpResourceId : tmpResourceIds)
         {         
             // TODO: Debugging
-            System.out.print(" " + resourceId);
+            System.out.print(" " + tmpResourceId);
             
-            resourceIds.add(resourceId);
+            resourceIds.add(tmpResourceId);
         }    
         
         // TODO: Debugging
         System.out.println();
         
-        // Add permission id and HashSet to userPermissions
-        userPermissions.put(permission.getId(), resourceIds);
+        // Add Permission id and Resource id HashSet to userPermissionIds
+        userPermissionIds.put(permission.getId(), resourceIds);
     }
     
     /* UTILITY METHODS */
     
+    /* *
+     * Creates a new fresh ArrayList for traversing a new tree of Entitlements
+     */
     public void newTreeVisit()
     {
-        resourceIds = new ArrayList<String>();
+        tmpResourceIds = new ArrayList<String>();
     }
     
     /* GETTERS AND SETTERS */
     
-    public LinkedHashMap<String, HashSet<String>> getUserPermissions()
+    public LinkedHashMap<String, HashSet<String>> getUserPermissionIds()
     {
-        return userPermissions;
+        return userPermissionIds;
     }
+
+    public ArrayList<String> getTmpResourceIds()
+    {
+        return tmpResourceIds;
+    }
+
+    public void setTmpResourceIds(ArrayList<String> tmpResourceIds)
+    {
+        this.tmpResourceIds = tmpResourceIds;
+    }  
 }

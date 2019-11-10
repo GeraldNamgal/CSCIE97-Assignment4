@@ -1,6 +1,6 @@
 package com.cscie97.store.authentication;
 
-public abstract class Entitlement
+public abstract class Entitlement implements Visitable
 {
     /* Variables */
     
@@ -19,6 +19,7 @@ public abstract class Entitlement
     
     /* Method(s) */
     
+    @Override
     public abstract void acceptVistor(EntitlementVisitor visitor);   
     
     /* Getters and Setters */

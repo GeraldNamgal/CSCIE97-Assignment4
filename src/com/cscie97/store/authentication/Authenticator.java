@@ -1,5 +1,6 @@
 package com.cscie97.store.authentication;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map.Entry;
@@ -66,18 +67,15 @@ public class Authenticator implements StoreAuthenticationService
 
         role1.addEntitlement(permission1);
         role1.addEntitlement(permission5);
-        rRole2.addBaseRole(role1);
         role.addEntitlement(rRole2);
         role2.addEntitlement(permission2);
         role2.addEntitlement(permission1);
-        rRole4.addBaseRole(role2);
         role.addEntitlement(rRole4);
         role3.addEntitlement(permission3);
-        rRole1.addBaseRole(role3);
         initiator.addEntitlement(rRole1);
         role4.addEntitlement(permission4);
-        rRole3.addBaseRole(role4);
-        rRole1.addBaseRole(rRole3);
+        rRole1.addEntitlement(rRole3);
+        rRole2.addEntitlement(permission4);
 
         GetPermissions getPermissions = new GetPermissions();
         
@@ -85,7 +83,7 @@ public class Authenticator implements StoreAuthenticationService
 
         // TODO: Debugging
         System.out.println();
-        for (Entry<String, HashSet<String>> permissionEntry : getPermissions.getUserPermissions().entrySet())
+        for (Entry<String, HashSet<String>> permissionEntry : getPermissions.getUserPermissionIds().entrySet())
         {
             System.out.print(permissionEntry.getKey() + " :");
             for (String resourceId : permissionEntry.getValue())
@@ -100,50 +98,7 @@ public class Authenticator implements StoreAuthenticationService
         }
     }
     
-    /* UTILITY METHODS */
-    
-    public void visitUserEntitlements(User user, EntitlementVisitor visitor)
-    {       
-        for (Entry<String, Entitlement> entitlementEntry : user.getEntitlements().entrySet())
-        {           
-            if (visitor.getClass().getName().endsWith(".GetPermissions"))
-            {
-                GetPermissions getPermissions = (GetPermissions) visitor;
-                getPermissions.newTreeVisit();
-            }
-            
-            traverseTree(entitlementEntry.getValue(), visitor);
-        }
-    }
-    
-    public void traverseTree(Entitlement entitlement, EntitlementVisitor visitor)
-    {      
-        entitlement.acceptVistor(visitor);
-        
-        // If current node is a ResourceRole, recurse
-        if (entitlement.getClass().getName().endsWith(".ResourceRole"))
-        {
-            ResourceRole rRole = (ResourceRole) entitlement;        
-            LinkedHashMap<String, BaseRole> baseRoles = rRole.getBaseRoles();
-            for (Entry<String, BaseRole> rRoleEntry : baseRoles.entrySet())
-            {
-                traverseTree(rRoleEntry.getValue(), visitor);
-            }
-        }
-        
-        // If current node is a Role, recurse
-        if (entitlement.getClass().getName().endsWith(".Role"))
-        {
-            Role role = (Role) entitlement;
-            LinkedHashMap<String, Entitlement> entitlements = role.getEntitlements();
-            for (Entry<String, Entitlement> entitlementEntry : entitlements.entrySet())
-            {
-                traverseTree(entitlementEntry.getValue(), visitor);
-            }
-        }        
-    }
-    
-    /* API METHODS */
+    /* API METHODS */   
     
     @Override
     public Permission definePermission(String id, String name, String description)
@@ -167,12 +122,12 @@ public class Authenticator implements StoreAuthenticationService
     }
 
     @Override
-    public User createUser(String userId, String userName)
+    public User createUser(String userId, String name)
     {
         // TODO: Check for duplicates before creating new User
         
         // Create a new User
-        User user = new User(userId, userName);
+        User user = new User(userId, name);
         
         // Add new User to list of Users
         users.put(user.getId(), user);
@@ -261,5 +216,53 @@ public class Authenticator implements StoreAuthenticationService
         
         // Return Auth Token
         return authToken;
-    }   
+    }
+
+    @Override
+    public void logout(AuthToken authToken)
+    {
+        // TODO Auto-generated method stub
+        
+    }
+    
+    @Override
+    public void visitUserEntitlements(User user, EntitlementVisitor visitor)
+    {       
+        for (Entry<String, Entitlement> entitlementEntry : user.getEntitlements().entrySet())
+        {           
+            if (visitor.getClass().getName().endsWith(".GetPermissions"))
+            {
+                GetPermissions getPermissions = (GetPermissions) visitor;
+                getPermissions.newTreeVisit();
+                traverseTreeGetPermissions(entitlementEntry.getValue(), visitor, getPermissions.getTmpResourceIds());
+            }    
+        }
+    }
+    
+    /* UTILITY METHODS */
+    
+    public void traverseTreeGetPermissions(Visitable entitlement, EntitlementVisitor visitor, ArrayList<String> tmpResourceIds)
+    {      
+        // Align visitor's tmpResourceIds with current recursion state's tmpResourceIds
+        GetPermissions getPermissions = (GetPermissions) visitor;
+        getPermissions.setTmpResourceIds(tmpResourceIds);
+        
+        // Call entitlement's acceptVisitor method
+        entitlement.acceptVistor(visitor);
+        
+        // If current node is a Role, recurse
+        if (entitlement.getClass().getName().endsWith(".Role") || entitlement.getClass().getName().endsWith(".ResourceRole"))
+        {
+            Role role = (Role) entitlement;            
+            LinkedHashMap<String, Entitlement> entitlements = role.getEntitlements();
+            for (Entry<String, Entitlement> entitlementEntry : entitlements.entrySet())
+            {
+                // Recurse with new Resource id list as parameter if current node is a ResourceRole
+                if (entitlement.getClass().getName().endsWith(".ResourceRole"))
+                    traverseTreeGetPermissions(entitlementEntry.getValue(), visitor, getPermissions.getTmpResourceIds());
+                else
+                    traverseTreeGetPermissions(entitlementEntry.getValue(), visitor, tmpResourceIds);
+            }
+        }              
+    }
 }

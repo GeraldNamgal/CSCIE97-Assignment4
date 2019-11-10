@@ -2,11 +2,11 @@ package com.cscie97.store.authentication;
 
 import java.util.LinkedHashMap;
 
-public class Role extends BaseRole
+public class Role extends Entitlement
 {
     /* Variables */
   
-    private LinkedHashMap<String, Entitlement> entitlements;
+    protected LinkedHashMap<String, Entitlement> entitlements;
     
     /* Constructor */
     
@@ -34,6 +34,6 @@ public class Role extends BaseRole
     @Override
     public void acceptVistor(EntitlementVisitor visitor)
     {
-        // No action needed
+        visitor.visitRole(this);
     }
 }

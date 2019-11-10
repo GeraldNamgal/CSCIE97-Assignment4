@@ -10,8 +10,6 @@ public class Permission extends Entitlement
     @Override
     public void acceptVistor(EntitlementVisitor visitor)
     {
-        // TODO Auto-generated method stub
-        
         visitor.visitPermission(this);
     }   
 }

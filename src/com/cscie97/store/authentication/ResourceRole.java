@@ -2,30 +2,23 @@ package com.cscie97.store.authentication;
 
 import java.util.LinkedHashMap;
 
-public class ResourceRole extends BaseRole
+public class ResourceRole extends Role
 {
     /* Variables */
     
     private Resource resource;
-    private LinkedHashMap<String, BaseRole> baseRoles;
     
     /* Constructor */
     
-    public ResourceRole(String id, String name, String description, Resource resource, BaseRole baseRole)
+    public ResourceRole(String id, String name, String description, Resource resource, Entitlement entitlement)
     {
         super(id, name, description);  
         
         this.resource = resource;
-        baseRoles = new LinkedHashMap<String, BaseRole>();
-        baseRoles.put(baseRole.getId(), baseRole);
+        entitlements.put(entitlement.getId(), entitlement);
     }
     
-    /* Methods */
-    
-    public void addBaseRole(BaseRole baseRole)
-    {
-        baseRoles.put(baseRole.getId(), baseRole);
-    }
+    // TODO: Make a constructor that doesn't take an Entitlement
     
     /* Getters and Setters */
     
@@ -33,17 +26,10 @@ public class ResourceRole extends BaseRole
     {
         return resource;
     }
-    
-    public LinkedHashMap<String, BaseRole> getBaseRoles()
-    {
-        return baseRoles;
-    }
 
     @Override
     public void acceptVistor(EntitlementVisitor visitor)
     {
-        // TODO Auto-generated method stub
-        
         visitor.visitResourceRole(this);
     }
 }
