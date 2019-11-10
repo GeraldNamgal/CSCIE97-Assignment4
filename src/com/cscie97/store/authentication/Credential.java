@@ -4,8 +4,8 @@ public class Credential
 {
     private String id;
     private String type;
-    private VoicePrint voiceprint;
-    private FacePrint faceprint;
+    private Voiceprint voiceprint;
+    private Faceprint faceprint;
     private Password password;
     
     // TODO: Store credential as a hash
@@ -16,12 +16,12 @@ public class Credential
         
         if (type.equals("voiceprint"))
         {
-            voiceprint = new VoicePrint(value);
+            voiceprint = new Voiceprint(value);
         }
         
         if (type.equals("faceprint"))
         {
-            faceprint = new FacePrint(value);
+            faceprint = new Faceprint(value);
         }
         
         if (type.equals("password"))
@@ -30,11 +30,11 @@ public class Credential
         }
     }
     
-    public class VoicePrint
+    public class Voiceprint
     {
         private String vp;
         
-        private VoicePrint(String vp)
+        private Voiceprint(String vp)
         {
             this.vp = vp;
         }
@@ -45,11 +45,11 @@ public class Credential
         }       
     }
     
-    public class FacePrint
+    public class Faceprint
     {
         private String fp;
         
-        private FacePrint(String fp)
+        private Faceprint(String fp)
         {
             this.fp = fp;
         }
@@ -80,5 +80,25 @@ public class Credential
     public String getId()
     {
         return id;
+    }
+    
+    public String getValue()
+    {
+        if (type.equals("password"))
+        {
+            return password.getPwd();
+        }
+            
+        else if (type.equals("voiceprint"))
+        {
+            return voiceprint.getVp();
+        }
+                
+        else if (type.equals("faceprint"))
+        {
+            return faceprint.getFp();
+        }
+        
+        return null;
     }
 }

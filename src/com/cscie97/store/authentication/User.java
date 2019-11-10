@@ -52,4 +52,14 @@ public class User
     {
         return entitlements;
     }
+
+    public LinkedHashMap<String, Credential> getCredentials()
+    {
+        return credentials;
+    }  
+
+    public LinkedHashMap<String, AuthToken> getAuthTokens()
+    {
+        return authTokens;
+    }       
 }

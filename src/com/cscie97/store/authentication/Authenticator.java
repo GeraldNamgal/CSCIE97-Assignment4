@@ -7,7 +7,7 @@ import java.util.Map.Entry;
 
 public class Authenticator implements StoreAuthenticationService
 {
-    /* Variables */
+    /* VARIABLES */
     
     private final String INITIATOR_ACCOUNT_ID = "initiator";      
     private int suggestedId = 0;
@@ -15,7 +15,7 @@ public class Authenticator implements StoreAuthenticationService
     private LinkedHashMap<String, User> users;
     private LinkedHashMap<String, HashSet<String>> tmpUserPermissions;
    
-    /* Constructor */
+    /* CONSTRUCTOR */
     
     public Authenticator()
     {      
@@ -46,7 +46,7 @@ public class Authenticator implements StoreAuthenticationService
         authTokenIdsUsed = new HashSet<String>(); 
     }  
     
-    /* API Methods */
+    /* API METHODS */
     
     @Override
     public Permission definePermission(String id, String name, String description)
@@ -115,36 +115,58 @@ public class Authenticator implements StoreAuthenticationService
     }
 
     @Override
-    public AuthToken obtainAuthToken(String username, String password)
+    public AuthToken obtainAuthToken(String credentialId, String credentialValue)
     {
         // TODO Auto-generated method stub
         
-        // TODO: Verify username and password with hash
+        // TODO: Verify credentialId and credentialValue with hash (password type only?)        
+      
+        // Search through each User's Credentials for given credentialId and credentialValue combination
+        Boolean found = false;
+        User user = null;
+        for (Entry<String, User> userEntry : users.entrySet())
+        {    
+            for (Entry<String, Credential> credentialEntry : userEntry.getValue().getCredentials().entrySet())
+            {
+                if (credentialEntry.getKey().equals(credentialId) && credentialEntry.getValue().getValue().equals(credentialValue))
+                {
+                    found = true;
+                    break;
+                }
+            }
+            
+            if (found == true)
+            {
+                user = userEntry.getValue();
+                break;
+            }
+        }
         
-        // Verify username exists
-        if (!users.containsKey(username))
+        // TODO: Throw Authentication Exception if credentialId and credentialValue weren't found
+        if (found == false)
         {
-            System.out.println("\nUsername not found");
+            System.out.println("\nCredential id and/or credential value are invalid");
             return null;
         }
         
+        // TODO: If User has a valid Auth Token, retrieve it
+        AuthToken authToken;
+        user.getAuthTokens();
         
-        
-        // TODO: Check if an Auth Token already exists and send that instead of creating new one?
-        
-        // If no existing Auth Token?, get new Auth Token id and create new AuthToken
+        // TODO: If User has no Auth Tokens, create one
         while (authTokenIdsUsed.contains(Integer.toString(suggestedId)))
             suggestedId++;        
-        AuthToken authToken = new AuthToken(Integer.toString(suggestedId));
+        authToken = new AuthToken(Integer.toString(suggestedId));
         
         // Add now-used Auth Token id to used id's list and increment suggestedId for next Auth Token
         authTokenIdsUsed.add(Integer.toString(suggestedId));
         suggestedId++;
         
+        // Return Auth Token
         return authToken;
     }
     
-    /* Utility Methods */
+    /* UTILITY METHODS */
     
     public LinkedHashMap<String, HashSet<String>> getUserPermissions(User user)
     {
@@ -164,7 +186,7 @@ public class Authenticator implements StoreAuthenticationService
         // Create pointer for default Resource list to pass
         ArrayList<String> resourceIdListToPass = resourceIdList;
         
-        // Create new Resource list if new node is a ResoureRole
+        // Change Resource list if new node is a ResoureRole
         if (entitlement.getClass().getName().endsWith(".ResourceRole"))
         {
             // Copy old Resource list to new one
@@ -182,6 +204,7 @@ public class Authenticator implements StoreAuthenticationService
             resourceIdListToPass = newResourceIdList;
         }
         
+        // If current node is a Permission
         if (entitlement.getClass().getName().endsWith(".Permission"))
         {      
             // Create HashSet pointer (for any resource id's associated with permission)
@@ -205,6 +228,7 @@ public class Authenticator implements StoreAuthenticationService
             tmpUserPermissions.put(entitlement.getId(), resourceIds);
         }
         
+        // Recurse for when current node is a Role
         if (entitlement.getClass().getName().endsWith(".Role"))
         {
             Role role = (Role) entitlement;
@@ -215,6 +239,7 @@ public class Authenticator implements StoreAuthenticationService
             }
         }
         
+        // Recurse for when current node is a ResourceRole
         if (entitlement.getClass().getName().endsWith(".ResourceRole"))
         {
             ResourceRole rRole = (ResourceRole) entitlement;

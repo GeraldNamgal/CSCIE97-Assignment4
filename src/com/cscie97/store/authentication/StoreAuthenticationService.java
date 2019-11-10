@@ -10,5 +10,5 @@ public interface StoreAuthenticationService
     void addRoleToUser(String userId, String roleId);
     ResourceRole createResourceRole(String id, String roleId, String resourceId);
     void addResourceRoleToUser(String userId, String resourceRoleId);
-    AuthToken obtainAuthToken(String username, String password);
+    AuthToken obtainAuthToken(String credentialId, String credentialValue);
 }
