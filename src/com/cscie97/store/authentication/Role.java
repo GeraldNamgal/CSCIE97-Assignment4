@@ -30,4 +30,10 @@ public class Role extends BaseRole
     {
         return entitlements;
     }
+
+    @Override
+    public void acceptVistor(EntitlementVisitor visitor)
+    {
+        // No action needed
+    }
 }

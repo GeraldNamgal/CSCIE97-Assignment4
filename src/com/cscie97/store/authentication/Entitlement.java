@@ -17,7 +17,9 @@ public abstract class Entitlement
         this.description = description;       
     }    
     
-    // TODO: Do away with? -- public abstract Boolean hasPermission(String permissionId, String resourceId);
+    /* Method(s) */
+    
+    public abstract void acceptVistor(EntitlementVisitor visitor);   
     
     /* Getters and Setters */
     

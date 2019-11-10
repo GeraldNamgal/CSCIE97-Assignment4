@@ -99,8 +99,8 @@ public class CommandProcessor
      */
     public void parseAndProcess(String input)
     {
-        // Login to get Auth Token
-        authToken = authenticator.obtainAuthToken("initiator", "password");
+        // TODO: Login to get Auth Token
+        //authToken = authenticator.obtainAuthToken("initiator", "password");
         
         // TODO: 
     }

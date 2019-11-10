@@ -38,4 +38,12 @@ public class ResourceRole extends BaseRole
     {
         return baseRoles;
     }
+
+    @Override
+    public void acceptVistor(EntitlementVisitor visitor)
+    {
+        // TODO Auto-generated method stub
+        
+        visitor.visitResourceRole(this);
+    }
 }
