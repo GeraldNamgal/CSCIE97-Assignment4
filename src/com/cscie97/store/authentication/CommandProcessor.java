@@ -99,9 +99,16 @@ public class CommandProcessor
      */
     public void parseAndProcess(String input)
     {
-        // TODO: Login to get Auth Token
-        //authToken = authenticator.obtainAuthToken("initiator", "password");
+        // TODO
         
-        // TODO: 
+        // Login to get Auth Token
+        authToken = authenticator.obtainAuthToken(Authenticator.getInitiatorUsername(), Authenticator.getInitiatorPassword());
+        
+        // TODO: Debugging -- Check that authToken obtainAuthToken works correctly
+        if (authToken != null)
+        {
+            System.out.println();
+            System.out.println(authToken.getId());
+        }
     }
 }

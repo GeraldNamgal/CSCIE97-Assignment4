@@ -26,7 +26,7 @@ public class ResourceRole extends Role
     }
 
     @Override
-    public void acceptVistor(EntitlementVisitor visitor)
+    public void acceptVisitor(EntitlementVisitor visitor)
     {
         visitor.visitResourceRole(this);
     }

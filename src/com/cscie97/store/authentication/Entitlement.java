@@ -20,7 +20,7 @@ public abstract class Entitlement implements Visitable
     /* Method(s) */
     
     @Override
-    public abstract void acceptVistor(EntitlementVisitor visitor);   
+    public abstract void acceptVisitor(EntitlementVisitor visitor);   
     
     /* Getters and Setters */
     

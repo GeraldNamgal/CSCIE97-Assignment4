@@ -32,7 +32,7 @@ public class Role extends Entitlement
     }
 
     @Override
-    public void acceptVistor(EntitlementVisitor visitor)
+    public void acceptVisitor(EntitlementVisitor visitor)
     {
         visitor.visitRole(this);
     }

@@ -8,7 +8,9 @@ public class Authenticator implements StoreAuthenticationService
 {
     /* VARIABLES */
     
-    private final String INITIATOR_ACCOUNT_ID = "initiatorUser";      
+    private static final String INITIATOR_USER_ID = "initiator";
+    private static final String INITIATOR_USER_USERNAME = INITIATOR_USER_ID + "-pwd";
+    private static final String INITIATOR_USER_PASSWORD = "password"; 
     private int suggestedId = 0;
     private HashSet<String> authTokenIdsUsed;
     private LinkedHashMap<String, User> users;
@@ -21,18 +23,22 @@ public class Authenticator implements StoreAuthenticationService
         users = new LinkedHashMap<String, User>();
         
         // Create an initiator User and add it to list of Users
-        User initiator = new User(INITIATOR_ACCOUNT_ID, "Initiator");
+        User initiator = new User(INITIATOR_USER_ID, "The Initiator");
         users.put(initiator.getId(), initiator);
         
-        // Give initiator User a login (username and password) credential
-        Credential credential = new Credential(initiator.getId(), "password", "password");
-        initiator.addCredential(credential);
+        // Give initiator User credentials
+        Credential pwdCredential = new Credential(INITIATOR_USER_USERNAME, "password", INITIATOR_USER_PASSWORD);
+        initiator.addCredential(pwdCredential);
+        Credential vpCredential = new Credential(initiator.getId() + "-vp", "voiceprint", "--voice:" + initiator.getId() + "--");
+        initiator.addCredential(vpCredential);
+        Credential fpCredential = new Credential(initiator.getId() + "-fp", "faceprint", "--face:" + initiator.getId() + "--");
+        initiator.addCredential(fpCredential);
         
         // Create Permission to use Authenticator API methods
-        Permission permission = new Permission("permission", "Use Authenticator API", "Use any of the Authenticator API methods");
+        Permission permission = new Permission("UseAuthenticatorAPI", "Use Authenticator API", "Use any of the Authenticator API methods");
         
         // Create a Role for Authenticator API Users
-        Role role = new Role("role", "Authenticator API User Role", "Has all permissions of an Authenticator API user");
+        Role role = new Role("AuthenticatorAPIUserRole", "Authenticator API User Role", "Has all permissions of an Authenticator API user");
         
         // Add Permission to Role
         role.addEntitlement(permission);
@@ -158,50 +164,68 @@ public class Authenticator implements StoreAuthenticationService
     @Override
     public AuthToken obtainAuthToken(String credentialId, String credentialValue)
     {
-        // TODO Auto-generated method stub
-        
-        // TODO: Verify credentialId and credentialValue with hash (password type only?)        
+        // TODO Auto-generated method stub               
       
         // Search through each User's Credentials for given credentialId and credentialValue combination
-        Boolean found = false;
-        User user = null;
+        Boolean foundCredential = false;
+        User userOfCredential = null;
         for (Entry<String, User> userEntry : users.entrySet())
         {    
             for (Entry<String, Credential> credentialEntry : userEntry.getValue().getCredentials().entrySet())
             {
+                // TODO: Verify credentialId and credentialValue with hash per requirements
+                
                 if (credentialEntry.getKey().equals(credentialId) && credentialEntry.getValue().getValue().equals(credentialValue))
                 {
-                    found = true;
+                    foundCredential = true;
                     break;
                 }
             }
             
-            if (found == true)
+            if (foundCredential == true)
             {
-                user = userEntry.getValue();
+                userOfCredential = userEntry.getValue();
                 break;
             }
         }
         
-        // TODO: Throw Authentication Exception if credentialId and credentialValue weren't found
-        if (found == false)
+        // Throw Authentication Exception if credentialId and/or credentialValue weren't found
+        if (foundCredential == false)
         {
-            System.out.println("\nCredential id and/or credential value are invalid");
-            return null;
+            try
+            {
+                throw new AuthenticationException("obtain Auth Token", "credential id and/or credential value are invalid");
+            }
+            
+            catch (AuthenticationException exception)
+            {
+                System.out.println();
+                System.out.print(exception.getMessage());      
+                return null;
+            }           
         }
         
-        // TODO: If User has a valid Auth Token, retrieve it
-        AuthToken authToken;
-        user.getAuthTokens();
+        // If User has a valid Auth Token, retrieve it
+        AuthToken authToken = null;
+        for (Entry<String, AuthToken> authTokenEntry : userOfCredential.getAuthTokens().entrySet())
+        {
+            if (authTokenEntry.getValue().isActive() == true)
+            {
+                authToken = authTokenEntry.getValue();
+            }
+        }
         
-        // TODO: If User has no Auth Tokens, create one
-        while (authTokenIdsUsed.contains(Integer.toString(suggestedId)))
-            suggestedId++;        
-        authToken = new AuthToken(Integer.toString(suggestedId));
-        
-        // Add now-used Auth Token id to used id's list and increment suggestedId for next Auth Token
-        authTokenIdsUsed.add(Integer.toString(suggestedId));
-        suggestedId++;
+        // If User has no Auth Tokens, create one
+        if (authToken == null)
+        {
+            while (authTokenIdsUsed.contains(Integer.toString(suggestedId)))
+                suggestedId++;        
+            authToken = new AuthToken(Integer.toString(suggestedId));
+            
+            // Add now-used Auth Token id to used id's list and increment suggestedId for next Auth Token
+            authTokenIdsUsed.add(Integer.toString(suggestedId));
+            suggestedId++;
+        }       
         
         // Return Auth Token
         return authToken;
@@ -217,6 +241,18 @@ public class Authenticator implements StoreAuthenticationService
     @Override
     public void visitUserEntitlements(Visitable user, EntitlementVisitor visitor)
     {       
-        user.acceptVistor(visitor);
-    }     
+        user.acceptVisitor(visitor);
+    }
+    
+    /* UTILITY METHODS */
+    
+    public static String getInitiatorUsername()
+    {
+        return INITIATOR_USER_USERNAME;
+    }    
+    
+    public static String getInitiatorPassword()
+    {
+        return INITIATOR_USER_PASSWORD;
+    }
 }

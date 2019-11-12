@@ -23,7 +23,7 @@ public class AuthToken
         return id;
     }
 
-    public Boolean getActive()
+    public Boolean isActive()
     {
         return active;
     }

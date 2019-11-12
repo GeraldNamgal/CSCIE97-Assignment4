@@ -76,25 +76,13 @@ public class GetPermissions implements EntitlementVisitor
         // Create HashSet pointer (for any resource id's associated with permission)
         HashSet<String> resourceIds;
         
-        // If Permission id encountered previously, get its HashSet
-        if (userPermissionIds.containsKey(permission.getId()))            
-            resourceIds = userPermissionIds.get(permission.getId());            
-        
-        // Else create a new HashSet for Permission id
-        else            
-            resourceIds = new HashSet<String>();            
-        
         // Add Resource id to HashSet
         for (String tmpResourceId : tmpResourceIds)
-        {         
-            // TODO: Debugging
+        {            
             System.out.print(" " + tmpResourceId);
             
             resourceIds.add(tmpResourceId);
         }    
-        
-        // TODO: Debugging
-        System.out.println();
         
         // Add Permission id and Resource id HashSet to userPermissionIds
         userPermissionIds.put(permission.getId(), resourceIds);*/
@@ -111,7 +99,7 @@ public class GetPermissions implements EntitlementVisitor
         roleIdsPtr = tmpRoleIds;
         
         // Call entitlement's acceptVisitor method
-        entitlement.acceptVistor(this);
+        entitlement.acceptVisitor(this);
         
         // TODO: Debugging
         if (entitlement.getClass().getName().endsWith(".Permission"))
