@@ -1,7 +1,5 @@
 package com.cscie97.store.authentication;
 
-import java.util.LinkedHashMap;
-
 public class ResourceRole extends Role
 {
     /* Variables */

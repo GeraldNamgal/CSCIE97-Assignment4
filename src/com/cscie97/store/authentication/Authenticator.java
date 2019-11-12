@@ -1,6 +1,5 @@
 package com.cscie97.store.authentication;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map.Entry;
@@ -9,7 +8,7 @@ public class Authenticator implements StoreAuthenticationService
 {
     /* VARIABLES */
     
-    private final String INITIATOR_ACCOUNT_ID = "initiator";      
+    private final String INITIATOR_ACCOUNT_ID = "initiatorUser";      
     private int suggestedId = 0;
     private HashSet<String> authTokenIdsUsed;
     private LinkedHashMap<String, User> users;
@@ -30,10 +29,10 @@ public class Authenticator implements StoreAuthenticationService
         initiator.addCredential(credential);
         
         // Create Permission to use Authenticator API methods
-        Permission permission = new Permission("useAuthenticatorAPI", "Use Authenticator API", "Use any of the Authenticator API methods");
+        Permission permission = new Permission("permission", "Use Authenticator API", "Use any of the Authenticator API methods");
         
         // Create a Role for Authenticator API Users
-        Role role = new Role("AuthenticatorApiUserRole", "Authenticator API User Role", "Has all permissions of an Authenticator API user");
+        Role role = new Role("role", "Authenticator API User Role", "Has all permissions of an Authenticator API user");
         
         // Add Permission to Role
         role.addEntitlement(permission);
@@ -46,24 +45,26 @@ public class Authenticator implements StoreAuthenticationService
         
         /* TODO: Testing... */
 
-        Permission permission1 = new Permission("permissionId1", "name", "description");
-        Permission permission2 = new Permission("permissionId2", "name", "description");
-        Permission permission3 = new Permission("permissionId3", "name", "description");
-        Permission permission4 = new Permission("permissionId4", "name", "description");
-        Permission permission5 = new Permission("permissionId5", "name", "description");
+        Permission permission1 = new Permission("permission 1", "name", "description");
+        Permission permission2 = new Permission("permission 2", "name", "description");
+        Permission permission3 = new Permission("permission 3", "name", "description");
+        Permission permission4 = new Permission("permission 4", "name", "description");
+        Permission permission5 = new Permission("permission 5", "name", "description");
 
-        Role role1 = new Role("roleId1", "name", "description");
-        Role role2 = new Role("roleId2", "name", "description");
-        Role role3 = new Role("roleId3", "name", "description");
-        Role role4 = new Role("roleId4", "name", "description");
+        Role role1 = new Role("role 1", "name", "description");
+        Role role2 = new Role("role 2", "name", "description");
+        Role role3 = new Role("role 3", "name", "description");
+        Role role4 = new Role("role 4", "name", "description");
 
-        Resource store1 = new Resource("store1", "description");
-        Resource store2 = new Resource("store2", "description");
+        Resource store1 = new Resource("store 1", "description");
+        Resource store2 = new Resource("store 2", "description");
+        Resource store3 = new Resource("store 3", "description");
 
-        ResourceRole rRole1 = new ResourceRole("rRoleId1", "name", "description", store1, role3);
-        ResourceRole rRole2 = new ResourceRole("rRoleId2", "name", "description", store1, role1);
-        ResourceRole rRole3 = new ResourceRole("rRoleId3", "name", "description", store1, role4);
-        ResourceRole rRole4 = new ResourceRole("rRoleId4", "name", "description", store2, role2);
+        ResourceRole rRole1 = new ResourceRole("resource role 1", "name", "description", store1, role3);
+        ResourceRole rRole2 = new ResourceRole("resource role 2", "name", "description", store1, role1);
+        ResourceRole rRole3 = new ResourceRole("resource role 3", "name", "description", store2, role4);
+        ResourceRole rRole4 = new ResourceRole("resource role 4", "name", "description", store2, role2);
+        ResourceRole rRole5 = new ResourceRole("resource role 5", "name", "description", store3, permission2);
 
         role1.addEntitlement(permission1);
         role1.addEntitlement(permission5);
@@ -76,13 +77,16 @@ public class Authenticator implements StoreAuthenticationService
         role4.addEntitlement(permission4);
         rRole1.addEntitlement(rRole3);
         rRole2.addEntitlement(permission4);
+        initiator.addEntitlement(rRole5);
+        rRole1.addEntitlement(permission);
+        role.addEntitlement(permission3);
+        initiator.addEntitlement(permission5);
 
         GetPermissions getPermissions = new GetPermissions();
         
         visitUserEntitlements(initiator, getPermissions);
 
         // TODO: Debugging
-        System.out.println();
         for (Entry<String, HashSet<String>> permissionEntry : getPermissions.getUserPermissionIds().entrySet())
         {
             System.out.print(permissionEntry.getKey() + " :");
@@ -226,43 +230,8 @@ public class Authenticator implements StoreAuthenticationService
     }
     
     @Override
-    public void visitUserEntitlements(User user, EntitlementVisitor visitor)
+    public void visitUserEntitlements(Visitable user, EntitlementVisitor visitor)
     {       
-        for (Entry<String, Entitlement> entitlementEntry : user.getEntitlements().entrySet())
-        {           
-            if (visitor.getClass().getName().endsWith(".GetPermissions"))
-            {
-                GetPermissions getPermissions = (GetPermissions) visitor;
-                getPermissions.newTreeVisit();
-                traverseTreeGetPermissions(entitlementEntry.getValue(), visitor, getPermissions.getTmpResourceIds());
-            }    
-        }
-    }
-    
-    /* UTILITY METHODS */
-    
-    public void traverseTreeGetPermissions(Visitable entitlement, EntitlementVisitor visitor, ArrayList<String> tmpResourceIds)
-    {      
-        // Align visitor's tmpResourceIds with current recursion state's tmpResourceIds
-        GetPermissions getPermissions = (GetPermissions) visitor;
-        getPermissions.setTmpResourceIds(tmpResourceIds);
-        
-        // Call entitlement's acceptVisitor method
-        entitlement.acceptVistor(visitor);
-        
-        // If current node is a Role, recurse
-        if (entitlement.getClass().getName().endsWith(".Role") || entitlement.getClass().getName().endsWith(".ResourceRole"))
-        {
-            Role role = (Role) entitlement;            
-            LinkedHashMap<String, Entitlement> entitlements = role.getEntitlements();
-            for (Entry<String, Entitlement> entitlementEntry : entitlements.entrySet())
-            {
-                // Recurse with new Resource id list as parameter if current node is a ResourceRole
-                if (entitlement.getClass().getName().endsWith(".ResourceRole"))
-                    traverseTreeGetPermissions(entitlementEntry.getValue(), visitor, getPermissions.getTmpResourceIds());
-                else
-                    traverseTreeGetPermissions(entitlementEntry.getValue(), visitor, tmpResourceIds);
-            }
-        }              
-    }
+        user.acceptVistor(visitor);
+    }     
 }

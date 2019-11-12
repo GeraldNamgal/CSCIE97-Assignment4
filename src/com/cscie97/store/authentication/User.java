@@ -2,7 +2,7 @@ package com.cscie97.store.authentication;
 
 import java.util.LinkedHashMap;
 
-public class User
+public class User implements Visitable
 {
     private String id;
     private String name;
@@ -61,5 +61,11 @@ public class User
     public LinkedHashMap<String, AuthToken> getAuthTokens()
     {
         return authTokens;
+    }
+
+    @Override
+    public void acceptVistor(EntitlementVisitor visitor)
+    {
+        visitor.visitUser(this);
     }       
 }
