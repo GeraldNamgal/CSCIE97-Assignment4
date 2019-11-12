@@ -82,24 +82,9 @@ public class Authenticator implements StoreAuthenticationService
         role.addEntitlement(permission3);
         initiator.addEntitlement(permission5);
 
-        GetPermissions getPermissions = new GetPermissions();
+        GetPermissions getPermissions = new GetPermissions(null, null, null);
         
-        visitUserEntitlements(initiator, getPermissions);
-
-        // TODO: Debugging
-        for (Entry<String, HashSet<String>> permissionEntry : getPermissions.getUserPermissionIds().entrySet())
-        {
-            System.out.print(permissionEntry.getKey() + " :");
-            for (String resourceId : permissionEntry.getValue())
-            {
-                System.out.print(" " + resourceId);
-            }
-
-            if (permissionEntry.getValue().size() == 0)
-                System.out.print(" empty");
-
-            System.out.println();
-        }
+        visitUserEntitlements(initiator, getPermissions);       
     }
     
     /* API METHODS */   

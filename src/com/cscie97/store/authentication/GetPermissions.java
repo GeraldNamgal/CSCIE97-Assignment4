@@ -1,7 +1,6 @@
 package com.cscie97.store.authentication;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map.Entry;
 
@@ -9,15 +8,20 @@ public class GetPermissions implements EntitlementVisitor
 {
     /* VARIABLES */
          
-    private LinkedHashMap<String, HashSet<String>> userPermissionIds; // Stores Permission id's of user and any associated ResourceRole resources
+    private Boolean hasPermission = false;
+    private String permissionIdToBeChecked;
+    private String associatedResourceId;
+    private String associatedRoleId;
     private ArrayList<String> resourceIdsPtr;
     private ArrayList<String> roleIdsPtr;
     
     /* CONSTRUCTOR */
     
-    public GetPermissions()
+    public GetPermissions(String permissionIdToBeChecked, String associatedResourceId, String associatedRoleId)
     {
-        userPermissionIds = new LinkedHashMap<String, HashSet<String>>();
+        this.permissionIdToBeChecked = permissionIdToBeChecked;
+        this.associatedResourceId = associatedResourceId;
+        this.associatedRoleId = associatedRoleId;
     }
     
     /* API METHODS */
@@ -61,9 +65,15 @@ public class GetPermissions implements EntitlementVisitor
     public void visitPermission(Permission permission)
     {
         // TODO: Debugging
-        System.out.print(permission.getId() + " : [ ");        
+        System.out.print(permission.getId() + " : [ ");
         
-        /*// Create HashSet pointer (for any resource id's associated with permission)
+        // TODO: Set hasPermission to true if permission is found
+        if (permission.getId().equals(permissionIdToBeChecked) && (resourceIdsPtr.contains(associatedResourceId) || resourceIdsPtr.isEmpty())
+                && roleIdsPtr.contains(associatedRoleId))
+            hasPermission = true;
+        
+        /* TODO: Delete?
+        // Create HashSet pointer (for any resource id's associated with permission)
         HashSet<String> resourceIds;
         
         // If Permission id encountered previously, get its HashSet
@@ -147,8 +157,8 @@ public class GetPermissions implements EntitlementVisitor
     
     /* GETTERS AND SETTERS */
     
-    public LinkedHashMap<String, HashSet<String>> getUserPermissionIds()
+    public Boolean getHasPermission()
     {
-        return userPermissionIds;
+        return hasPermission;
     }     
 }
