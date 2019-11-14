@@ -8,20 +8,28 @@ public class GetPermissions implements EntitlementVisitor
 {
     /* VARIABLES */
          
-    private Boolean hasPermission = false;
-    private String permissionIdToBeChecked;
+    // TODO: Necessary vars or delete? --
     private String associatedResourceId;
     private String associatedRoleId;
+    
+    private Boolean hasPermission = false;
+    private String permissionIdToBeChecked;    
     private ArrayList<String> resourceIdsPtr;
     private ArrayList<String> roleIdsPtr;
     
-    /* CONSTRUCTOR */
+    /* CONSTRUCTOR(S) */
     
+    // TODO: Necessary constructor or delete?
     public GetPermissions(String permissionIdToBeChecked, String associatedResourceId, String associatedRoleId)
     {
         this.permissionIdToBeChecked = permissionIdToBeChecked;
         this.associatedResourceId = associatedResourceId;
         this.associatedRoleId = associatedRoleId;
+    }
+    
+    public GetPermissions(String permissionIdToBeChecked)
+    {
+        this.permissionIdToBeChecked = permissionIdToBeChecked;
     }
     
     /* API METHODS */
@@ -32,7 +40,7 @@ public class GetPermissions implements EntitlementVisitor
         for (Entry<String, Entitlement> entitlementEntry : user.getEntitlements().entrySet())
         {       
             traverseTreeGetPermissions(entitlementEntry.getValue(), new ArrayList<String>(), new ArrayList<String>());              
-        }
+        }        
     }  
     
     @Override
@@ -67,12 +75,16 @@ public class GetPermissions implements EntitlementVisitor
         // TODO: Debugging
         System.out.print(permission.getId() + " : [ ");
         
-        // TODO: Set hasPermission to true if permission is found
-        if (permission.getId().equals(permissionIdToBeChecked) && (resourceIdsPtr.contains(associatedResourceId) || resourceIdsPtr.isEmpty())
-                && roleIdsPtr.contains(associatedRoleId))
+        /* TODO: Set hasPermission to true if permission is found */
+        
+        if (permission.getId().equals(permissionIdToBeChecked))
             hasPermission = true;
         
-        /* TODO: Delete?
+        /*if (permission.getId().equals(permissionIdToBeChecked) && (resourceIdsPtr.contains(associatedResourceId) || resourceIdsPtr.isEmpty())
+                && roleIdsPtr.contains(associatedRoleId))
+            hasPermission = true;*/
+        
+        /* TODO: Delete? --
         // Create HashSet pointer (for any resource id's associated with permission)
         HashSet<String> resourceIds;
         

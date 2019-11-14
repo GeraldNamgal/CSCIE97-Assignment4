@@ -13,7 +13,7 @@ public class CommandProcessor
     /* Variables */
     
     private StoreAuthenticationService authenticator;
-    private AuthToken authToken;
+    private AuthToken hardcodedUserAuthToken;
     private int lineNum = 0;
     
     /* API Methods */
@@ -101,14 +101,48 @@ public class CommandProcessor
     {
         // TODO
         
-        // Login to get Auth Token
-        authToken = authenticator.obtainAuthToken(Authenticator.getInitiatorUsername(), Authenticator.getInitiatorPassword());
+        // Login CommandProcessor to get Auth Token
+        hardcodedUserAuthToken = authenticator.obtainAuthToken(Authenticator.getHardcodedUserUsername(), Authenticator.getHardcodedUserPassword());
         
-        // TODO: Debugging -- Check that authToken obtainAuthToken works correctly
-        if (authToken != null)
+        /* TODO: Debugging -- Check that authToken obtainAuthToken works correctly */
+        if (hardcodedUserAuthToken != null)
         {
             System.out.println();
-            System.out.println(authToken.getId());
-        }
+            System.out.println(hardcodedUserAuthToken.getId());
+            
+            // Try to get Auth Token again
+            hardcodedUserAuthToken = authenticator.obtainAuthToken(Authenticator.getHardcodedUserUsername(), Authenticator.getHardcodedUserPassword());
+            
+            // Auth Token should still be the some one
+            System.out.println();
+            System.out.println(hardcodedUserAuthToken.getId());     
+            
+            // TODO: Check validity of Auth Token before and after logout and after re-login
+            
+            if (hardcodedUserAuthToken.isActive())
+                System.out.println("It's valid");
+            else
+                System.out.println("It's invalid");
+            
+            // Logout
+            authenticator.logout(hardcodedUserAuthToken);
+            
+            if (hardcodedUserAuthToken.isActive())
+                System.out.println("It's valid");
+            else
+                System.out.println("It's invalid");
+            
+            // Log back in 
+            hardcodedUserAuthToken = authenticator.obtainAuthToken(Authenticator.getHardcodedUserUsername(), Authenticator.getHardcodedUserPassword());
+            
+            if (hardcodedUserAuthToken.isActive())
+                System.out.println("It's valid");
+            else
+                System.out.println("It's invalid");
+            
+            // Auth Token should be different
+            System.out.println();
+            System.out.println(hardcodedUserAuthToken.getId());
+        }        
     }
 }

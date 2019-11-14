@@ -8,12 +8,14 @@ public class Authenticator implements StoreAuthenticationService
 {
     /* VARIABLES */
     
-    private static final String INITIATOR_USER_ID = "initiator";
-    private static final String INITIATOR_USER_USERNAME = INITIATOR_USER_ID + "-pwd";
-    private static final String INITIATOR_USER_PASSWORD = "password"; 
+    private static final String HARDCODED_USER_ID = "hardcodedUser";
+    private static final String HARDCODED_USER_USERNAME = HARDCODED_USER_ID + "-pwd";
+    private static final String HARDCODED_USER_PASSWORD = "password";
+    private final String MY_AUTHTOKEN_ID = "authenticatorAuthTokenId";
     private int suggestedId = 0;
     private HashSet<String> authTokenIdsUsed;
     private LinkedHashMap<String, User> users;
+    private AuthToken myAuthToken;
    
     /* CONSTRUCTOR */
     
@@ -22,32 +24,45 @@ public class Authenticator implements StoreAuthenticationService
         // Initialize list of Users
         users = new LinkedHashMap<String, User>();
         
-        // Create an initiator User and add it to list of Users
-        User initiator = new User(INITIATOR_USER_ID, "The Initiator");
-        users.put(initiator.getId(), initiator);
+        // Create a hardcoded User, add it to list of Users, and give it Credentials
+        User hardcodedUser = new User(HARDCODED_USER_ID, "Hardcoded User");
+        users.put(hardcodedUser.getId(), hardcodedUser);
+        Credential credential = new Credential(HARDCODED_USER_USERNAME, "password", HARDCODED_USER_PASSWORD);
+        hardcodedUser.addCredential(credential);
+        credential = new Credential(hardcodedUser.getId() + "-vp", "voiceprint", "--voice:" + hardcodedUser.getId() + "--");
+        hardcodedUser.addCredential(credential);
+        credential = new Credential(hardcodedUser.getId() + "-fp", "faceprint", "--face:" + hardcodedUser.getId() + "--");
+        hardcodedUser.addCredential(credential);
         
-        // Give initiator User credentials
-        Credential pwdCredential = new Credential(INITIATOR_USER_USERNAME, "password", INITIATOR_USER_PASSWORD);
-        initiator.addCredential(pwdCredential);
-        Credential vpCredential = new Credential(initiator.getId() + "-vp", "voiceprint", "--voice:" + initiator.getId() + "--");
-        initiator.addCredential(vpCredential);
-        Credential fpCredential = new Credential(initiator.getId() + "-fp", "faceprint", "--face:" + initiator.getId() + "--");
-        initiator.addCredential(fpCredential);
+        // Create Permission to use Authenticator API methods, and a Role for Authenticator API Users
+        Permission permission = new Permission("useAuthenticatorAPI", "Use Authenticator API", "Use any of the Authenticator API methods");
+        Role role = new Role("authenticatorAPIUserRole", "Authenticator API User Role", "Has all permissions of an Authenticator API user");
         
-        // Create Permission to use Authenticator API methods
-        Permission permission = new Permission("UseAuthenticatorAPI", "Use Authenticator API", "Use any of the Authenticator API methods");
-        
-        // Create a Role for Authenticator API Users
-        Role role = new Role("AuthenticatorAPIUserRole", "Authenticator API User Role", "Has all permissions of an Authenticator API user");
-        
-        // Add Permission to Role
+        // Add permission to role and role to hardcodedUser 
         role.addEntitlement(permission);
+        hardcodedUser.addEntitlement(role);
         
-        // Add Role to initiator User
-        initiator.addEntitlement(role);
-        
-        // Create a new HashSet to store and track used/processed Auth Token id's
+        // Create a new HashSet to store and track used/processed Auth Token id's for managing Auth Tokens
         authTokenIdsUsed = new HashSet<String>();
+        
+        // Create a User for the Authenticator itself, add it to list of Users, and give it Credentials
+        User authenticator = new User("authenticator", "The Authenticator");
+        users.put(authenticator.getId(), authenticator);
+        credential = new Credential(authenticator.getId() + "-pwd", "password", "password");
+        authenticator.addCredential(credential);
+        credential = new Credential(authenticator.getId() + "-vp", "voiceprint", "--voice:" + authenticator.getId() + "--");
+        authenticator.addCredential(credential);
+        credential = new Credential(authenticator.getId() + "-fp", "faceprint", "--face:" + authenticator.getId() + "--");
+        authenticator.addCredential(credential);
+        
+        // Create permission to modify AuthToken's "active" attribute and give it to Authenticator User (only it has this special permission)
+        Permission authTokenPermission = new Permission("updateAuthTokenValid", "Update Valid on Auth Token", "Has permission to validate/invalidate Auth Tokens");
+        authenticator.addEntitlement(authTokenPermission);
+                
+        // Get Authenticator User its special Auth Token
+        myAuthToken = new AuthToken(MY_AUTHTOKEN_ID, this);
+        authenticator.addAuthToken(myAuthToken);
+        
         
         /* TODO: Testing... */
 
@@ -79,18 +94,18 @@ public class Authenticator implements StoreAuthenticationService
         role2.addEntitlement(permission1);
         role.addEntitlement(rRole4);
         role3.addEntitlement(permission3);
-        initiator.addEntitlement(rRole1);
+        hardcodedUser.addEntitlement(rRole1);
         role4.addEntitlement(permission4);
         rRole1.addEntitlement(rRole3);
         rRole2.addEntitlement(permission4);
-        initiator.addEntitlement(rRole5);
+        hardcodedUser.addEntitlement(rRole5);
         rRole1.addEntitlement(permission);
         role.addEntitlement(permission3);
-        initiator.addEntitlement(permission5);
-
-        GetPermissions getPermissions = new GetPermissions(null, null, null);
+        hardcodedUser.addEntitlement(permission5);
         
-        visitUserEntitlements(initiator, getPermissions);       
+        // TODO: Testing
+        GetPermissions getPermissions = new GetPermissions(null, null, null);        
+        hardcodedUser.acceptVisitor(getPermissions);
     }
     
     /* API METHODS */   
@@ -194,10 +209,10 @@ public class Authenticator implements StoreAuthenticationService
         {
             try
             {
-                throw new AuthenticationException("obtain Auth Token", "credential id and/or credential value are invalid");
+                throw new AuthenticatorException("AuthenticationException", "obtain Auth Token", "credential id and/or credential value are invalid");
             }
             
-            catch (AuthenticationException exception)
+            catch (AuthenticatorException exception)
             {
                 System.out.println();
                 System.out.print(exception.getMessage());      
@@ -215,16 +230,19 @@ public class Authenticator implements StoreAuthenticationService
             }
         }
         
-        // If User has no Auth Tokens, create one
+        // If User has no Auth Tokens or valid ones, create one
         if (authToken == null)
         {
             while (authTokenIdsUsed.contains(Integer.toString(suggestedId)))
                 suggestedId++;        
-            authToken = new AuthToken(Integer.toString(suggestedId));
+            authToken = new AuthToken(Integer.toString(suggestedId), this);
             
             // Add now-used Auth Token id to used id's list and increment suggestedId for next Auth Token
             authTokenIdsUsed.add(Integer.toString(suggestedId));
             suggestedId++;
+            
+            // Add newly created Auth Token to User's list of Auth Tokens
+            userOfCredential.addAuthToken(authToken);
         }       
         
         // Return Auth Token
@@ -236,23 +254,101 @@ public class Authenticator implements StoreAuthenticationService
     {
         // TODO Auto-generated method stub
         
+        // Validate given Auth Token
+        Boolean foundAuthToken = false;
+        for (Entry<String, User> userEntry : users.entrySet())
+        {            
+            for (Entry<String, AuthToken> authTokenEntry : userEntry.getValue().getAuthTokens().entrySet())
+            {
+                if (authTokenEntry.getValue().equals(authToken))
+                {
+                    foundAuthToken = true;
+                    break;
+                }
+            }    
+        }
+        
+        // Throw InvalidAuthTokenException if Auth Token not found or null
+        if ((foundAuthToken == false) || (authToken == null))
+        {
+            try
+            {              
+                throw new AuthenticatorException("InvalidAuthTokenException", "logout", "Auth Token not found; not logged out");
+            }
+            
+            catch (AuthenticatorException exception)
+            {
+                System.out.println();
+                System.out.print(exception.getMessage());      
+                return;
+            }           
+        }
+        
+        // Invalidate Auth Token
+        authToken.setActive(false, myAuthToken);
     }
-    
+        
     @Override
-    public void visitUserEntitlements(Visitable user, EntitlementVisitor visitor)
-    {       
-        user.acceptVisitor(visitor);
+    public Boolean hasPermission(String permissionId, AuthToken authToken)
+    {
+        // TODO Auto-generated method stub  
+        
+        // Find User associated with Auth Token
+        Boolean foundAuthToken = false;
+        User userOfAuthToken = null;
+        for (Entry<String, User> userEntry : users.entrySet())
+        {            
+            for (Entry<String, AuthToken> authTokenEntry : userEntry.getValue().getAuthTokens().entrySet())
+            {
+                if (authTokenEntry.getValue().equals(authToken))
+                {
+                    foundAuthToken = true;
+                    break;
+                }
+            }
+            
+            if (foundAuthToken == true)
+            {
+                userOfAuthToken = userEntry.getValue();
+                break;
+            }
+        }
+        
+        // Throw InvalidAuthTokenException if Auth Token not found 
+        if (foundAuthToken == false)
+        {
+            try
+            {
+                // TODO: Change to InvalidAuthTokenException and other exceptions per requirements? (i.e., make the actual classes, not just strings)
+                throw new AuthenticatorException("InvalidAuthTokenException", "check for \""+ permissionId +"\" permission", "Auth Token not found");
+            }
+            
+            catch (AuthenticatorException exception)
+            {
+                System.out.println();
+                System.out.print(exception.getMessage());      
+                return false;
+            }           
+        }
+        
+        // Check if User of Auth Token has permissions
+        GetPermissions getPermissions = new GetPermissions(permissionId);        
+        userOfAuthToken.acceptVisitor(getPermissions);
+        
+        // TODO: Throw exception if User doesn't have the Permission
+        
+        return getPermissions.getHasPermission();
     }
     
     /* UTILITY METHODS */
     
-    public static String getInitiatorUsername()
+    public static String getHardcodedUserUsername()
     {
-        return INITIATOR_USER_USERNAME;
+        return HARDCODED_USER_USERNAME;
     }    
     
-    public static String getInitiatorPassword()
+    public static String getHardcodedUserPassword()
     {
-        return INITIATOR_USER_PASSWORD;
-    }
+        return HARDCODED_USER_PASSWORD;
+    }   
 }

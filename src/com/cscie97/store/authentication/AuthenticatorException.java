@@ -1,20 +1,22 @@
 package com.cscie97.store.authentication;
 
 @SuppressWarnings("serial")
-public class AuthenticationException extends java.lang.Exception
+public class AuthenticatorException extends java.lang.Exception
 {
     /* API Variables */
     
     private String action;
     private String reason;
+    private String exception;
     
     /* Constructor */
     
     /* *
      *
      */
-    public AuthenticationException(String action, String reason)
+    public AuthenticatorException(String exception, String action, String reason)
     {
+        this.exception = exception;
         this.action = action;
         this.reason = reason;
     }
@@ -26,6 +28,6 @@ public class AuthenticationException extends java.lang.Exception
      */
     public String getMessage()
     {
-        return "AuthenticationException thrown --\n - Action: " + action + "\n" + " - Reason: " + reason + "\n";
+        return exception + " thrown --\n - Action: " + action + "\n" + " - Reason: " + reason + "\n";
     }    
 }
