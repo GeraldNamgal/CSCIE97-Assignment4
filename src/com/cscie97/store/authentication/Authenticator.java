@@ -16,13 +16,17 @@ public class Authenticator implements StoreAuthenticationService
     private HashSet<String> authTokenIdsUsed;
     private LinkedHashMap<String, User> users;
     private AuthToken myAuthToken;
+    private LinkedHashMap<String, Entitlement> entitlements;
+    private LinkedHashMap<String, Resource> resources;
    
     /* CONSTRUCTOR */
     
     public Authenticator()
     {      
-        // Initialize list of Users
+        // Create list of Users, Entitlements, and Resources
         users = new LinkedHashMap<String, User>();
+        entitlements = new LinkedHashMap<String, Entitlement>();
+        resources = new LinkedHashMap<String, Resource>();
         
         // Create a hardcoded User, add it to list of Users, and give it Credentials
         User hardcodedUser = new User(HARDCODED_USER_ID, "Hardcoded User");
@@ -35,14 +39,14 @@ public class Authenticator implements StoreAuthenticationService
         hardcodedUser.addCredential(credential);
         
         // Create Permission to use Authenticator API methods, and a Role for Authenticator API Users
-        Permission permission = new Permission("useAuthenticatorAPI", "Use Authenticator API", "Use any of the Authenticator API methods");
+        Permission permission = new Permission("useAuthenticatorAPI", "Use Authenticator API", "Use any of the restricted Authenticator API methods");
         Role role = new Role("authenticatorAPIUserRole", "Authenticator API User Role", "Has all permissions of an Authenticator API user");
         
         // Add permission to role and role to hardcodedUser 
         role.addEntitlement(permission);
         hardcodedUser.addEntitlement(role);
         
-        // Create a new HashSet to store and track used/processed Auth Token id's for managing Auth Tokens
+        // Create a new HashSet to store and track used/processed AuthToken id's for managing AuthTokens
         authTokenIdsUsed = new HashSet<String>();
         
         // Create a User for the Authenticator itself, add it to list of Users, and give it Credentials
@@ -56,10 +60,10 @@ public class Authenticator implements StoreAuthenticationService
         authenticator.addCredential(credential);
         
         // Create permission to modify AuthToken's "active" attribute and give it to Authenticator User (only it has this special permission)
-        Permission authTokenPermission = new Permission("updateAuthTokenValid", "Update Valid on Auth Token", "Has permission to validate/invalidate Auth Tokens");
+        Permission authTokenPermission = new Permission("updateAuthTokenValid", "Update Valid on AuthToken", "Has permission to validate/invalidate AuthTokens");
         authenticator.addEntitlement(authTokenPermission);
                 
-        // Get Authenticator User its special Auth Token
+        // Get Authenticator User its special AuthToken
         myAuthToken = new AuthToken(MY_AUTHTOKEN_ID, this);
         authenticator.addAuthToken(myAuthToken);
         
@@ -102,39 +106,61 @@ public class Authenticator implements StoreAuthenticationService
         rRole1.addEntitlement(permission);
         role.addEntitlement(permission3);
         hardcodedUser.addEntitlement(permission5);
-        
-        // TODO: Testing
-        GetPermissions getPermissions = new GetPermissions(null, null, null);        
-        hardcodedUser.acceptVisitor(getPermissions);
     }
     
     /* API METHODS */   
     
     @Override
-    public Permission definePermission(String id, String name, String description)
+    public Permission definePermission(String id, String name, String description, AuthToken authTokenForMethod)
     {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public Role defineRole(String id, String name, String description)
-    {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public void addPermission(String roleId, String permissionId)
-    {
-        // TODO Auto-generated method stub
+        // Check that given AuthToken has permission to access this method
+        if (!hasPermission("useAuthenticatorAPI", authTokenForMethod))
+            return null;
         
+        // Create Permission and add it to entitlements
+        Permission permission = new Permission(id, name, description);
+        entitlements.put(permission.getId(), permission);
+        
+        return permission;
     }
 
     @Override
-    public User createUser(String userId, String name)
+    public Role defineRole(String id, String name, String description, AuthToken authTokenForMethod)
     {
-        // TODO: Check for duplicates before creating new User
+        // Check that given AuthToken has permission to access this method
+        if (!hasPermission("useAuthenticatorAPI", authTokenForMethod))
+            return null;
+        
+        // Create Role and add it to entitlements
+        Role role = new Role(id, name, description);
+        entitlements.put(role.getId(), role);
+        
+        return role;
+    }
+
+    @Override
+    public void addPermissionToRole(String roleId, String permissionId, AuthToken authTokenForMethod)
+    {
+        // TODO 
+        
+        // Check that given AuthToken has permission to access this method
+        if (!hasPermission("useAuthenticatorAPI", authTokenForMethod))
+            return;
+        
+        // Get given Permission and Role and add the Permission to the Role
+        Entitlement permission = entitlements.get(permissionId);
+        Role role = (Role) entitlements.get(roleId);
+        role.addEntitlement(permission);
+    }
+
+    @Override
+    public User createUser(String userId, String name, AuthToken authTokenForMethod)
+    {       
+        // Check that given AuthToken has permission to access this method
+        if (!hasPermission("useAuthenticatorAPI", authTokenForMethod))
+            return null;
+        
+        // TODO (if have time): Check for duplicates before creating new User
         
         // Create a new User
         User user = new User(userId, name);
@@ -146,40 +172,87 @@ public class Authenticator implements StoreAuthenticationService
     }
 
     @Override
-    public void addUserCredential(String userId, String type, String value)
+    public void addUserCredential(String userId, String type, String value, AuthToken authTokenForMethod)
     {
-        // TODO Auto-generated method stub
+        // TODO 
         
+        // Check that given AuthToken has permission to access this method
+        if (!hasPermission("useAuthenticatorAPI", authTokenForMethod))
+            return;
+        
+        // Create Credential
+        Credential credential = null;        
+        if(type.equals("password"))
+            credential = new Credential(userId + "-pwd", type, value);
+        if(type.equals("voiceprint"))
+            credential = new Credential(userId + "-vp", type, value);
+        if(type.equals("faceprint"))
+            credential = new Credential(userId + "-fp", type, value);
+                
+        // Add Credential to User's Credentials
+        if (credential != null)
+            users.get(userId).addCredential(credential);
     }
 
     @Override
-    public void addRoleToUser(String userId, String roleId)
+    public void addRoleToUser(String userId, String roleId, AuthToken authTokenForMethod)
     {
-        // TODO Auto-generated method stub
+        // Check that given AuthToken has permission to access this method
+        if (!hasPermission("useAuthenticatorAPI", authTokenForMethod))
+            return;
         
+        // Get given Role and User and add the Role to the User
+        Entitlement role = entitlements.get(roleId);
+        users.get(userId).addEntitlement(role);
     }
 
     @Override
-    public ResourceRole createResourceRole(String name, String roleId, String resourceId)
+    public Resource createResource(String id, String description, AuthToken authTokenForMethod)
     {
-        // TODO Auto-generated method stub
+        // Check that given AuthToken has permission to access this method
+        if (!hasPermission("useAuthenticatorAPI", authTokenForMethod))
+            return null;        
         
-        // TODO: Make sure to check that same resource isn't repeated (or something?)
+        Resource resource = new Resource(id, description);
+        resources.put(resource.getId(), resource);
         
-        return null;
+        return resource;
+    }
+    
+    @Override
+    public ResourceRole createResourceRole(String id, String name, String description, String resourceId, String entitlementId, AuthToken authTokenForMethod)
+    {
+        // TODO 
+        
+        // Check that given AuthToken has permission to access this method
+        if (!hasPermission("useAuthenticatorAPI", authTokenForMethod))
+            return null;
+        
+        // TODO (if have time): Make sure to check that same resource isn't repeated (or something?)        
+        
+        // Get given Resource and Entitlement to add to the ResourceRole
+        Resource resource = resources.get(resourceId);
+        Entitlement entitlement = entitlements.get(entitlementId);
+        ResourceRole resourceRole = new ResourceRole(id, name, description, resource, entitlement);
+        entitlements.put(resourceRole.getId(), resourceRole);
+        
+        return resourceRole;
     }
 
     @Override
-    public void addResourceRoleToUser(String userId, String resourceRoleId)
+    public void addResourceRoleToUser(String userId, String resourceRoleId, AuthToken authTokenForMethod)
     {
-        // TODO Auto-generated method stub
+        // TODO
         
+        // Check that given AuthToken has permission to access this method
+        if (!hasPermission("useAuthenticatorAPI", authTokenForMethod))
+            return;
     }
 
     @Override
     public AuthToken obtainAuthToken(String credentialId, String credentialValue)
     {
-        // TODO Auto-generated method stub               
+        // TODO               
       
         // Search through each User's Credentials for given credentialId and credentialValue combination
         Boolean foundCredential = false;
@@ -209,7 +282,7 @@ public class Authenticator implements StoreAuthenticationService
         {
             try
             {
-                throw new AuthenticatorException("AuthenticationException", "obtain Auth Token", "credential id and/or credential value are invalid");
+                throw new AuthenticatorException("AuthenticationException", "obtain AuthToken", "credential id and/or credential value are invalid");
             }
             
             catch (AuthenticatorException exception)
@@ -220,7 +293,7 @@ public class Authenticator implements StoreAuthenticationService
             }           
         }
         
-        // If User has a valid Auth Token, retrieve it
+        // If User has a valid AuthToken, retrieve it
         AuthToken authToken = null;
         for (Entry<String, AuthToken> authTokenEntry : userOfCredential.getAuthTokens().entrySet())
         {
@@ -230,37 +303,37 @@ public class Authenticator implements StoreAuthenticationService
             }
         }
         
-        // If User has no Auth Tokens or valid ones, create one
+        // If User has no AuthTokens or valid ones, create one
         if (authToken == null)
         {
             while (authTokenIdsUsed.contains(Integer.toString(suggestedId)))
                 suggestedId++;        
             authToken = new AuthToken(Integer.toString(suggestedId), this);
             
-            // Add now-used Auth Token id to used id's list and increment suggestedId for next Auth Token
+            // Add now-used AuthToken id to used id's list and increment suggestedId for next AuthToken
             authTokenIdsUsed.add(Integer.toString(suggestedId));
             suggestedId++;
             
-            // Add newly created Auth Token to User's list of Auth Tokens
+            // Add newly created AuthToken to User's list of AuthTokens
             userOfCredential.addAuthToken(authToken);
         }       
         
-        // Return Auth Token
+        // Return AuthToken
         return authToken;
     }
 
     @Override
     public void logout(AuthToken authToken)
     {
-        // TODO Auto-generated method stub
+        // TODO 
         
-        // Validate given Auth Token
+        // Validate given AuthToken
         Boolean foundAuthToken = false;
         for (Entry<String, User> userEntry : users.entrySet())
         {            
             for (Entry<String, AuthToken> authTokenEntry : userEntry.getValue().getAuthTokens().entrySet())
             {
-                if (authTokenEntry.getValue().equals(authToken))
+                if (authTokenEntry.getValue().equals(authToken) && (authTokenEntry.getValue().isActive() == true))
                 {
                     foundAuthToken = true;
                     break;
@@ -268,12 +341,12 @@ public class Authenticator implements StoreAuthenticationService
             }    
         }
         
-        // Throw InvalidAuthTokenException if Auth Token not found or null
+        // Throw InvalidAuthTokenException if AuthToken not found or null
         if ((foundAuthToken == false) || (authToken == null))
         {
             try
             {              
-                throw new AuthenticatorException("InvalidAuthTokenException", "logout", "Auth Token not found; not logged out");
+                throw new AuthenticatorException("InvalidAuthTokenException", "logout", "Invalid AuthToken; not logged out");
             }
             
             catch (AuthenticatorException exception)
@@ -284,23 +357,23 @@ public class Authenticator implements StoreAuthenticationService
             }           
         }
         
-        // Invalidate Auth Token
+        // Invalidate AuthToken
         authToken.setActive(false, myAuthToken);
     }
         
     @Override
     public Boolean hasPermission(String permissionId, AuthToken authToken)
     {
-        // TODO Auto-generated method stub  
+        // TODO   
         
-        // Find User associated with Auth Token
+        // Find AuthToken and User associated with it
         Boolean foundAuthToken = false;
         User userOfAuthToken = null;
         for (Entry<String, User> userEntry : users.entrySet())
         {            
             for (Entry<String, AuthToken> authTokenEntry : userEntry.getValue().getAuthTokens().entrySet())
             {
-                if (authTokenEntry.getValue().equals(authToken))
+                if (authTokenEntry.getValue().equals(authToken) && (authTokenEntry.getValue().isActive() == true))
                 {
                     foundAuthToken = true;
                     break;
@@ -314,13 +387,12 @@ public class Authenticator implements StoreAuthenticationService
             }
         }
         
-        // Throw InvalidAuthTokenException if Auth Token not found 
+        // Throw InvalidAuthTokenException if AuthToken not found 
         if (foundAuthToken == false)
         {
             try
             {
-                // TODO: Change to InvalidAuthTokenException and other exceptions per requirements? (i.e., make the actual classes, not just strings)
-                throw new AuthenticatorException("InvalidAuthTokenException", "check for \""+ permissionId +"\" permission", "Auth Token not found");
+                throw new AuthenticatorException("InvalidAuthTokenException", "check for \""+ permissionId +"\" permission", "Invalid AuthToken");
             }
             
             catch (AuthenticatorException exception)
@@ -331,11 +403,25 @@ public class Authenticator implements StoreAuthenticationService
             }           
         }
         
-        // Check if User of Auth Token has permissions
+        // Check if User of AuthToken has permission
         GetPermissions getPermissions = new GetPermissions(permissionId);        
         userOfAuthToken.acceptVisitor(getPermissions);
         
-        // TODO: Throw exception if User doesn't have the Permission
+        // Throw exception if User doesn't have the Permission
+        if (!getPermissions.getHasPermission())
+        {
+            try
+            {
+                throw new AuthenticatorException("AccessDeniedException", "check for \""+ permissionId +"\" permission", "User does not have permission");
+            }
+            
+            catch (AuthenticatorException exception)
+            {
+                System.out.println();
+                System.out.print(exception.getMessage());
+                return false;
+            }
+        }
         
         return getPermissions.getHasPermission();
     }
@@ -350,5 +436,11 @@ public class Authenticator implements StoreAuthenticationService
     public static String getHardcodedUserPassword()
     {
         return HARDCODED_USER_PASSWORD;
-    }   
+    }
+    
+    // TODO: Delete later (for debugging purposes only)
+    public AuthToken getMyAuthToken()
+    {
+        return myAuthToken;
+    }
 }

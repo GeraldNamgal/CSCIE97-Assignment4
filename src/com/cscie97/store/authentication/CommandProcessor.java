@@ -101,48 +101,10 @@ public class CommandProcessor
     {
         // TODO
         
-        // Login CommandProcessor to get Auth Token
+        // Login CommandProcessor as the hardcoded User to get AuthToken for operating Authenticator methods
         hardcodedUserAuthToken = authenticator.obtainAuthToken(Authenticator.getHardcodedUserUsername(), Authenticator.getHardcodedUserPassword());
         
-        /* TODO: Debugging -- Check that authToken obtainAuthToken works correctly */
-        if (hardcodedUserAuthToken != null)
-        {
-            System.out.println();
-            System.out.println(hardcodedUserAuthToken.getId());
-            
-            // Try to get Auth Token again
-            hardcodedUserAuthToken = authenticator.obtainAuthToken(Authenticator.getHardcodedUserUsername(), Authenticator.getHardcodedUserPassword());
-            
-            // Auth Token should still be the some one
-            System.out.println();
-            System.out.println(hardcodedUserAuthToken.getId());     
-            
-            // TODO: Check validity of Auth Token before and after logout and after re-login
-            
-            if (hardcodedUserAuthToken.isActive())
-                System.out.println("It's valid");
-            else
-                System.out.println("It's invalid");
-            
-            // Logout
-            authenticator.logout(hardcodedUserAuthToken);
-            
-            if (hardcodedUserAuthToken.isActive())
-                System.out.println("It's valid");
-            else
-                System.out.println("It's invalid");
-            
-            // Log back in 
-            hardcodedUserAuthToken = authenticator.obtainAuthToken(Authenticator.getHardcodedUserUsername(), Authenticator.getHardcodedUserPassword());
-            
-            if (hardcodedUserAuthToken.isActive())
-                System.out.println("It's valid");
-            else
-                System.out.println("It's invalid");
-            
-            // Auth Token should be different
-            System.out.println();
-            System.out.println(hardcodedUserAuthToken.getId());
-        }        
+        // TODO: Do CLI script commands now to see if they work
+        authenticator.definePermission("userAdmin", "User Administrator", "Create, Update, Delete Users", hardcodedUserAuthToken);
     }
 }

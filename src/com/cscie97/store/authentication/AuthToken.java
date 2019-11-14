@@ -34,21 +34,6 @@ public class AuthToken
     {
         // Check that given authToken has "updateAuthTokenValid" Permission first
         if (authenticator.hasPermission("updateAuthTokenValid", authToken))
-            this.active = trueOrFalse;
-        
-        // Throw an AccessDenied exception if given authToken doesn't have the Permission
-        else
-        {
-            try
-            {             
-                throw new AuthenticatorException("AccessDenied", "check for \"updateAuthTokenValid\" permission", "Auth Token does not have Permission");
-            }
-            
-            catch (AuthenticatorException exception)
-            {
-                System.out.println();
-                System.out.print(exception.getMessage());          
-            }           
-        }
+            this.active = trueOrFalse;     
     }   
 }

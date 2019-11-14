@@ -72,8 +72,8 @@ public class GetPermissions implements EntitlementVisitor
     @Override
     public void visitPermission(Permission permission)
     {
-        // TODO: Debugging
-        System.out.print(permission.getId() + " : [ ");
+        /*// TODO: Debugging
+        System.out.print(permission.getId() + " : [ ");*/
         
         /* TODO: Set hasPermission to true if permission is found */
         
@@ -113,7 +113,7 @@ public class GetPermissions implements EntitlementVisitor
         // Call entitlement's acceptVisitor method
         entitlement.acceptVisitor(this);
         
-        // TODO: Debugging
+        /*// TODO: Debugging
         if (entitlement.getClass().getName().endsWith(".Permission"))
         {
             for (String id : resourceIdsPtr)
@@ -124,7 +124,7 @@ public class GetPermissions implements EntitlementVisitor
             for (String id : roleIdsPtr)
                 System.out.print(id + " ");
             System.out.println("]");
-        }
+        }*/
         
         // If current node is a Role, recurse
         if (entitlement.getClass().getName().endsWith(".Role") || entitlement.getClass().getName().endsWith(".ResourceRole"))
