@@ -8,7 +8,7 @@ public class ResourceRole extends Role
     
     /* Constructor */
     
-    public ResourceRole(String id, String name, String description, Resource resource, Entitlement entitlement)
+    public ResourceRole(String id, String name, String description, Entitlement entitlement, Resource resource)
     {
         super(id, name, description);  
         
