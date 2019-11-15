@@ -8,12 +8,12 @@ define permission "checkout" "Checkout" "Can check out items from store(s)"
 define role "adult consumer" "Adult Consumer Role" "Has all permissions of an adult consumer"
 define role "child consumer" "Child Consumer Role" "Has all permissions of a child consumer"
 define role guest "Guest Role" "Has all permissions of a guest"
-define role "admin role" "Admin Role" "Has all permissions of an administrator"
+define role admin "Admin Role" "Has all permissions of an administrator"
 
-add entitlement to role "admin role" "user admin"
-add entitlement to role "admin role" "control robot"
-add entitlement to role "admin role" "control speaker"
-add entitlement to role "admin role" "control turnstile"
+add entitlement to role admin "user admin"
+add entitlement to role admin "control robot"
+add entitlement to role admin "control speaker"
+add entitlement to role admin "control turnstile"
 add entitlement to role "adult consumer" "control robot"
 add entitlement to role "adult consumer" "enter store"
 add entitlement to role "adult consumer" checkout
@@ -34,6 +34,8 @@ define resource "store 1" "Represents store 1 Store of Model Service"
 define resource role "store 1 child consumer" "name" "description" "child consumer" "store 1"
 define resource role "store 1 adult consumer" "name" "description" "adult consumer" "store 1"
 
-add entitlement to user debra "admin role"
+add entitlement to user debra admin
 add entitlement to user sam "store 1 adult consumer"
 add entitlement to user jimmy "store 1 child consumer"
+
+print inventory

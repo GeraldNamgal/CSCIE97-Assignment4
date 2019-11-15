@@ -15,6 +15,8 @@ public interface StoreAuthenticationService
     AuthToken obtainAuthToken(String credentialId, String credentialValue);
     void logout(AuthToken authToken);
     Boolean hasPermission(String permissionId, AuthToken authToken);
+    void printInventory();
+    LinkedHashMap<String, User> getUsers();
     
     // TODO: For debugging (can delete later)
     AuthToken getMyAuthToken();

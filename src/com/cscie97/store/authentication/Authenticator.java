@@ -4,7 +4,7 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map.Entry;
 
-public class Authenticator implements StoreAuthenticationService
+public class Authenticator implements StoreAuthenticationService, Visitable
 {
     /* VARIABLES */
     
@@ -321,7 +321,13 @@ public class Authenticator implements StoreAuthenticationService
         // Invalidate AuthToken
         authToken.setActive(false, myAuthToken);
     }
-        
+    
+    @Override
+    public void acceptVisitor(EntitlementVisitor visitor)
+    {        
+        visitor.visitAuthenticator(this);
+    }
+    
     @Override
     public Boolean hasPermission(String permissionId, AuthToken authToken)
     {
@@ -385,6 +391,19 @@ public class Authenticator implements StoreAuthenticationService
         }
         
         return getPermissions.getHasPermission();
+    }  
+    
+    @Override
+    public void printInventory()
+    {
+        PrintInventory printInventory = new PrintInventory();
+        this.acceptVisitor(printInventory);
+    }
+    
+    @Override
+    public LinkedHashMap<String, User> getUsers()
+    {
+        return users;
     }
     
     /* UTILITY METHODS */
@@ -398,7 +417,7 @@ public class Authenticator implements StoreAuthenticationService
     {
         return HARDCODED_USER_PASSWORD;
     }
-    
+   
     // TODO: For debugging (can delete later)
     public AuthToken getMyAuthToken()
     {
@@ -409,5 +428,5 @@ public class Authenticator implements StoreAuthenticationService
     public LinkedHashMap<String, Entitlement> getEntitlements()
     {
         return entitlements;
-    }
+    }  
 }

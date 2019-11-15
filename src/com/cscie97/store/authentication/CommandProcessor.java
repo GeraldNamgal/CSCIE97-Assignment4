@@ -389,6 +389,13 @@ public class CommandProcessor
             System.out.println();
         }
         
+        else if((splitInputArr.length == 2) && splitInputArr[0].equalsIgnoreCase("print") && splitInputArr[1].equalsIgnoreCase("inventory"))
+        {
+            System.out.println("-: " + trimmedInput);
+            authenticator.printInventory();
+            System.out.println();
+        }
+        
         // TODO: Else route the command to the Modeler Service's CommandProcessor
         else
         {            
@@ -411,11 +418,11 @@ public class CommandProcessor
         authenticator.defineResource("store 2", "description", hardcodedUserAuthToken);
         authenticator.defineResource("store 3", "description", hardcodedUserAuthToken);
         
-        authenticator.defineResourceRole("resource role 1", "name", "description", "store 1", "role 3", hardcodedUserAuthToken);
-        authenticator.defineResourceRole("resource role 2", "name", "description", "store 1", "role 1", hardcodedUserAuthToken);
-        authenticator.defineResourceRole("resource role 3", "name", "description", "store 2", "role 4", hardcodedUserAuthToken);
-        authenticator.defineResourceRole("resource role 4", "name", "description", "store 2", "role 2", hardcodedUserAuthToken);
-        authenticator.defineResourceRole("resource role 5", "name", "description", "store 3", "permission 2", hardcodedUserAuthToken);
+        authenticator.defineResourceRole("resource role 1", "name", "description", "role 3", "store 1", hardcodedUserAuthToken);
+        authenticator.defineResourceRole("resource role 2", "name", "description", "role 1", "store 1", hardcodedUserAuthToken);
+        authenticator.defineResourceRole("resource role 3", "name", "description", "role 4", "store 2", hardcodedUserAuthToken);
+        authenticator.defineResourceRole("resource role 4", "name", "description", "role 2", "store 2", hardcodedUserAuthToken);
+        authenticator.defineResourceRole("resource role 5", "name", "description", "permission 2", "store 3", hardcodedUserAuthToken);
         
         authenticator.addEntitlementToRole("role 1", "permission 1", hardcodedUserAuthToken);
         authenticator.addEntitlementToRole("role 1", "permission 5", hardcodedUserAuthToken);
@@ -430,6 +437,8 @@ public class CommandProcessor
         authenticator.addEntitlementToUser("hardcodedUser", "resource role 5", hardcodedUserAuthToken);
         authenticator.addEntitlementToRole("resource role 1", "useAuthenticatorAPI", hardcodedUserAuthToken);
         authenticator.addEntitlementToRole("authenticatorAPIUserRole", "permission 3", hardcodedUserAuthToken);
-        authenticator.addEntitlementToUser("hardcodedUser", "permission 5", hardcodedUserAuthToken);*/
+        authenticator.addEntitlementToUser("hardcodedUser", "permission 5", hardcodedUserAuthToken);
+        
+        authenticator.printInventory();*/
     }
 }

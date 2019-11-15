@@ -35,6 +35,12 @@ public class GetPermissions implements EntitlementVisitor
     /* API METHODS */
 
     @Override
+    public void visitAuthenticator(Authenticator authenticator)
+    {
+        // No action needed
+    }
+    
+    @Override
     public void visitUser(User user)
     {
         for (Entry<String, Entitlement> entitlementEntry : user.getEntitlements().entrySet())
@@ -77,8 +83,11 @@ public class GetPermissions implements EntitlementVisitor
         
         /* TODO: Set hasPermission to true if permission is found */
         
-        if (permission.getId().equals(permissionIdToBeChecked))
+        // If Permission id is found and the Permission isn't associated with any resources
+        if (permission.getId().equals(permissionIdToBeChecked) && resourceIdsPtr.isEmpty())
             hasPermission = true;
+        
+        // TODO: If Permission id is found and the Permission is associated with a resource(s)
         
         /*if (permission.getId().equals(permissionIdToBeChecked) && (resourceIdsPtr.contains(associatedResourceId) || resourceIdsPtr.isEmpty())
                 && roleIdsPtr.contains(associatedRoleId))
@@ -160,5 +169,5 @@ public class GetPermissions implements EntitlementVisitor
     public Boolean getHasPermission()
     {
         return hasPermission;
-    }     
+    }       
 }
