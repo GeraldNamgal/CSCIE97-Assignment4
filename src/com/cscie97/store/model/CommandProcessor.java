@@ -7,13 +7,9 @@
 
 package com.cscie97.store.model;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-
 import java.util.ArrayList;
 
+import com.cscie97.store.authentication.StoreAuthenticationService;
 import com.cscie97.store.controller.Controller;
 
 /* *
@@ -23,10 +19,28 @@ public class CommandProcessor
 {
     /* Variables */
 
+    private StoreAuthenticationService authenticator;
     private com.cscie97.ledger.CommandProcessor ledgerCp;
     private StoreModelService modeler;
     private Observer controller;
     private int lineNum = 0;
+    
+    /* Constructor */
+    
+    public CommandProcessor(StoreAuthenticationService authenticator)
+    {
+        // Create Authenticator
+        this.authenticator = authenticator;
+        
+        // Create Modeler 
+        this.modeler = new Modeler();       
+        
+        // Create ledger 
+        this.ledgerCp = new com.cscie97.ledger.CommandProcessor();
+        
+        // Create Controller 
+        this.controller = new Controller((Subject) modeler, ledgerCp);
+    }
     
     /* API Methods */
 
@@ -35,19 +49,7 @@ public class CommandProcessor
      * @command The input string to be parsed
      */
     public void processCommand(String command)
-    {       
-        // Create Modeler if it doesn't exist
-        if (modeler == null)
-            modeler = new Modeler();       
-        
-        // Create ledger command processor if it doesn't exist
-        if (ledgerCp == null)
-            ledgerCp = new com.cscie97.ledger.CommandProcessor();
-        
-        // Create Controller if it doesn't exist
-        if (controller == null)
-            controller = new Controller((Subject) modeler, ledgerCp);
-    	
+    {             	
         parseAndProcess(command);
     }
     
@@ -59,63 +61,8 @@ public class CommandProcessor
      * Referenced https://www.journaldev.com/709/java-read-file-line-by-line
      */
     public void processCommandFile(String commandFile)
-    {       
-        // Create Modeler if it doesn't exist
-        if (modeler == null)
-            modeler = new Modeler();       
-        
-        // Create ledger command processor if it doesn't exist
-        if (ledgerCp == null)
-            ledgerCp = new com.cscie97.ledger.CommandProcessor();
-        
-        // Create Controller if it doesn't exist
-        if (controller == null)
-            controller = new Controller((Subject) modeler, ledgerCp);
-    	
-        // Check if the file is empty
-        try
-        {
-            File newFile = new File(commandFile);
-            if (newFile != null)
-            {
-                if (newFile.length() == 0)
-                    throw new CommandProcessorException("in processCommandFile method", "file is empty");
-            }
-        }
-
-        catch (CommandProcessorException exception)
-        {
-            System.out.println(exception.getMessage());
-            return;
-        }
-
-        // Read file
-        try
-        {
-            BufferedReader reader;
-            reader = new BufferedReader(new FileReader(commandFile));
-            String line = reader.readLine();
-
-            while (line != null)
-            {
-                // Counter up lineNum
-                lineNum++;
-
-                // Call parseAndProcess method if line isn't empty
-                if (line.length() > 0)
-                    parseAndProcess(line);
-
-                // Read next line
-                line = reader.readLine();
-            }
-
-            reader.close();
-        }
-
-        catch (IOException exception)
-        {
-            exception.printStackTrace();
-        }
+    {    	
+        // Not needed
     }       
     
     /* Utility Methods */

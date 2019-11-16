@@ -7,10 +7,6 @@
 
 package com.cscie97.ledger;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map.Entry;
@@ -34,50 +30,7 @@ public class CommandProcessor
     // Referenced https://www.journaldev.com/709/java-read-file-line-by-line
     public void processCommandFile(String commandFile)
     {       
-        // Check if the file is empty
-        try
-        {
-            File newFile = new File(commandFile);
-            if (newFile != null)
-            {
-                if (newFile.length() == 0)
-                    throw new CommandProcessorException("in processCommandFile method", "file is empty");
-            }
-        }
-
-        catch (CommandProcessorException exception)
-        {
-            System.out.println(exception.getMessage());
-            return;
-        }
-
-        // Read file
-        try
-        {
-            BufferedReader reader;
-            reader = new BufferedReader(new FileReader(commandFile));
-            String line = reader.readLine();
-
-            while (line != null)
-            {
-                // Counter up lineNum
-                lineNum++;
-
-                // Call parseAndProcess method if line isn't empty
-                if (line.length() > 0)
-                    parseAndProcess(line);
-
-                // Read next line
-                line = reader.readLine();
-            }
-
-            reader.close();
-        }
-
-        catch (IOException exception)
-        {
-            exception.printStackTrace();
-        }
+       // Not needed
     }
 
     /* *

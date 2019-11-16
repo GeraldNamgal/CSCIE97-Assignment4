@@ -6,13 +6,12 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import com.cscie97.store.model.CommandProcessorException;
-
 public class CommandProcessor
 {
     /* Variables */
     
     private StoreAuthenticationService authenticator;
+    private com.cscie97.store.model.CommandProcessor modelerCp;
     private AuthToken hardcodedUserAuthToken;
     private int lineNum = 0;
     
@@ -23,6 +22,9 @@ public class CommandProcessor
         // Create Authenticator      
         authenticator = new Authenticator();
         
+        // Create Modeler 
+        this.modelerCp = new com.cscie97.store.model.CommandProcessor(authenticator);
+        
         // Login CommandProcessor to Authenticator with hardcoded User credentials for operating Authenticator methods
         hardcodedUserAuthToken = authenticator.obtainAuthToken(Authenticator.getHardcodedUserUsername(), Authenticator.getHardcodedUserPassword());
     }
@@ -30,7 +32,7 @@ public class CommandProcessor
     /* API Methods */
 
     /* *
-     * Parses a string for valid CLI/DSL command syntax and calls corresponding Modeler method
+     * Parses a string for valid CLI/DSL command syntax and calls corresponding Authenticator method
      * @command The input string to be parsed
      */
     public void processCommand(String command)
@@ -39,7 +41,7 @@ public class CommandProcessor
     }    
     
     /* *
-     * Parses a file of strings for valid CLI/DSL command syntax and calls corresponding Modeler methods
+     * Parses a file of strings for valid CLI/DSL command syntax and calls corresponding Authenticator methods
      * for each string found    
      * @param commandFile the name of the file to be pased
      * Referenced https://www.journaldev.com/709/java-read-file-line-by-line
@@ -95,7 +97,7 @@ public class CommandProcessor
     /* Utility Methods */
 
     /* *
-     * Utility method that parses a string for valid DSL/CLI command syntax and calls Modeler methods
+     * Utility method that parses a string for valid DSL/CLI command syntax and calls Authenticator methods
      * based on parsing result
      * @param input The line of string to be parsed
      */
@@ -113,7 +115,7 @@ public class CommandProcessor
             return;
         }
         
-     // Delimit input string on whitespace and add each value to array
+        // Delimit input string on whitespace and add each value to array
         String[] splitInputArr = trimmedInput.split("\\s+");
         
         /* If input contained quotes, then validate their correct usage and fix array - code block BEGINNING */
@@ -399,7 +401,7 @@ public class CommandProcessor
         // TODO: Else route the command to the Modeler Service's CommandProcessor
         else
         {            
-            
+            modelerCp.processCommand(input);
         }
         
         /*// TODO: Still need? -- Testing

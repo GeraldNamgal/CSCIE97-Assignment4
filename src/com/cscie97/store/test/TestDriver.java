@@ -12,7 +12,7 @@ import java.util.Scanner;
 import com.cscie97.store.authentication.CommandProcessor;
 
 /* *
- * Test driver class that contains main method that calls the Store Model CommandProcessor class to exercise the Modeler
+ * Test driver class that contains main method that calls the Store Authenticator CommandProcessor class to exercise the Authenticator
  * and Ledger services
  */
 public class TestDriver

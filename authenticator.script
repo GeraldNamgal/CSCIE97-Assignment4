@@ -39,3 +39,5 @@ add entitlement to user sam "store 1 adult consumer"
 add entitlement to user jimmy "store 1 child consumer"
 
 print inventory
+
+define store "store 1" name "Harvard Square Store" address "1400 Mass Avenue, Cambridge, MA 02138"

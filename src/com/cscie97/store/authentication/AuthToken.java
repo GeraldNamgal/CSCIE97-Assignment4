@@ -6,16 +6,18 @@ public class AuthToken
     
     private String id;
     private Boolean active;
-    private StoreAuthenticationService authenticator;
+    private User userOfAuthToken;
+    private StoreAuthenticationService authenticator;    
     
     /* Constructor */
     
     // TODO: Add a lastUsed parameter and/or attribute
-    public AuthToken(String id, Authenticator authenticator)
+    public AuthToken(String id, User userOfAuthToken, Authenticator authenticator)
     {
         this.id = id;
         this.active = true;
-        this.authenticator = authenticator;
+        this.userOfAuthToken = userOfAuthToken;
+        this.authenticator = authenticator;        
     }
     
     /* Getters and Setters */
@@ -32,8 +34,13 @@ public class AuthToken
 
     public void setActive(Boolean trueOrFalse, AuthToken authToken)
     {
-        // Check that given authToken has "updateAuthTokenValid" Permission first
-        if (authenticator.hasPermission("updateAuthTokenValid", authToken))
+        // Check that given authToken has "updateAuthTokenValidity" Permission first
+        if (authenticator.hasPermission("updateAuthTokenValidity", authToken))
             this.active = trueOrFalse;     
-    }   
+    }
+    
+    public User getUserOfAuthToken()
+    {
+        return userOfAuthToken;
+    }
 }

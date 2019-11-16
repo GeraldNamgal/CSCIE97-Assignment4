@@ -82,6 +82,11 @@ public class Credential
         return id;
     }
     
+    public String getType()
+    {
+        return type;
+    }
+    
     public String getValue()
     {
         if (type.equals("password"))
