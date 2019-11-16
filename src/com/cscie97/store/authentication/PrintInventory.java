@@ -25,10 +25,7 @@ public class PrintInventory implements EntitlementVisitor
             for (int i = 0; i < level * tabSpace; i++)
                 System.out.print(" ");
             System.out.print("|");
-            System.out.println("User: id = \"" + userEntry.getValue().getId() + "\"");
-            for (int i = 0; i < level * tabSpace; i++)
-                System.out.print(" ");
-            System.out.println("       name = \"" + userEntry.getValue().getName() + "\"");
+            System.out.println("User: id = \"" + userEntry.getValue().getId() + "\"; name = \"" + userEntry.getValue().getName() + "\"");
             userEntry.getValue().acceptVisitor(this);
         }
     }
@@ -43,10 +40,7 @@ public class PrintInventory implements EntitlementVisitor
             for (int i = 0; i < level * tabSpace; i++)
                 System.out.print(" ");
             System.out.print("|");
-            System.out.println("Credential: id = \"" + credentialEntry.getValue().getId() + "\"");
-            for (int i = 0; i < level * tabSpace; i++)
-                System.out.print(" ");
-            System.out.println("             type = \"" + credentialEntry.getValue().getType() + "\"");
+            System.out.println("Credential: id = \"" + credentialEntry.getValue().getId() + "\"; type = \"" + credentialEntry.getValue().getType() + "\"");
         }
                     
         for (Entry<String, AuthToken> authTokenEntry : user.getAuthTokens().entrySet())
@@ -54,10 +48,7 @@ public class PrintInventory implements EntitlementVisitor
             for (int i = 0; i < level * tabSpace; i++)
                 System.out.print(" ");
             System.out.print("|");
-            System.out.println("AuthToken: id = \"" + authTokenEntry.getValue().getId() + "\"");
-            for (int i = 0; i < level * tabSpace; i++)
-                System.out.print(" ");
-            System.out.println("            active = \"" + authTokenEntry.getValue().isActive() + "\"");
+            System.out.println("AuthToken: id = \"" + authTokenEntry.getValue().getId() + "\"; active = \"" + authTokenEntry.getValue().isActive() + "\"");
         }
         
         for (Entry<String, Entitlement> entitlementEntry : user.getEntitlements().entrySet())
@@ -69,16 +60,14 @@ public class PrintInventory implements EntitlementVisitor
     @Override
     public void visitRole(Role role)
     {        
-        System.out.println("Role: id = \"" + role.getId() + "\"");
+        System.out.println("Role: id = \"" + role.getId() + "\"; name = \"" + role.getName() + "\"; description = \"" + role.getDescription() + "\"");
     }
     
     @Override
     public void visitResourceRole(ResourceRole rRole)
     {
-        System.out.println("ResourceRole: id = \"" + rRole.getId() + "\"");
-        for (int i = 0; i < levelPtr * tabSpace; i++)
-            System.out.print(" ");
-        System.out.println("               resource.getId() = \"" + rRole.getResource().getId() + "\"");        
+        System.out.println("ResourceRole: id = \"" + rRole.getId() + "\"; name = \"" + rRole.getName() + "\"; description = \""
+                + rRole.getDescription() + "\"; resource.getId() = \"" + rRole.getResource().getId() + "\"");        
     }
 
     @Override
@@ -86,7 +75,8 @@ public class PrintInventory implements EntitlementVisitor
     {
         // TODO
         
-        System.out.println("Permission: id = \"" + permission.getId() + "\"");        
+        System.out.println("Permission: id = \"" + permission.getId() + "\"; name = \"" + permission.getName() + "\"; description = \""
+                + permission.getDescription() + "\"");        
     }
     
     /* UTILITY METHODS */
