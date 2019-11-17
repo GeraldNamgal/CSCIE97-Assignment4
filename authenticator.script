@@ -1,3 +1,4 @@
+# Define permissions
 define permission "user admin" "User Administrator" "Create, Update, Delete Users"
 define permission "control robot" "Control Robot" "Full Control of Robots"
 define permission "control speaker" "Control Speaker" "Full Control of Speaker"
@@ -5,11 +6,13 @@ define permission "control turnstile" "Control Turnstile" "Full Control of Turns
 define permission "enter store" "Enter Store" "Can enter store(s)"
 define permission "checkout" "Checkout" "Can check out items from store(s)"
 
+# Define roles
 define role "adult consumer" "Adult Consumer Role" "Has all permissions of an adult consumer"
 define role "child consumer" "Child Consumer Role" "Has all permissions of a child consumer"
 define role guest "Guest Role" "Has all permissions of a guest"
 define role admin "Admin Role" "Has all permissions of an administrator"
 
+# Add permissions to roles
 add entitlement to role admin "user admin"
 add entitlement to role admin "control robot"
 add entitlement to role admin "control speaker"
@@ -21,23 +24,109 @@ add entitlement to role "child consumer" "enter store"
 add entitlement to role "child consumer" checkout
 add entitlement to role guest "enter store"
 
+# Define users
 define user sam "Sam Davis"
 define user jimmy "Jimmy Jones"
 define user debra "Debra Smart"
 
+# Add credentials to users
 add user credential sam voiceprint --voice:sam--
 add user credential jimmy faceprint --face:jimmy--
 add user credential debra password secret
 
-define resource "store 1" "Represents store 1 Store of Model Service"
+# Define resource store 1
+define resource "store1" "Represents store1 Store of Model Service"
 
-define resource role "store 1 child consumer" "name" "description" "child consumer" "store 1"
-define resource role "store 1 adult consumer" "name" "description" "adult consumer" "store 1"
+# Define resource roles
+define resource role "store1 child consumer" "name" "description" "child consumer" "store1"
+define resource role "store1 adult consumer" "name" "description" "adult consumer" "store1"
 
+# Add roles to users
 add entitlement to user debra admin
-add entitlement to user sam "store 1 adult consumer"
-add entitlement to user jimmy "store 1 child consumer"
+add entitlement to user sam "store1 adult consumer"
+add entitlement to user jimmy "store1 child consumer"
 
+# Print inventory
 print inventory
 
-define store "store 1" name "Harvard Square Store" address "1400 Mass Avenue, Cambridge, MA 02138"
+# Exception: Try to define store 1 (i.e., use Store Model Service) without required permission
+define store "store1" name "Harvard Square Store" address "1400 Mass Avenue, Cambridge, MA 02138"
+
+# Give hardcodedUser permission to use StoreModelService
+define permission "use StoreModelService" "Use Store Model Service" "Permission to use Store Model Service methods"
+add entitlement to user hardcodedUser "use StoreModelService"
+
+# Define store 1 (should now have permission)
+define store "store1" name "Harvard Square Store" address "1400 Mass Avenue, Cambridge, MA 02138"
+
+# Define the rest of store 1's assets
+define aisle store1:aisle1 name Milks description "milk, yogurt, and other dairy-like products" location floor
+define aisle store1:aisle2 name "Breads and Grains" description "breads, grains, wheat" location floor
+define aisle store1:aisle3 name Drinks description "canned and room temperature" location floor
+define aisle store1:aisle5 name Miscellaneous description "random stuff" location storeroom
+define shelf store1:aisle1:shelf1 name Milks level high description "regular, soy, and almond" temperature refrigerated
+define shelf store1:aisle5:shelf1 name Milks level high description "regular, soy and almond" temperature refrigerated
+define shelf store1:aisle2:shelf2 name "Cereals" level high description "cereal and oatmeal"
+define shelf store1:aisle5:shelf2 name "Cereals" level high description "cereal and oatmeal"
+define product product1 name "Soya Drink" description "soy milk brand" size "2 lbs" category "milk" unit_price 35 temperature refrigerated
+define inventory inventory1 location store1:aisle1:shelf1 capacity 30 count 30 product product1
+define inventory inventory2 location store1:aisle5:shelf1 capacity 30 count 30 product product1
+define product product2 name "Almond Drank" description "almond milk brand" size "2 lbs" category "milk" unit_price 40 temperature refrigerated
+define inventory inventory3 location store1:aisle1:shelf1 capacity 40 count 40 product product2
+define inventory inventory4 location store1:aisle5:shelf1 capacity 40 count 40 product product2
+define product product3 name "Crunchy Cereal" description "breakfast cereal" size "1 lbs" category "breakfast food" unit_price 27
+define inventory inventory5 location store1:aisle2:shelf2 capacity 35 count 35 product product3
+define inventory inventory6 location store1:aisle5:shelf2 capacity 35 count 35 product product3
+define device camera1 name "camera 1" type camera location store1:aisle1
+define device camera2 name "camera 2" type camera location store1:aisle2
+define device camera3 name "camera 3" type camera location store1:aisle3
+define device camera4 name "camera 4" type camera location store1:null
+define device camera5 name "camera 5" type camera location store1:aisle5
+define device microphone1 name "microphone 1" type microphone location store1:aisle1
+define device microphone2 name "microphone 2" type microphone location store1:aisle2
+define device microphone3 name "microphone 3" type microphone location store1:aisle3
+define device microphone4 name "microphone 4" type microphone location store1:null
+define device turnstile1 name "turnstile 1" type turnstile location store1:null
+define device turnstile2 name "turnstile 2" type turnstile location store1:null
+define device turnstile3 name "turnstile 3" type turnstile location store1:null
+define device speaker1 name "speaker 1" type speaker location store1:aisle1
+define device speaker2 name "speaker 2" type speaker location store1:aisle2
+define device speaker3 name "speaker 3" type speaker location store1:aisle3
+define device robot1 name "robot 1" type robot location store1:null
+define device robot2 name "robot 2" type robot location store1:null
+define device robot3 name "robot 3" type robot location store1:null
+define customer customer1 first_name John last_name Jones age_group adult type registered email_address john.j@jmail.com account john
+define customer customer2 first_name Stephanie last_name Jones age_group child type guest email_address steph.j@jmail.com account stephanie
+define customer customer3 first_name Mark last_name Jones age_group adult type registered email_address mark.j@jmail.com account mark
+define customer customer4 first_name Mary last_name Stein age_group adult type registered email_address mary.s@jmail.com account mary
+define customer customer5 first_name Joseph last_name McAllister age_group adult type registered email_address joseph.m@jmail.com account joseph
+define customer customer6 first_name Stan last_name Jenkins age_group adult type registered email_address stan.j@jmail.com account stan
+define customer customer7 first_name Jalina last_name White age_group adult type registered email_address jalina.w@jmail.com account jalina
+define customer customer8 first_name Sebastian last_name Kim age_group adult type registered email_address sebastian.k@jmail.com account sebastian
+define customer customer9 first_name Lisa last_name Ford age_group adult type registered email_address lisa.f@jmail.com account lisa
+define customer customer10 first_name Art last_name Weyl age_group adult type registered email_address art.w@jmail.com account art
+define customer customer11 first_name Karen last_name Peterson age_group adult type registered email_address karen.p@jmail.com account karen
+
+# Create ledger, Blockchain accounts, and initial fund transactions
+Create-ledger ledger description "for blockchaining" seed "CSCIE-97"
+create-account store1
+create-account john
+process-transaction 0 amount 2000 fee 10 payload "fund account" payer master receiver john
+create-account mark
+process-transaction 1 amount 2000 fee 10 payload "fund account" payer master receiver mark
+create-account mary
+process-transaction 2 amount 0 fee 10 payload "fund account" payer master receiver mary
+create-account joseph
+process-transaction 3 amount 2000 fee 10 payload "fund account" payer master receiver joseph
+create-account stan
+process-transaction 4 amount 2000 fee 10 payload "fund account" payer master receiver stan
+create-account jalina
+process-transaction 5 amount 2000 fee 10 payload "fund account" payer master receiver jalina
+create-account sebastian
+process-transaction 6 amount 2000 fee 10 payload "fund account" payer master receiver sebastian
+create-account lisa
+process-transaction 7 amount 2000 fee 10 payload "fund account" payer master receiver lisa
+create-account art
+process-transaction 8 amount 2000 fee 10 payload "fund account" payer master receiver art
+create-account karen
+process-transaction 9 amount 2000 fee 10 payload "fund account" payer master receiver karen

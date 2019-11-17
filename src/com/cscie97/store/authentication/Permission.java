@@ -8,7 +8,7 @@ public class Permission extends Entitlement
     }
 
     @Override
-    public void acceptVisitor(EntitlementVisitor visitor)
+    public void acceptVisitor(Visitor visitor)
     {
         visitor.visitPermission(this);
     }   

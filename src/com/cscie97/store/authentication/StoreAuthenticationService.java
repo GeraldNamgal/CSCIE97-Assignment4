@@ -14,9 +14,11 @@ public interface StoreAuthenticationService
     void addUserCredential(String userId, String type, String value, AuthToken authTokenForMethod);      
     AuthToken obtainAuthToken(String credentialId, String credentialValue);
     void logout(AuthToken authToken);
-    Boolean hasPermission(String permissionId, AuthToken authToken);
+    GetPermissionVisitor hasPermission(PermissionTuple permissionTuple, AuthToken authToken);
     void printInventory();
-    LinkedHashMap<String, User> getUsers();
+    
+    // Getters and Setters
+    LinkedHashMap<String, User> getUsers(); // Used in PrintInventory
     
     // TODO: For debugging (can delete later)
     AuthToken getMyAuthToken();

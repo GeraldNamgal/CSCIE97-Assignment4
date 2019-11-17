@@ -9,6 +9,8 @@ package com.cscie97.store.model;
 
 import java.util.ArrayList;
 
+import com.cscie97.store.authentication.AuthToken;
+import com.cscie97.store.authentication.Authenticator;
 import com.cscie97.store.authentication.StoreAuthenticationService;
 import com.cscie97.store.controller.Controller;
 
@@ -19,27 +21,28 @@ public class CommandProcessor
 {
     /* Variables */
 
-    private StoreAuthenticationService authenticator;
+    private com.cscie97.store.authentication.CommandProcessor authenticatorCp;
     private com.cscie97.ledger.CommandProcessor ledgerCp;
     private StoreModelService modeler;
-    private Observer controller;
-    private int lineNum = 0;
+    private AuthToken hardcodedUserAuthToken;    
     
     /* Constructor */
     
-    public CommandProcessor(StoreAuthenticationService authenticator)
-    {
-        // Create Authenticator
-        this.authenticator = authenticator;
-        
+    public CommandProcessor(StoreAuthenticationService authenticator, com.cscie97.store.authentication.CommandProcessor authenticatorCp)
+    { 
         // Create Modeler 
-        this.modeler = new Modeler();       
+        modeler = new Modeler(authenticator);       
         
         // Create ledger 
-        this.ledgerCp = new com.cscie97.ledger.CommandProcessor();
+        ledgerCp = new com.cscie97.ledger.CommandProcessor(authenticatorCp);
         
         // Create Controller 
-        this.controller = new Controller((Subject) modeler, ledgerCp);
+        new Controller((Subject) modeler, ledgerCp, authenticator);
+        
+        this.authenticatorCp = authenticatorCp;
+        
+        // Login CommandProcessor with hardcoded User credentials so can operate Modeler methods
+        hardcodedUserAuthToken = authenticator.obtainAuthToken(Authenticator.getHardcodedUserUsername(), Authenticator.getHardcodedUserPassword());
     }
     
     /* API Methods */
@@ -80,7 +83,7 @@ public class CommandProcessor
         // Check if input is a comment
         if (trimmedInput.charAt(0) == '#')
         {                         
-            System.out.println(trimmedInput + " [line " + lineNum + " in file]");          
+            System.out.println(trimmedInput + " [line " + authenticatorCp.getLineNum() + " in file]");          
             return;
         }
 
@@ -121,16 +124,16 @@ public class CommandProcessor
 	            {
 	               	try
 	                {
-	                    if (lineNum == 0)
+	                    if (authenticatorCp.getLineNum() == 0)
 	                        throw new CommandProcessorException("in processCommand method", "missing closing quote in user input");
 	
                             else
-	                        throw new CommandProcessorException("in processCommandFile method", "missing closing quote in user input", lineNum);            
+	                        throw new CommandProcessorException("in processCommandFile method", "missing closing quote in user input", authenticatorCp.getLineNum());            
 	                }
 	                    
 	                catch (CommandProcessorException exception)
 	                {
-	                    if (lineNum == 0)
+	                    if (authenticatorCp.getLineNum() == 0)
 	                    {
 	                        System.out.println("-: " + trimmedInput);
 	                        System.out.println();
@@ -168,16 +171,16 @@ public class CommandProcessor
 	            {
 	               	try
 	                {
-	                    if (lineNum == 0)
+	                    if (authenticatorCp.getLineNum() == 0)
 	                        throw new CommandProcessorException("in processCommand method", "missing opening quote in user input");
 	
 	                    else
-	                        throw new CommandProcessorException("in processCommandFile method", "missing opening quote in user input", lineNum);            
+	                        throw new CommandProcessorException("in processCommandFile method", "missing opening quote in user input", authenticatorCp.getLineNum());            
 	                }
 	                    
 	                catch (CommandProcessorException exception)
 	                {
-	                    if (lineNum == 0)
+	                    if (authenticatorCp.getLineNum() == 0)
 	                    {
 	                        System.out.println("-: " + trimmedInput);
 	                        System.out.println();
@@ -203,16 +206,16 @@ public class CommandProcessor
         {
             try
             {
-                if (lineNum == 0)
+                if (authenticatorCp.getLineNum() == 0)
                     throw new CommandProcessorException("in processCommand method", "missing closing quote in user input");
 
                 else
-                    throw new CommandProcessorException("in processCommandFile method", "missing closing quote in user input", lineNum);            
+                    throw new CommandProcessorException("in processCommandFile method", "missing closing quote in user input", authenticatorCp.getLineNum());            
             }
             
             catch (CommandProcessorException exception)
             {
-                if (lineNum == 0)
+                if (authenticatorCp.getLineNum() == 0)
                 {
                     System.out.println("-: " + trimmedInput);
                     System.out.println();
@@ -300,21 +303,18 @@ public class CommandProcessor
         
         /* code block END ("If input contained quotes, then validate their correct usage and fix array") */              
         
-        // Continue parsing for valid DSL commands for CLI
-        String auth_token = null;
-        
         if ((splitInputArr.length == 7) && splitInputArr[0].equalsIgnoreCase("define") && splitInputArr[1].equalsIgnoreCase("store")
                 && splitInputArr[3].equalsIgnoreCase("name") && splitInputArr[5].equalsIgnoreCase("address"))
         {
             System.out.println("-: " + trimmedInput);
-            modeler.defineStore(splitInputArr[2], splitInputArr[4], splitInputArr[6], auth_token);
+            modeler.defineStore(splitInputArr[2], splitInputArr[4], splitInputArr[6], hardcodedUserAuthToken);
             System.out.println();
         }   	
         
         else if ((splitInputArr.length == 3) && splitInputArr[0].equalsIgnoreCase("show") && splitInputArr[1].equalsIgnoreCase("store"))
         {
             System.out.println("-: " + trimmedInput);
-            modeler.showStore(splitInputArr[2], auth_token);
+            modeler.showStore(splitInputArr[2], hardcodedUserAuthToken);
             System.out.println();
         }
    
@@ -323,7 +323,7 @@ public class CommandProcessor
                 && splitInputArr[7].equalsIgnoreCase("location") && (splitInputArr[2].split(":").length == 2))
         {
             System.out.println("-: " + trimmedInput);
-            modeler.defineAisle(splitInputArr[2], splitInputArr[4], splitInputArr[6], splitInputArr[8], auth_token);
+            modeler.defineAisle(splitInputArr[2], splitInputArr[4], splitInputArr[6], splitInputArr[8], hardcodedUserAuthToken);
             System.out.println();
         }
         
@@ -331,7 +331,7 @@ public class CommandProcessor
                 && (splitInputArr[2].split(":").length == 2))
         {
             System.out.println("-: " + trimmedInput);
-            modeler.showAisle(splitInputArr[2], auth_token);
+            modeler.showAisle(splitInputArr[2], hardcodedUserAuthToken);
             System.out.println();
         }
         
@@ -341,7 +341,7 @@ public class CommandProcessor
                 && splitInputArr[7].equalsIgnoreCase("description") && (splitInputArr[2].split(":").length == 3))
         {
             System.out.println("-: " + trimmedInput);
-            modeler.defineShelf(splitInputArr[2], splitInputArr[4], splitInputArr[6], splitInputArr[8], auth_token);
+            modeler.defineShelf(splitInputArr[2], splitInputArr[4], splitInputArr[6], splitInputArr[8], hardcodedUserAuthToken);
             System.out.println();
         }    
     
@@ -352,7 +352,7 @@ public class CommandProcessor
                 && (splitInputArr[2].split(":").length == 3))
         {
             System.out.println("-: " + trimmedInput);
-            modeler.defineShelf(splitInputArr[2], splitInputArr[4], splitInputArr[6], splitInputArr[8], splitInputArr[10], auth_token);
+            modeler.defineShelf(splitInputArr[2], splitInputArr[4], splitInputArr[6], splitInputArr[8], splitInputArr[10], hardcodedUserAuthToken);
             System.out.println();
         }
     
@@ -360,7 +360,7 @@ public class CommandProcessor
                 && (splitInputArr[2].split(":").length == 3))
         {
             System.out.println("-: " + trimmedInput);
-            modeler.showShelf(splitInputArr[2], auth_token);
+            modeler.showShelf(splitInputArr[2], hardcodedUserAuthToken);
             System.out.println();
         }    
     
@@ -386,16 +386,16 @@ public class CommandProcessor
             {
                 try
                 {
-                    if (lineNum == 0)
+                    if (authenticatorCp.getLineNum() == 0)
                         throw new CommandProcessorException("in processCommand method", "invalid integer input");
 
                     else
-                        throw new CommandProcessorException("in processCommandFile method", "invalid integer input", lineNum);            
+                        throw new CommandProcessorException("in processCommandFile method", "invalid integer input", authenticatorCp.getLineNum());            
                 }
                 
                 catch (CommandProcessorException exception)
                 {
-                    if (lineNum == 0)
+                    if (authenticatorCp.getLineNum() == 0)
                     {
                         System.out.println("-: " + trimmedInput);
                         System.out.println();
@@ -418,7 +418,7 @@ public class CommandProcessor
             {
                 System.out.println("-: " + trimmedInput);
                 modeler.defineInventory(splitInputArr[2], splitInputArr[4], Integer.parseInt(splitInputArr[6]),
-                        Integer.parseInt(splitInputArr[8]), splitInputArr[10], auth_token);
+                        Integer.parseInt(splitInputArr[8]), splitInputArr[10], hardcodedUserAuthToken);
                 System.out.println();
             }
         }
@@ -426,7 +426,7 @@ public class CommandProcessor
         else if ((splitInputArr.length == 3) && splitInputArr[0].equalsIgnoreCase("show") && splitInputArr[1].equalsIgnoreCase("inventory"))
         {
             System.out.println("-: " + trimmedInput);
-            modeler.showInventory(splitInputArr[2], auth_token);
+            modeler.showInventory(splitInputArr[2], hardcodedUserAuthToken);
             System.out.println();
         }
         
@@ -449,16 +449,16 @@ public class CommandProcessor
             {
                 try
                 {
-                    if (lineNum == 0)
+                    if (authenticatorCp.getLineNum() == 0)
                         throw new CommandProcessorException("in processCommand method", "invalid integer input; inventory not updated");
 
                     else
-                        throw new CommandProcessorException("in processCommandFile method", "invalid integer input; inventory not updated", lineNum);            
+                        throw new CommandProcessorException("in processCommandFile method", "invalid integer input; inventory not updated", authenticatorCp.getLineNum());            
                 }
                 
                 catch (CommandProcessorException exception)
                 {
-                    if (lineNum == 0)
+                    if (authenticatorCp.getLineNum() == 0)
                     {
                         System.out.println("-: " + trimmedInput);
                         System.out.println();
@@ -477,7 +477,7 @@ public class CommandProcessor
             }
             
             System.out.println("-: " + trimmedInput);
-            modeler.updateInventory(splitInputArr[2], Integer.parseInt(splitInputArr[4]), auth_token);
+            modeler.updateInventory(splitInputArr[2], Integer.parseInt(splitInputArr[4]), hardcodedUserAuthToken);
             System.out.println();            
         }       
         
@@ -503,16 +503,16 @@ public class CommandProcessor
             {
                 try
                 {
-                    if (lineNum == 0)
+                    if (authenticatorCp.getLineNum() == 0)
                         throw new CommandProcessorException("in processCommand method", "invalid integer input; product not created");
 
                     else
-                        throw new CommandProcessorException("in processCommandFile method", "invalid integer input; product not created", lineNum);            
+                        throw new CommandProcessorException("in processCommandFile method", "invalid integer input; product not created", authenticatorCp.getLineNum());            
                 }
                 
                 catch (CommandProcessorException exception)
                 {
-                    if (lineNum == 0)
+                    if (authenticatorCp.getLineNum() == 0)
                     {
                         System.out.println("-: " + trimmedInput);
                         System.out.println();
@@ -532,7 +532,7 @@ public class CommandProcessor
                           
             System.out.println("-: " + trimmedInput);
             modeler.defineProduct(splitInputArr[2], splitInputArr[4], splitInputArr[6], splitInputArr[8], splitInputArr[10],
-                    Integer.parseInt(splitInputArr[12]), splitInputArr[14], auth_token);
+                    Integer.parseInt(splitInputArr[12]), splitInputArr[14], hardcodedUserAuthToken);
             System.out.println();            
         }
     
@@ -558,16 +558,16 @@ public class CommandProcessor
             {
                 try
                 {
-                    if (lineNum == 0)
+                    if (authenticatorCp.getLineNum() == 0)
                         throw new CommandProcessorException("in processCommand method", "invalid integer input; product not created");
 
                     else
-                        throw new CommandProcessorException("in processCommandFile method", "invalid integer input; product not created", lineNum);            
+                        throw new CommandProcessorException("in processCommandFile method", "invalid integer input; product not created", authenticatorCp.getLineNum());            
                 }
                 
                 catch (CommandProcessorException exception)
                 {
-                    if (lineNum == 0)
+                    if (authenticatorCp.getLineNum() == 0)
                     {
                         System.out.println("-: " + trimmedInput);
                         System.out.println();
@@ -587,14 +587,14 @@ public class CommandProcessor
             
             System.out.println("-: " + trimmedInput);
             modeler.defineProduct(splitInputArr[2], splitInputArr[4], splitInputArr[6], splitInputArr[8], splitInputArr[10],
-                    Integer.parseInt(splitInputArr[12]), auth_token);
+                    Integer.parseInt(splitInputArr[12]), hardcodedUserAuthToken);
             System.out.println();
         }
     
         else if ((splitInputArr.length == 3) && splitInputArr[0].equalsIgnoreCase("show") && splitInputArr[1].equalsIgnoreCase("product"))
         {
             System.out.println("-: " + trimmedInput);
-            modeler.showProduct(splitInputArr[2], auth_token);
+            modeler.showProduct(splitInputArr[2], hardcodedUserAuthToken);
             System.out.println();
         }    
     
@@ -605,7 +605,7 @@ public class CommandProcessor
         {
             System.out.println("-: " + trimmedInput);
             modeler.defineCustomer(splitInputArr[2], splitInputArr[4], splitInputArr[6], splitInputArr[8], splitInputArr[10], splitInputArr[12]
-                    , splitInputArr[14], auth_token);
+                    , splitInputArr[14], hardcodedUserAuthToken);
             System.out.println();
         }
         
@@ -614,21 +614,21 @@ public class CommandProcessor
                 || (splitInputArr[4].equals("null"))))
         {
             System.out.println("-: " + trimmedInput);
-            modeler.updateCustomer(splitInputArr[2], splitInputArr[4], splitInputArr[5], auth_token);
+            modeler.updateCustomer(splitInputArr[2], splitInputArr[4], splitInputArr[5], hardcodedUserAuthToken);
             System.out.println();
         }   
         
         else if ((splitInputArr.length == 3) && splitInputArr[0].equalsIgnoreCase("show") && splitInputArr[1].equalsIgnoreCase("customer"))
         {
             System.out.println("-: " + trimmedInput);
-            modeler.showCustomer(splitInputArr[2], auth_token);
+            modeler.showCustomer(splitInputArr[2], hardcodedUserAuthToken);
             System.out.println();
         }    
     
         else if ((splitInputArr.length == 2) && splitInputArr[0].equalsIgnoreCase("get_customer_basket"))
         {
             System.out.println("-: " + trimmedInput);
-            modeler.getCustomerBasket(splitInputArr[1], auth_token);
+            modeler.getCustomerBasket(splitInputArr[1], hardcodedUserAuthToken);
             System.out.println();
         }          
     
@@ -651,16 +651,16 @@ public class CommandProcessor
             {
                 try
                 {
-                    if (lineNum == 0)
+                    if (authenticatorCp.getLineNum() == 0)
                         throw new CommandProcessorException("in processCommand method", "invalid integer input; item not added");
 
                     else
-                        throw new CommandProcessorException("in processCommandFile method", "invalid integer input; item not added", lineNum);            
+                        throw new CommandProcessorException("in processCommandFile method", "invalid integer input; item not added", authenticatorCp.getLineNum());            
                 }
                 
                 catch (CommandProcessorException exception)
                 {
-                    if (lineNum == 0)
+                    if (authenticatorCp.getLineNum() == 0)
                     {
                         System.out.println("-: " + trimmedInput);
                         System.out.println();
@@ -679,7 +679,7 @@ public class CommandProcessor
             }
             
             System.out.println("-: " + trimmedInput);
-            modeler.addBasketItem(splitInputArr[1], splitInputArr[3], Integer.parseInt(splitInputArr[5]), auth_token);
+            modeler.addBasketItem(splitInputArr[1], splitInputArr[3], Integer.parseInt(splitInputArr[5]), hardcodedUserAuthToken);
             System.out.println();
         }
         
@@ -702,16 +702,16 @@ public class CommandProcessor
             {
                 try
                 {
-                    if (lineNum == 0)
+                    if (authenticatorCp.getLineNum() == 0)
                         throw new CommandProcessorException("in processCommand method", "invalid integer input; item not removed");
 
                     else
-                        throw new CommandProcessorException("in processCommandFile method", "invalid integer input; item not removed", lineNum);            
+                        throw new CommandProcessorException("in processCommandFile method", "invalid integer input; item not removed", authenticatorCp.getLineNum());            
                 }
                 
                 catch (CommandProcessorException exception)
                 {
-                    if (lineNum == 0)
+                    if (authenticatorCp.getLineNum() == 0)
                     {
                         System.out.println("-: " + trimmedInput);
                         System.out.println();
@@ -730,21 +730,21 @@ public class CommandProcessor
             }
             
             System.out.println("-: " + trimmedInput);
-            modeler.removeBasketItem(splitInputArr[1], splitInputArr[3], Integer.parseInt(splitInputArr[5]), auth_token);
+            modeler.removeBasketItem(splitInputArr[1], splitInputArr[3], Integer.parseInt(splitInputArr[5]), hardcodedUserAuthToken);
             System.out.println();            
         }
         
         else if ((splitInputArr.length == 2) && splitInputArr[0].equalsIgnoreCase("clear_basket"))
         {
             System.out.println("-: " + trimmedInput);
-            modeler.clearBasket(splitInputArr[1], auth_token);
+            modeler.clearBasket(splitInputArr[1], hardcodedUserAuthToken);
             System.out.println();
         }   
         
         else if ((splitInputArr.length == 3) && splitInputArr[0].equalsIgnoreCase("show") &&  splitInputArr[1].equalsIgnoreCase("basket_items"))
         {
             System.out.println("-: " + trimmedInput);
-            modeler.showBasketItems(splitInputArr[2], auth_token);
+            modeler.showBasketItems(splitInputArr[2], hardcodedUserAuthToken);
             System.out.println();
         }      
     
@@ -753,14 +753,14 @@ public class CommandProcessor
                 && splitInputArr[7].equalsIgnoreCase("location") && (splitInputArr[8].split(":").length == 2))
         {
             System.out.println("-: " + trimmedInput);
-            modeler.defineDevice(splitInputArr[2], splitInputArr[4], splitInputArr[6], splitInputArr[8], auth_token);
+            modeler.defineDevice(splitInputArr[2], splitInputArr[4], splitInputArr[6], splitInputArr[8], hardcodedUserAuthToken);
             System.out.println();
         }
         
         else if ((splitInputArr.length == 3) && splitInputArr[0].equalsIgnoreCase("show") && splitInputArr[1].equalsIgnoreCase("device"))
         {
             System.out.println("-: " + trimmedInput);
-            modeler.showDevice(splitInputArr[2], auth_token);
+            modeler.showDevice(splitInputArr[2], hardcodedUserAuthToken);
             System.out.println();
         }    
     
@@ -768,7 +768,7 @@ public class CommandProcessor
                 && splitInputArr[3].equalsIgnoreCase("event"))
         {
             System.out.println("-: " + trimmedInput);
-            modeler.createEvent(splitInputArr[2], splitInputArr[4], auth_token);
+            modeler.createEvent(splitInputArr[2], splitInputArr[4], hardcodedUserAuthToken);
             System.out.println();
         }    
     
@@ -776,7 +776,7 @@ public class CommandProcessor
                 && splitInputArr[3].equalsIgnoreCase("message"))
         {
             System.out.println("-: " + trimmedInput);
-            modeler.createCommand(splitInputArr[2], splitInputArr[4], auth_token);
+            modeler.createCommand(splitInputArr[2], splitInputArr[4], hardcodedUserAuthToken);
             System.out.println();
         }        
     	

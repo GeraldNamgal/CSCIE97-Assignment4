@@ -3,7 +3,7 @@ package com.cscie97.store.authentication;
 import java.util.LinkedHashMap;
 import java.util.Map.Entry;
 
-public class PrintInventory implements EntitlementVisitor
+public class PrintInventoryVisitor implements Visitor
 {      
     /* VARIABLES */
     
@@ -16,7 +16,7 @@ public class PrintInventory implements EntitlementVisitor
     @Override
     public void visitAuthenticator(Authenticator authenticator)
     {
-        Integer level = baseLevel;        
+        Integer level = baseLevel.intValue();        
         
         System.out.println();
         
@@ -66,15 +66,17 @@ public class PrintInventory implements EntitlementVisitor
     @Override
     public void visitResourceRole(ResourceRole rRole)
     {
-        System.out.println("ResourceRole: id = \"" + rRole.getId() + "\"; name = \"" + rRole.getName() + "\"; description = \""
-                + rRole.getDescription() + "\"; resource.getId() = \"" + rRole.getResource().getId() + "\"");        
+        Integer level = levelPtr + 1;
+        
+        System.out.println("ResourceRole: id = \"" + rRole.getId() + "\"; name = \"" + rRole.getName() + "\"; description = \"" + rRole.getDescription() + "\"");
+        for (int i = 0; i < level * tabSpace; i++)
+            System.out.print(" ");
+        System.out.println("|Resource: id = \"" + rRole.getResource().getId() + "\"");        
     }
 
     @Override
     public void visitPermission(Permission permission)
     {
-        // TODO
-        
         System.out.println("Permission: id = \"" + permission.getId() + "\"; name = \"" + permission.getName() + "\"; description = \""
                 + permission.getDescription() + "\"");        
     }

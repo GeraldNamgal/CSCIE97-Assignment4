@@ -23,9 +23,9 @@ public class CommandProcessor
         authenticator = new Authenticator();
         
         // Create Modeler 
-        this.modelerCp = new com.cscie97.store.model.CommandProcessor(authenticator);
+        modelerCp = new com.cscie97.store.model.CommandProcessor(authenticator, this);
         
-        // Login CommandProcessor to Authenticator with hardcoded User credentials for operating Authenticator methods
+        // Login CommandProcessor with hardcoded User credentials so can operate Authenticator methods
         hardcodedUserAuthToken = authenticator.obtainAuthToken(Authenticator.getHardcodedUserUsername(), Authenticator.getHardcodedUserPassword());
     }
     
@@ -103,8 +103,6 @@ public class CommandProcessor
      */
     public void parseAndProcess(String input)
     {
-        // TODO
-        
         // Trim leading and trailing whitespace
         String trimmedInput = input.trim();
 
@@ -398,7 +396,7 @@ public class CommandProcessor
             System.out.println();
         }
         
-        // TODO: Else route the command to the Modeler Service's CommandProcessor
+        // Else route the command to the Modeler Service's CommandProcessor
         else
         {            
             modelerCp.processCommand(input);
@@ -442,5 +440,12 @@ public class CommandProcessor
         authenticator.addEntitlementToUser("hardcodedUser", "permission 5", hardcodedUserAuthToken);
         
         authenticator.printInventory();*/
+    }
+    
+    /* Getters and Setters */
+    
+    public int getLineNum()
+    {
+        return lineNum;
     }
 }

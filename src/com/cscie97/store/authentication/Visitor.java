@@ -1,6 +1,6 @@
 package com.cscie97.store.authentication;
 
-public interface EntitlementVisitor
+public interface Visitor
 {
     void visitAuthenticator(Authenticator authenticator);
     void visitUser(User user);

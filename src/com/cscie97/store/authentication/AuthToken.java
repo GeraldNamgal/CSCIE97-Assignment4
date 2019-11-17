@@ -12,7 +12,7 @@ public class AuthToken
     /* Constructor */
     
     // TODO: Add a lastUsed parameter and/or attribute
-    public AuthToken(String id, User userOfAuthToken, Authenticator authenticator)
+    public AuthToken(String id, User userOfAuthToken, StoreAuthenticationService authenticator)
     {
         this.id = id;
         this.active = true;
@@ -32,10 +32,11 @@ public class AuthToken
         return active;
     }
 
-    public void setActive(Boolean trueOrFalse, AuthToken authToken)
+    public void setActive(Boolean trueOrFalse, AuthToken authTokenForMethod)
     {
         // Check that given authToken has "updateAuthTokenValidity" Permission first
-        if (authenticator.hasPermission("updateAuthTokenValidity", authToken))
+        GetPermissionVisitor getPermission = authenticator.hasPermission(new PermissionTuple("updateAuthTokenValidity"), authTokenForMethod);
+        if ((getPermission != null) && getPermission.getHasPermission())
             this.active = trueOrFalse;     
     }
     

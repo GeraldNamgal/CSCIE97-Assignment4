@@ -6,9 +6,6 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map.Entry;
 
-import com.cscie97.ledger.Account;
-import com.cscie97.ledger.Transaction;
-
 public class Authenticator implements StoreAuthenticationService, Visitable
 {
     /* VARIABLES */
@@ -78,7 +75,7 @@ public class Authenticator implements StoreAuthenticationService, Visitable
         // Give authTokenPermission to Authenticator User (only it has this special permission)
         authenticatorUser.addEntitlement(authTokenPermission);
                 
-        // Get Authenticator User its special AuthToken
+        // Get Authenticator its special AuthToken
         myAuthToken = new AuthToken(MY_AUTHTOKEN_ID, authenticatorUser, this);
         authenticatorUser.addAuthToken(myAuthToken);
         
@@ -92,9 +89,10 @@ public class Authenticator implements StoreAuthenticationService, Visitable
     public Permission definePermission(String id, String name, String description, AuthToken authTokenForMethod)
     {
         // Check that given AuthToken has permission to access this method
-        if (!hasPermission("useAuthenticatorAPI", authTokenForMethod))
+        GetPermissionVisitor getPermission = hasPermission(new PermissionTuple("useAuthenticatorAPI"), authTokenForMethod);
+        if ((getPermission == null) || !getPermission.getHasPermission())
             return null;
-        
+                
         // Create Permission and add it to entitlements
         Permission permission = new Permission(id, name, description);
         entitlements.put(permission.getId(), permission);
@@ -106,9 +104,10 @@ public class Authenticator implements StoreAuthenticationService, Visitable
     public Role defineRole(String id, String name, String description, AuthToken authTokenForMethod)
     {
         // Check that given AuthToken has permission to access this method
-        if (!hasPermission("useAuthenticatorAPI", authTokenForMethod))
+        GetPermissionVisitor getPermission = hasPermission(new PermissionTuple("useAuthenticatorAPI"), authTokenForMethod);
+        if ((getPermission == null) || !getPermission.getHasPermission())
             return null;
-        
+                
         // Create Role and add it to entitlements
         Role role = new Role(id, name, description);
         entitlements.put(role.getId(), role);
@@ -119,12 +118,11 @@ public class Authenticator implements StoreAuthenticationService, Visitable
     @Override
     public void addEntitlementToRole(String roleId, String entitlementId, AuthToken authTokenForMethod)
     {
-        // TODO 
-        
         // Check that given AuthToken has permission to access this method
-        if (!hasPermission("useAuthenticatorAPI", authTokenForMethod))
+        GetPermissionVisitor getPermission = hasPermission(new PermissionTuple("useAuthenticatorAPI"), authTokenForMethod);
+        if ((getPermission == null) || !getPermission.getHasPermission())
             return;
-        
+                
         // TODO (if have time): Check that given Permission and Role are valid objects         
         
         // Get given Permission and Role and add the Permission to the Role
@@ -137,9 +135,10 @@ public class Authenticator implements StoreAuthenticationService, Visitable
     public User defineUser(String userId, String name, AuthToken authTokenForMethod)
     {       
         // Check that given AuthToken has permission to access this method
-        if (!hasPermission("useAuthenticatorAPI", authTokenForMethod))
+        GetPermissionVisitor getPermission = hasPermission(new PermissionTuple("useAuthenticatorAPI"), authTokenForMethod);
+        if ((getPermission == null) || !getPermission.getHasPermission())
             return null;
-        
+                
         // TODO (if have time): Check for duplicates before creating new User or nah (so can rewrite User easily)?
         
         // Create a new User
@@ -154,12 +153,11 @@ public class Authenticator implements StoreAuthenticationService, Visitable
     @Override
     public void addUserCredential(String userId, String type, String value, AuthToken authTokenForMethod)
     {
-        // TODO 
-        
         // Check that given AuthToken has permission to access this method
-        if (!hasPermission("useAuthenticatorAPI", authTokenForMethod))
+        GetPermissionVisitor getPermission = hasPermission(new PermissionTuple("useAuthenticatorAPI"), authTokenForMethod);
+        if ((getPermission == null) || !getPermission.getHasPermission())
             return;
-        
+                
         // TODO (if have time): Check that given User is valid
         
         // Create Credential
@@ -183,9 +181,10 @@ public class Authenticator implements StoreAuthenticationService, Visitable
     public void addEntitlementToUser(String userId, String entitlementId, AuthToken authTokenForMethod)
     {
         // Check that given AuthToken has permission to access this method
-        if (!hasPermission("useAuthenticatorAPI", authTokenForMethod))
+        GetPermissionVisitor getPermission = hasPermission(new PermissionTuple("useAuthenticatorAPI"), authTokenForMethod);
+        if ((getPermission == null) || !getPermission.getHasPermission())
             return;
-        
+                
         // TODO (if have time): Check that given User and Role are valid
         
         // Get given Role and User and add the Role to the User
@@ -197,9 +196,10 @@ public class Authenticator implements StoreAuthenticationService, Visitable
     public Resource defineResource(String id, String description, AuthToken authTokenForMethod)
     {
         // Check that given AuthToken has permission to access this method
-        if (!hasPermission("useAuthenticatorAPI", authTokenForMethod))
-            return null;        
-        
+        GetPermissionVisitor getPermission = hasPermission(new PermissionTuple("useAuthenticatorAPI"), authTokenForMethod);
+        if ((getPermission == null) || !getPermission.getHasPermission())
+            return null;
+                
         Resource resource = new Resource(id, description);
         resources.put(resource.getId(), resource);
         
@@ -209,12 +209,11 @@ public class Authenticator implements StoreAuthenticationService, Visitable
     @Override
     public ResourceRole defineResourceRole(String id, String name, String description, String entitlementId, String resourceId, AuthToken authTokenForMethod)
     {
-        // TODO 
-        
         // Check that given AuthToken has permission to access this method
-        if (!hasPermission("useAuthenticatorAPI", authTokenForMethod))
+        GetPermissionVisitor getPermission = hasPermission(new PermissionTuple("useAuthenticatorAPI"), authTokenForMethod);
+        if ((getPermission == null) || !getPermission.getHasPermission())
             return null;
-        
+                
         // TODO (if have time): Check that given Resource and Entitlement are valid
         
         // Get given Resource and Entitlement to add to the ResourceRole
@@ -229,8 +228,6 @@ public class Authenticator implements StoreAuthenticationService, Visitable
     @Override
     public AuthToken obtainAuthToken(String credentialId, String credentialValue)
     {
-        // TODO               
-      
         // Get the User of the Credential
         User userOfCredential = credentialUserIndexes.get(credentialId + hashCalculator(credentialValue));       
         
@@ -305,29 +302,27 @@ public class Authenticator implements StoreAuthenticationService, Visitable
     }
     
     @Override
-    public void acceptVisitor(EntitlementVisitor visitor)
+    public void acceptVisitor(Visitor visitor)
     {        
         visitor.visitAuthenticator(this);
     }
     
     @Override
-    public Boolean hasPermission(String permissionId, AuthToken authToken)
+    public GetPermissionVisitor hasPermission(PermissionTuple permissionTuple, AuthToken authToken)
     {
-        // TODO   
-        
         // Throw InvalidAuthTokenException if AuthToken is null or inactive
         if (authToken == null || authToken.isActive().equals(false))
         {
             try
             {
-                throw new AuthenticatorException("InvalidAuthTokenException", "check for \""+ permissionId +"\" permission", "invalid AuthToken");
+                throw new AuthenticatorException("InvalidAuthTokenException", "check for \""+ permissionTuple.getPermissionId() +"\" permission", "invalid AuthToken");
             }
             
             catch (AuthenticatorException exception)
             {
                 System.out.println();
                 System.out.print(exception.getMessage());      
-                return false;
+                return null;
             }           
         }
         
@@ -339,44 +334,44 @@ public class Authenticator implements StoreAuthenticationService, Visitable
         {
             try
             {
-                throw new AuthenticatorException("InvalidAuthTokenException", "check for \""+ permissionId +"\" permission", "user of AuthToken not found");
+                throw new AuthenticatorException("InvalidAuthTokenException", "check for \""+ permissionTuple.getPermissionId() +"\" permission", "user of AuthToken not found");
             }
             
             catch (AuthenticatorException exception)
             {
                 System.out.println();
                 System.out.print(exception.getMessage());      
-                return false;
+                return null;
             }           
         }
         
         // Check if User of AuthToken has permission
-        GetPermissions getPermissions = new GetPermissions(permissionId);        
-        userOfAuthToken.acceptVisitor(getPermissions);
+        GetPermissionVisitor getPermission = new GetPermissionVisitor(permissionTuple);        
+        userOfAuthToken.acceptVisitor(getPermission);
         
         // Throw exception if User doesn't have the Permission
-        if (!getPermissions.getHasPermission())
+        if ((getPermission == null) || !getPermission.getHasPermission())
         {
             try
             {
-                throw new AuthenticatorException("AccessDeniedException", "check for \""+ permissionId +"\" permission", "user does not have permission");
+                throw new AuthenticatorException("AccessDeniedException", "check for \""+ permissionTuple.getPermissionId() +"\" permission", "user does not have permission");
             }
             
             catch (AuthenticatorException exception)
             {
                 System.out.println();
                 System.out.print(exception.getMessage());
-                return false;
+                return null;
             }
         }
         
-        return getPermissions.getHasPermission();
+        return getPermission;
     }  
     
     @Override
     public void printInventory()
     {
-        PrintInventory printInventory = new PrintInventory();
+        PrintInventoryVisitor printInventory = new PrintInventoryVisitor();
         this.acceptVisitor(printInventory);
     }
     

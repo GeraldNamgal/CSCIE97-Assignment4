@@ -4,32 +4,22 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map.Entry;
 
-public class GetPermissions implements EntitlementVisitor
+public class GetPermissionVisitor implements Visitor
 {
     /* VARIABLES */
-         
-    // TODO: Necessary vars or delete? --
-    private String associatedResourceId;
-    private String associatedRoleId;
-    
+   
     private Boolean hasPermission = false;
-    private String permissionIdToBeChecked;    
+    private PermissionTuple permissionTupleToBeChecked;
+    private ArrayList<PermissionTuple> permissionsTuples;
     private ArrayList<String> resourceIdsPtr;
     private ArrayList<String> roleIdsPtr;
     
     /* CONSTRUCTOR(S) */
-    
-    // TODO: Necessary constructor or delete?
-    public GetPermissions(String permissionIdToBeChecked, String associatedResourceId, String associatedRoleId)
+        
+    public GetPermissionVisitor(PermissionTuple permissionTupleToBeChecked)
     {
-        this.permissionIdToBeChecked = permissionIdToBeChecked;
-        this.associatedResourceId = associatedResourceId;
-        this.associatedRoleId = associatedRoleId;
-    }
-    
-    public GetPermissions(String permissionIdToBeChecked)
-    {
-        this.permissionIdToBeChecked = permissionIdToBeChecked;
+        this.permissionTupleToBeChecked = permissionTupleToBeChecked;
+        permissionsTuples = new ArrayList<PermissionTuple>();
     }
     
     /* API METHODS */
@@ -81,32 +71,63 @@ public class GetPermissions implements EntitlementVisitor
         /*// TODO: Debugging
         System.out.print(permission.getId() + " : [ ");*/
         
-        /* TODO: Set hasPermission to true if permission is found */
-        
-        // If Permission id is found and the Permission isn't associated with any resources
-        if (permission.getId().equals(permissionIdToBeChecked) && resourceIdsPtr.isEmpty())
-            hasPermission = true;
-        
-        // TODO: If Permission id is found and the Permission is associated with a resource(s)
-        
-        /*if (permission.getId().equals(permissionIdToBeChecked) && (resourceIdsPtr.contains(associatedResourceId) || resourceIdsPtr.isEmpty())
-                && roleIdsPtr.contains(associatedRoleId))
-            hasPermission = true;*/
-        
-        /* TODO: Delete? --
-        // Create HashSet pointer (for any resource id's associated with permission)
-        HashSet<String> resourceIds;
-        
-        // Add Resource id to HashSet
-        for (String tmpResourceId : tmpResourceIds)
-        {            
-            System.out.print(" " + tmpResourceId);
+        // If Permission id is found 
+        if (permission.getId().equals(permissionTupleToBeChecked.getPermissionId()))
+        {
+            // If Permission is associated with no resources
+            if (resourceIdsPtr.isEmpty())
+            {
+                hasPermission = true;
+                
+                // Create new PermissionTuple
+                PermissionTuple permissionTuple = new PermissionTuple(permission.getId());
+                
+                // Add associated resource id's to PermissionTuple
+                for (String resourceId : resourceIdsPtr)                
+                    permissionTuple.addResourceId(resourceId);
+                
+                // Add associated role id's to PermissionTuple
+                for (String roleId : roleIdsPtr)
+                    permissionTuple.addRoleId(roleId);
+                
+                // Add PermissionTuple to permissionsTuples list
+                permissionsTuples.add(permissionTuple);
+            }
             
-            resourceIds.add(tmpResourceId);
-        }    
-        
-        // Add Permission id and Resource id HashSet to userPermissionIds
-        userPermissionIds.put(permission.getId(), resourceIds);*/
+            // If Permission is associated with a resource(s)            
+            else
+            {
+                Boolean allResources = true;
+                
+                for (String resourceId : permissionTupleToBeChecked.getResourceIds())
+                {
+                    if (!resourceIdsPtr.contains(resourceId))
+                    {
+                        allResources = false;
+                        break;
+                    }
+                }
+                
+                if (allResources == true)
+                {
+                    hasPermission = true;
+                    
+                    // Create new PermissionTuple
+                    PermissionTuple permissionTuple = new PermissionTuple(permission.getId());
+                    
+                    // Add associated resource id's to PermissionTuple
+                    for (String resourceId : resourceIdsPtr)                
+                        permissionTuple.addResourceId(resourceId);
+                    
+                    // Add associated role id's to PermissionTuple
+                    for (String roleId : roleIdsPtr)
+                        permissionTuple.addRoleId(roleId);
+                    
+                    // Add PermissionTuple to permissionsTuples list
+                    permissionsTuples.add(permissionTuple);
+                }
+            }
+        }   
     }
     
     /* UTILITY METHODS */
@@ -169,5 +190,15 @@ public class GetPermissions implements EntitlementVisitor
     public Boolean getHasPermission()
     {
         return hasPermission;
-    }       
+    }
+
+    public PermissionTuple getPermissionTupleToBeChecked()
+    {
+        return permissionTupleToBeChecked;
+    }  
+
+    public ArrayList<PermissionTuple> getPermissionsTuples()
+    {
+        return permissionsTuples;
+    }      
 }

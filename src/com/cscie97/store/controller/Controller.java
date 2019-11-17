@@ -14,6 +14,7 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map.Entry;
 
+import com.cscie97.store.authentication.StoreAuthenticationService;
 import com.cscie97.store.model.Aisle;
 import com.cscie97.store.model.Appliance;
 import com.cscie97.store.model.Basket;
@@ -35,17 +36,19 @@ public class Controller implements Observer
     /* Variables */
     
     private StoreModelService modeler;
+    private StoreAuthenticationService authenticator;
     private com.cscie97.ledger.CommandProcessor ledgerCp;    
     
-    /* Constructor */
+    /* Constructor */ 
     
-    public Controller(Subject modeler, com.cscie97.ledger.CommandProcessor ledgerCp)
+    public Controller(Subject modeler, com.cscie97.ledger.CommandProcessor ledgerCp, StoreAuthenticationService authenticator)
     {       
         // Register Controller with Model Service
         modeler.registerObserver(this);
         
         this.modeler = (StoreModelService) modeler;
         this.ledgerCp = ledgerCp;
+        this.authenticator = authenticator;
     }
 
     /* API Method(s) */

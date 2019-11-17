@@ -64,7 +64,7 @@ public class User implements Visitable
     }
 
     @Override
-    public void acceptVisitor(EntitlementVisitor visitor)
+    public void acceptVisitor(Visitor visitor)
     {
         visitor.visitUser(this);
     }       

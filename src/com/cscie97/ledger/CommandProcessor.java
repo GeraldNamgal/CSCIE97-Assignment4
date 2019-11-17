@@ -16,7 +16,14 @@ public class CommandProcessor
     /* My Variables */
 
     private Ledger ledger;
-    private int lineNum = 0;
+    private com.cscie97.store.authentication.CommandProcessor authenticatorCp;
+    
+    /* Constructor */
+    
+    public CommandProcessor(com.cscie97.store.authentication.CommandProcessor authenticatorCp)
+    {
+        this.authenticatorCp = authenticatorCp;
+    }
 
     /* *
      * API Methods
@@ -218,16 +225,16 @@ public class CommandProcessor
             {
                 try
                 {
-                    if (lineNum == 0)
+                    if (authenticatorCp.getLineNum() == 0)
                         throw new CommandProcessorException("in processCommand method", "ledger already exists; input rejected");
 
                     else
-                        throw new CommandProcessorException("in processCommandFile method", "ledger already exists; input rejected", lineNum);            
+                        throw new CommandProcessorException("in processCommandFile method", "ledger already exists; input rejected", authenticatorCp.getLineNum());            
                 }
                 
                 catch (CommandProcessorException exception)
                 {
-                    if (lineNum == 0)
+                    if (authenticatorCp.getLineNum() == 0)
                     {
                         System.out.println("-: " + trimmedLine);
                         System.out.println();
@@ -286,16 +293,16 @@ public class CommandProcessor
             {
                 try
                 {
-                    if (lineNum == 0)
+                    if (authenticatorCp.getLineNum() == 0)
                         throw new CommandProcessorException("in processCommand method", "invalid DSL command input");
 
                     else
-                        throw new CommandProcessorException("in processCommandFile method", "invalid DSL command input", lineNum);
+                        throw new CommandProcessorException("in processCommandFile method", "invalid DSL command input", authenticatorCp.getLineNum());
                 }
 
                 catch (CommandProcessorException exception)
                 {
-                    if (lineNum == 0)
+                    if (authenticatorCp.getLineNum() == 0)
                     {
                         System.out.println("-: " + trimmedLine);
                         System.out.println();
@@ -319,16 +326,16 @@ public class CommandProcessor
         {
             try
             {
-                if (lineNum == 0)
+                if (authenticatorCp.getLineNum() == 0)
                     throw new CommandProcessorException("in processCommand method", "no ledger exists; input rejected");
 
                 else
-                    throw new CommandProcessorException("in processCommandFile method", "no ledger exists; input rejected", lineNum);            
+                    throw new CommandProcessorException("in processCommandFile method", "no ledger exists; input rejected", authenticatorCp.getLineNum());            
             }
             
             catch (CommandProcessorException exception)
             {
-                if (lineNum == 0)
+                if (authenticatorCp.getLineNum() == 0)
                 {
                     System.out.println("-: " + trimmedLine);
                     System.out.println();
@@ -408,16 +415,16 @@ public class CommandProcessor
             {
                 try
                 {
-                    if (lineNum == 0)
+                    if (authenticatorCp.getLineNum() == 0)
                         throw new CommandProcessorException("in processCommand method", "invalid DSL command input");
 
                     else
-                        throw new CommandProcessorException("in processCommandFile method", "invalid DSL command input", lineNum);
+                        throw new CommandProcessorException("in processCommandFile method", "invalid DSL command input", authenticatorCp.getLineNum());
                 }
 
                 catch (CommandProcessorException exception)
                 {
-                    if (lineNum == 0)
+                    if (authenticatorCp.getLineNum() == 0)
                     {
                         System.out.println("-: " + trimmedLine);
                         System.out.println();
@@ -483,16 +490,16 @@ public class CommandProcessor
             {
                 try
                 {
-                    if (lineNum == 0)
+                    if (authenticatorCp.getLineNum() == 0)
                         throw new CommandProcessorException("in processCommand method", "invalid DSL command input");
 
                     else
-                        throw new CommandProcessorException("in processCommandFile method", "invalid DSL command input", lineNum);
+                        throw new CommandProcessorException("in processCommandFile method", "invalid DSL command input", authenticatorCp.getLineNum());
                 }
 
                 catch (CommandProcessorException exception)
                 {
-                    if (lineNum == 0)
+                    if (authenticatorCp.getLineNum() == 0)
                     {
                         System.out.println("-: " + trimmedLine);
                         System.out.println();
@@ -537,16 +544,16 @@ public class CommandProcessor
         {
             try
             {
-                if (lineNum == 0)
+                if (authenticatorCp.getLineNum() == 0)
                     throw new CommandProcessorException("in processCommand method", "invalid DSL command input");
 
                 else
-                    throw new CommandProcessorException("in processCommandFile method", "invalid DSL command input", lineNum);
+                    throw new CommandProcessorException("in processCommandFile method", "invalid DSL command input", authenticatorCp.getLineNum());
             }
 
             catch (CommandProcessorException exception)
             {
-                if (lineNum == 0)
+                if (authenticatorCp.getLineNum() == 0)
                 {
                     System.out.println("-: " + trimmedLine);
                     System.out.println();

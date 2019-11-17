@@ -11,6 +11,8 @@ public class PermissionTuple
     public PermissionTuple(String permissionId)
     {
         this.permissionId = permissionId;
+        resourceIds = new ArrayList<String>();
+        roleIds = new ArrayList<String>();
     }
     
     public void addResourceId(String resourceId)
