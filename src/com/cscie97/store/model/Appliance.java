@@ -7,9 +7,8 @@
 
 package com.cscie97.store.model;
 
-import com.cscie97.store.authentication.AuthToken;
+import com.cscie97.store.authentication.AuthTokenTuple;
 import com.cscie97.store.authentication.GetPermissionsVisitor;
-import com.cscie97.store.authentication.PermissionTuple;
 import com.cscie97.store.authentication.StoreAuthenticationService;
 
 /* *
@@ -179,31 +178,31 @@ public class Appliance extends Sensor
 
     /* Getters and Setters */
     
-    public Turnstile getTurnstile(AuthToken authTokenForMethod)
+    public Turnstile getTurnstile(AuthTokenTuple authTokenTupleForMethod)
     {
         // TODO: Check that given authToken has "control turnstile" Permission first
-        GetPermissionsVisitor getPermissionVisitor = authenticator.getUserPermissions(authTokenForMethod);
-        if ((getPermissionVisitor != null) && getPermissionVisitor.hasPermission(new PermissionTuple("control turnstile")))        
+        GetPermissionsVisitor getPermissionVisitor = authenticator.getUserPermissions(authTokenTupleForMethod.getAuthToken());
+        if ((getPermissionVisitor != null) && getPermissionVisitor.hasPermission(authTokenTupleForMethod.getPermissionTuple().setPermissionId("control turnstile")))        
             return turnstile;
        
         return null;
     }    
 
-    public Speaker getSpeaker(AuthToken authTokenForMethod)
+    public Speaker getSpeaker(AuthTokenTuple authTokenTupleForMethod)
     {
         // TODO: Check that given authToken has "control speaker" Permission first
-        GetPermissionsVisitor getPermissionVisitor = authenticator.getUserPermissions(authTokenForMethod);
-        if ((getPermissionVisitor != null) && getPermissionVisitor.hasPermission(new PermissionTuple("control speaker")))     
+        GetPermissionsVisitor getPermissionVisitor = authenticator.getUserPermissions(authTokenTupleForMethod.getAuthToken());
+        if ((getPermissionVisitor != null) && getPermissionVisitor.hasPermission(authTokenTupleForMethod.getPermissionTuple().setPermissionId("control speaker")))     
             return speaker;
         
         return null;
     }    
 
-    public Robot getRobot(AuthToken authTokenForMethod)
+    public Robot getRobot(AuthTokenTuple authTokenTupleForMethod)
     {
         // TODO: Check that given authToken has "control robot" Permission first
-        GetPermissionsVisitor getPermissionVisitor = authenticator.getUserPermissions(authTokenForMethod);
-        if ((getPermissionVisitor != null) && getPermissionVisitor.hasPermission(new PermissionTuple("control robot"))) 
+        GetPermissionsVisitor getPermissionVisitor = authenticator.getUserPermissions(authTokenTupleForMethod.getAuthToken());
+        if ((getPermissionVisitor != null) && getPermissionVisitor.hasPermission(authTokenTupleForMethod.getPermissionTuple().setPermissionId("control robot"))) 
             return robot;
         
         return null;

@@ -10,6 +10,7 @@ package com.cscie97.store.model;
 import java.util.ArrayList;
 
 import com.cscie97.store.authentication.AuthToken;
+import com.cscie97.store.authentication.AuthTokenTuple;
 import com.cscie97.store.authentication.Authenticator;
 import com.cscie97.store.authentication.StoreAuthenticationService;
 import com.cscie97.store.controller.Controller;
@@ -308,14 +309,14 @@ public class CommandProcessor
                 && splitInputArr[3].equalsIgnoreCase("name") && splitInputArr[5].equalsIgnoreCase("address"))
         {
             System.out.println("-: " + trimmedInput);
-            modeler.defineStore(splitInputArr[2], splitInputArr[4], splitInputArr[6], hardcodedUserAuthToken);
+            modeler.defineStore(splitInputArr[2], splitInputArr[4], splitInputArr[6], new AuthTokenTuple(hardcodedUserAuthToken));
             System.out.println();
         }   	
         
         else if ((splitInputArr.length == 3) && splitInputArr[0].equalsIgnoreCase("show") && splitInputArr[1].equalsIgnoreCase("store"))
         {
             System.out.println("-: " + trimmedInput);
-            modeler.showStore(splitInputArr[2], hardcodedUserAuthToken);
+            modeler.showStore(splitInputArr[2], new AuthTokenTuple(hardcodedUserAuthToken));
             System.out.println();
         }
    
@@ -324,7 +325,7 @@ public class CommandProcessor
                 && splitInputArr[7].equalsIgnoreCase("location") && (splitInputArr[2].split(":").length == 2))
         {
             System.out.println("-: " + trimmedInput);
-            modeler.defineAisle(splitInputArr[2], splitInputArr[4], splitInputArr[6], splitInputArr[8], hardcodedUserAuthToken);
+            modeler.defineAisle(splitInputArr[2], splitInputArr[4], splitInputArr[6], splitInputArr[8], new AuthTokenTuple(hardcodedUserAuthToken));
             System.out.println();
         }
         
@@ -332,7 +333,7 @@ public class CommandProcessor
                 && (splitInputArr[2].split(":").length == 2))
         {
             System.out.println("-: " + trimmedInput);
-            modeler.showAisle(splitInputArr[2], hardcodedUserAuthToken);
+            modeler.showAisle(splitInputArr[2], new AuthTokenTuple(hardcodedUserAuthToken));
             System.out.println();
         }
         
@@ -342,7 +343,7 @@ public class CommandProcessor
                 && splitInputArr[7].equalsIgnoreCase("description") && (splitInputArr[2].split(":").length == 3))
         {
             System.out.println("-: " + trimmedInput);
-            modeler.defineShelf(splitInputArr[2], splitInputArr[4], splitInputArr[6], splitInputArr[8], hardcodedUserAuthToken);
+            modeler.defineShelf(splitInputArr[2], splitInputArr[4], splitInputArr[6], splitInputArr[8], new AuthTokenTuple(hardcodedUserAuthToken));
             System.out.println();
         }    
     
@@ -353,7 +354,7 @@ public class CommandProcessor
                 && (splitInputArr[2].split(":").length == 3))
         {
             System.out.println("-: " + trimmedInput);
-            modeler.defineShelf(splitInputArr[2], splitInputArr[4], splitInputArr[6], splitInputArr[8], splitInputArr[10], hardcodedUserAuthToken);
+            modeler.defineShelf(splitInputArr[2], splitInputArr[4], splitInputArr[6], splitInputArr[8], splitInputArr[10], new AuthTokenTuple(hardcodedUserAuthToken));
             System.out.println();
         }
     
@@ -361,7 +362,7 @@ public class CommandProcessor
                 && (splitInputArr[2].split(":").length == 3))
         {
             System.out.println("-: " + trimmedInput);
-            modeler.showShelf(splitInputArr[2], hardcodedUserAuthToken);
+            modeler.showShelf(splitInputArr[2], new AuthTokenTuple(hardcodedUserAuthToken));
             System.out.println();
         }    
     
@@ -419,7 +420,7 @@ public class CommandProcessor
             {
                 System.out.println("-: " + trimmedInput);
                 modeler.defineInventory(splitInputArr[2], splitInputArr[4], Integer.parseInt(splitInputArr[6]),
-                        Integer.parseInt(splitInputArr[8]), splitInputArr[10], hardcodedUserAuthToken);
+                        Integer.parseInt(splitInputArr[8]), splitInputArr[10], new AuthTokenTuple(hardcodedUserAuthToken));
                 System.out.println();
             }
         }
@@ -427,7 +428,7 @@ public class CommandProcessor
         else if ((splitInputArr.length == 3) && splitInputArr[0].equalsIgnoreCase("show") && splitInputArr[1].equalsIgnoreCase("inventory"))
         {
             System.out.println("-: " + trimmedInput);
-            modeler.showInventory(splitInputArr[2], hardcodedUserAuthToken);
+            modeler.showInventory(splitInputArr[2], new AuthTokenTuple(hardcodedUserAuthToken));
             System.out.println();
         }
         
@@ -478,7 +479,7 @@ public class CommandProcessor
             }
             
             System.out.println("-: " + trimmedInput);
-            modeler.updateInventory(splitInputArr[2], Integer.parseInt(splitInputArr[4]), hardcodedUserAuthToken);
+            modeler.updateInventory(splitInputArr[2], Integer.parseInt(splitInputArr[4]), new AuthTokenTuple(hardcodedUserAuthToken));
             System.out.println();            
         }       
         
@@ -533,7 +534,7 @@ public class CommandProcessor
                           
             System.out.println("-: " + trimmedInput);
             modeler.defineProduct(splitInputArr[2], splitInputArr[4], splitInputArr[6], splitInputArr[8], splitInputArr[10],
-                    Integer.parseInt(splitInputArr[12]), splitInputArr[14], hardcodedUserAuthToken);
+                    Integer.parseInt(splitInputArr[12]), splitInputArr[14], new AuthTokenTuple(hardcodedUserAuthToken));
             System.out.println();            
         }
     
@@ -588,14 +589,14 @@ public class CommandProcessor
             
             System.out.println("-: " + trimmedInput);
             modeler.defineProduct(splitInputArr[2], splitInputArr[4], splitInputArr[6], splitInputArr[8], splitInputArr[10],
-                    Integer.parseInt(splitInputArr[12]), hardcodedUserAuthToken);
+                    Integer.parseInt(splitInputArr[12]), new AuthTokenTuple(hardcodedUserAuthToken));
             System.out.println();
         }
     
         else if ((splitInputArr.length == 3) && splitInputArr[0].equalsIgnoreCase("show") && splitInputArr[1].equalsIgnoreCase("product"))
         {
             System.out.println("-: " + trimmedInput);
-            modeler.showProduct(splitInputArr[2], hardcodedUserAuthToken);
+            modeler.showProduct(splitInputArr[2], new AuthTokenTuple(hardcodedUserAuthToken));
             System.out.println();
         }    
     
@@ -606,7 +607,7 @@ public class CommandProcessor
         {
             System.out.println("-: " + trimmedInput);
             modeler.defineCustomer(splitInputArr[2], splitInputArr[4], splitInputArr[6], splitInputArr[8], splitInputArr[10], splitInputArr[12]
-                    , splitInputArr[14], hardcodedUserAuthToken);
+                    , splitInputArr[14], new AuthTokenTuple(hardcodedUserAuthToken));
             System.out.println();
         }
         
@@ -615,21 +616,21 @@ public class CommandProcessor
                 || (splitInputArr[4].equals("null"))))
         {
             System.out.println("-: " + trimmedInput);
-            modeler.updateCustomer(splitInputArr[2], splitInputArr[4], splitInputArr[5], hardcodedUserAuthToken);
+            modeler.updateCustomer(splitInputArr[2], splitInputArr[4], splitInputArr[5], new AuthTokenTuple(hardcodedUserAuthToken));
             System.out.println();
         }   
         
         else if ((splitInputArr.length == 3) && splitInputArr[0].equalsIgnoreCase("show") && splitInputArr[1].equalsIgnoreCase("customer"))
         {
             System.out.println("-: " + trimmedInput);
-            modeler.showCustomer(splitInputArr[2], hardcodedUserAuthToken);
+            modeler.showCustomer(splitInputArr[2], new AuthTokenTuple(hardcodedUserAuthToken));
             System.out.println();
         }    
     
         else if ((splitInputArr.length == 2) && splitInputArr[0].equalsIgnoreCase("get_customer_basket"))
         {
             System.out.println("-: " + trimmedInput);
-            modeler.getCustomerBasket(splitInputArr[1], hardcodedUserAuthToken);
+            modeler.getCustomerBasket(splitInputArr[1], new AuthTokenTuple(hardcodedUserAuthToken));
             System.out.println();
         }          
     
@@ -680,7 +681,7 @@ public class CommandProcessor
             }
             
             System.out.println("-: " + trimmedInput);
-            modeler.addBasketItem(splitInputArr[1], splitInputArr[3], Integer.parseInt(splitInputArr[5]), hardcodedUserAuthToken);
+            modeler.addBasketItem(splitInputArr[1], splitInputArr[3], Integer.parseInt(splitInputArr[5]), new AuthTokenTuple(hardcodedUserAuthToken));
             System.out.println();
         }
         
@@ -731,21 +732,21 @@ public class CommandProcessor
             }
             
             System.out.println("-: " + trimmedInput);
-            modeler.removeBasketItem(splitInputArr[1], splitInputArr[3], Integer.parseInt(splitInputArr[5]), hardcodedUserAuthToken);
+            modeler.removeBasketItem(splitInputArr[1], splitInputArr[3], Integer.parseInt(splitInputArr[5]), new AuthTokenTuple(hardcodedUserAuthToken));
             System.out.println();            
         }
         
         else if ((splitInputArr.length == 2) && splitInputArr[0].equalsIgnoreCase("clear_basket"))
         {
             System.out.println("-: " + trimmedInput);
-            modeler.clearBasket(splitInputArr[1], hardcodedUserAuthToken);
+            modeler.clearBasket(splitInputArr[1], new AuthTokenTuple(hardcodedUserAuthToken));
             System.out.println();
         }   
         
         else if ((splitInputArr.length == 3) && splitInputArr[0].equalsIgnoreCase("show") &&  splitInputArr[1].equalsIgnoreCase("basket_items"))
         {
             System.out.println("-: " + trimmedInput);
-            modeler.showBasketItems(splitInputArr[2], hardcodedUserAuthToken);
+            modeler.showBasketItems(splitInputArr[2], new AuthTokenTuple(hardcodedUserAuthToken));
             System.out.println();
         }      
     
@@ -754,14 +755,14 @@ public class CommandProcessor
                 && splitInputArr[7].equalsIgnoreCase("location") && (splitInputArr[8].split(":").length == 2))
         {
             System.out.println("-: " + trimmedInput);
-            modeler.defineDevice(splitInputArr[2], splitInputArr[4], splitInputArr[6], splitInputArr[8], hardcodedUserAuthToken);
+            modeler.defineDevice(splitInputArr[2], splitInputArr[4], splitInputArr[6], splitInputArr[8], new AuthTokenTuple(hardcodedUserAuthToken));
             System.out.println();
         }
         
         else if ((splitInputArr.length == 3) && splitInputArr[0].equalsIgnoreCase("show") && splitInputArr[1].equalsIgnoreCase("device"))
         {
             System.out.println("-: " + trimmedInput);
-            modeler.showDevice(splitInputArr[2], hardcodedUserAuthToken);
+            modeler.showDevice(splitInputArr[2], new AuthTokenTuple(hardcodedUserAuthToken));
             System.out.println();
         }    
     
@@ -769,7 +770,7 @@ public class CommandProcessor
                 && splitInputArr[3].equalsIgnoreCase("event"))
         {
             System.out.println("-: " + trimmedInput);
-            modeler.createEvent(splitInputArr[2], splitInputArr[4], hardcodedUserAuthToken);
+            modeler.createEvent(splitInputArr[2], splitInputArr[4], new AuthTokenTuple(hardcodedUserAuthToken));
             System.out.println();
         }    
     
@@ -777,7 +778,7 @@ public class CommandProcessor
                 && splitInputArr[3].equalsIgnoreCase("message"))
         {
             System.out.println("-: " + trimmedInput);
-            modeler.createCommand(splitInputArr[2], splitInputArr[4], hardcodedUserAuthToken);
+            modeler.createCommand(splitInputArr[2], splitInputArr[4], new AuthTokenTuple(hardcodedUserAuthToken));
             System.out.println();
         }        
     	

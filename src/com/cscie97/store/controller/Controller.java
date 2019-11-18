@@ -15,6 +15,7 @@ import java.util.LinkedHashMap;
 import java.util.Map.Entry;
 
 import com.cscie97.store.authentication.AuthToken;
+import com.cscie97.store.authentication.AuthTokenTuple;
 import com.cscie97.store.authentication.Authenticator;
 import com.cscie97.store.authentication.StoreAuthenticationService;
 import com.cscie97.store.model.Aisle;
@@ -320,7 +321,7 @@ public class Controller implements Observer
         public void execute()
         {
             // Get the source store
-            LinkedHashMap<String, Store> stores = modeler.getStores(myAuthToken);
+            LinkedHashMap<String, Store> stores = modeler.getStores(new AuthTokenTuple(myAuthToken));
             
             // TODO: Handling correctly? Throw exception?
             if (stores == null)
@@ -348,21 +349,21 @@ public class Controller implements Observer
                     if (appliance.getType().equals("turnstile"))
                     {                    
                         // Open turnstile
-                        if (appliance.getTurnstile(myAuthToken) != null)
-                            System.out.println(appliance.getName() + ": open = " + appliance.getTurnstile(myAuthToken).setOpen(true));
+                        if (appliance.getTurnstile(new AuthTokenTuple(myAuthToken)) != null)
+                            System.out.println(appliance.getName() + ": open = " + appliance.getTurnstile(new AuthTokenTuple(myAuthToken)).setOpen(true));
                     }
                     
                     // If device is a speaker
                     if (appliance.getType().equals("speaker"))
                     {
                         // Announce emergency
-                        if (appliance.getSpeaker(myAuthToken) != null)
+                        if (appliance.getSpeaker(new AuthTokenTuple(myAuthToken)) != null)
                         {
                             String announcement = "There is a " + eventType + " in " + store.getAisles().get(aisleNumber).getName()
                                     + " aisle. Please leave store immediately!";
                             
                             System.out.println(appliance.getName() + ": \"" + announcement + "\"");
-                            appliance.getSpeaker(myAuthToken).announce(announcement);
+                            appliance.getSpeaker(new AuthTokenTuple(myAuthToken)).announce(announcement);
                         }
                     }
                     
@@ -380,10 +381,10 @@ public class Controller implements Observer
             {
                 Appliance appliance = (Appliance) store.getDevices().get(robotKeys.get(0));                
                 
-                if (appliance.getRobot(myAuthToken) != null)
+                if (appliance.getRobot(new AuthTokenTuple(myAuthToken)) != null)
                 {
                     System.out.println(appliance.getName() + ": Addressing " + eventType + " in " + store.getAisles().get(aisleNumber).getName() + " aisle");
-                    appliance.getRobot(myAuthToken).addressEmergency(eventType, store.getAisles().get(aisleNumber).getNumber());
+                    appliance.getRobot(new AuthTokenTuple(myAuthToken)).addressEmergency(eventType, store.getAisles().get(aisleNumber).getNumber());
                 }
             }
             
@@ -395,10 +396,10 @@ public class Controller implements Observer
                 {
                     appliance = (Appliance) store.getDevices().get(robotKeys.get(i));
                     
-                    if (appliance.getRobot(myAuthToken) != null)
+                    if (appliance.getRobot(new AuthTokenTuple(myAuthToken)) != null)
                     {
                         System.out.println(appliance.getName() + ": Assisting customers leaving " + store.getName());
-                        appliance.getRobot(myAuthToken).assstLeavingCstmrs(store.getId());
+                        appliance.getRobot(new AuthTokenTuple(myAuthToken)).assstLeavingCstmrs(store.getId());
                     }
                 }
             }
@@ -442,7 +443,7 @@ public class Controller implements Observer
         public void execute()
         {
             // Get the source store
-            LinkedHashMap<String, Store> stores = modeler.getStores(myAuthToken);
+            LinkedHashMap<String, Store> stores = modeler.getStores(new AuthTokenTuple(myAuthToken));
             Store store = stores.get(sourceDevice.getLocation().split(":")[0]);
             
             // Get inventory using event's location and product info
@@ -460,7 +461,7 @@ public class Controller implements Observer
             }
             
             // Get customer's (virtual) basket
-            modeler.getCustomerBasket(customerId, myAuthToken);
+            modeler.getCustomerBasket(customerId, new AuthTokenTuple(myAuthToken));
             
             // Initialize array for getting store's robot Appliance map keys (for restocking)
             ArrayList<String> robotKeys = new ArrayList<String>();           
@@ -493,11 +494,11 @@ public class Controller implements Observer
                 // Update customer's virtual basket items by adding item to it
                 System.out.println("Controller Service: Adding " + Integer.parseInt(number) + " of " + productId + " to customer "
                         + customerId + "'s virtual basket");
-                modeler.addBasketItem(customerId, productId, Integer.parseInt(number), myAuthToken);                
+                modeler.addBasketItem(customerId, productId, Integer.parseInt(number), new AuthTokenTuple(myAuthToken));                
                 
                 // Update inventory by decrementing product count on the shelf
                 System.out.println("Controller Service: Updating inventory " + inventory.getInventoryId() + "'s count by " + Integer.parseInt(number) * (-1));                
-                modeler.updateInventory(inventory.getInventoryId(), (Integer.parseInt(number) * (-1)), myAuthToken);
+                modeler.updateInventory(inventory.getInventoryId(), (Integer.parseInt(number) * (-1)), new AuthTokenTuple(myAuthToken));
                              
                 // If store has robots then command one to restock what customer removed
                 if (robotKeys.size() > 0)
@@ -539,7 +540,7 @@ public class Controller implements Observer
                                             + inventories.get(storeroomInvIds.get(0)).getLocation().split(":")[2]) + " (storeroom) "
                                     + "to " + aisleShelfLoc);
                             
-                            appliance.getRobot(myAuthToken).restock(productId, (inventories.get(storeroomInvIds.get(0)).getLocation().split(":")[1]
+                            appliance.getRobot(new AuthTokenTuple(myAuthToken)).restock(productId, (inventories.get(storeroomInvIds.get(0)).getLocation().split(":")[1]
                                     + inventories.get(storeroomInvIds.get(0)).getLocation().split(":")[2]), aisleShelfLoc);                                         
                                 
                             // If storeroom product supply is less than update amount then get all of the supply for restock
@@ -550,11 +551,11 @@ public class Controller implements Observer
                             // Update storeroom location's inventory
                             System.out.println("Controller Service: Updating inventory " + inventories.get(storeroomInvIds.get(0)).getInventoryId()
                                     + "'s (storeroom) count by " + (updateAmount * (-1)));
-                            modeler.updateInventory(inventories.get(storeroomInvIds.get(0)).getInventoryId(), (updateAmount * (-1)), myAuthToken);                                                
+                            modeler.updateInventory(inventories.get(storeroomInvIds.get(0)).getInventoryId(), (updateAmount * (-1)), new AuthTokenTuple(myAuthToken));                                                
 
                             // Update floor location's inventory
                             System.out.println("Controller Service: Updating inventory " + inventory.getInventoryId() + "'s count by " + updateAmount);
-                            modeler.updateInventory(inventory.getInventoryId(), updateAmount, myAuthToken);                    
+                            modeler.updateInventory(inventory.getInventoryId(), updateAmount, new AuthTokenTuple(myAuthToken));                    
                         }
                         
                         // Else there's no product to restock with
@@ -613,11 +614,11 @@ public class Controller implements Observer
             {
                 // Update basket items by removing item from it
                 System.out.println("Controller Service: Removing " + Integer.parseInt(number) + " of " + productId + " from customer " + customerId + "'s virtual basket");                
-                modeler.removeBasketItem(customerId, productId, Integer.parseInt(number), myAuthToken);
+                modeler.removeBasketItem(customerId, productId, Integer.parseInt(number), new AuthTokenTuple(myAuthToken));
                 
                 // If there's room on the shelf to put back items, add them back to shelf
                 if ((inventory.getCapacity() - inventory.getCount()) >= Integer.parseInt(number))
-                    modeler.updateInventory(inventory.getInventoryId(), Integer.parseInt(number), myAuthToken);
+                    modeler.updateInventory(inventory.getInventoryId(), Integer.parseInt(number), new AuthTokenTuple(myAuthToken));
                 
                 // Else if there's no room on the floor shelf, put back on storeroom shelf
                 else
@@ -658,13 +659,13 @@ public class Controller implements Observer
                                     + productId + " to " + (inventories.get(storeroomInvIds.get(0)).getLocation().split(":")[1] + ":"
                                             + inventories.get(storeroomInvIds.get(0)).getLocation().split(":")[2]) + " (storeroom)");
                             
-                            appliance.getRobot(myAuthToken).restock(productId, (inventories.get(storeroomInvIds.get(0)).getLocation().split(":")[1]
+                            appliance.getRobot(new AuthTokenTuple(myAuthToken)).restock(productId, (inventories.get(storeroomInvIds.get(0)).getLocation().split(":")[1]
                                     + inventories.get(storeroomInvIds.get(0)).getLocation().split(":")[2]), aisleShelfLoc);                       
                                 
                             // Update storeroom location's inventory
                             System.out.println("Controller Service: Updating inventory " + inventories.get(storeroomInvIds.get(0)).getInventoryId()
                                     + "'s (storeroom) count by " + Integer.parseInt(number));
-                            modeler.updateInventory(inventories.get(storeroomInvIds.get(0)).getInventoryId(), Integer.parseInt(number), myAuthToken);                    
+                            modeler.updateInventory(inventories.get(storeroomInvIds.get(0)).getInventoryId(), Integer.parseInt(number), new AuthTokenTuple(myAuthToken));                    
                         }
                         
                         // Else there's no storage to put items back on
@@ -737,7 +738,7 @@ public class Controller implements Observer
         public void execute()
         {
             // Get the source store
-            LinkedHashMap<String, Store> stores = modeler.getStores(myAuthToken);
+            LinkedHashMap<String, Store> stores = modeler.getStores(new AuthTokenTuple(myAuthToken));
             Store store = stores.get(sourceDevice.getLocation().split(":")[0]);                
             
             // Initialize array for getting store's robot appliance map keys
@@ -768,10 +769,10 @@ public class Controller implements Observer
             {
                 Appliance appliance = (Appliance) store.getDevices().get(robotKeys.get(0));      
                                     
-                System.out.println(appliance.getName() + ": Cleaning " + modeler.getProducts(myAuthToken).get(productId).getName()+ " in "
+                System.out.println(appliance.getName() + ": Cleaning " + modeler.getProducts(new AuthTokenTuple(myAuthToken)).get(productId).getName()+ " in "
                         + store.getAisles().get(aisleNumber).getName() + " aisle");
                 
-                appliance.getRobot(myAuthToken).clean(productId, aisleNumber);                
+                appliance.getRobot(new AuthTokenTuple(myAuthToken)).clean(productId, aisleNumber);                
             }
             
             // Else if store doesn't have a robot; cancel actions
@@ -817,7 +818,7 @@ public class Controller implements Observer
         public void execute()
         {
             // Get the source store
-            LinkedHashMap<String, Store> stores = modeler.getStores(myAuthToken);
+            LinkedHashMap<String, Store> stores = modeler.getStores(new AuthTokenTuple(myAuthToken));
             Store store = stores.get(sourceDevice.getLocation().split(":")[0]);                
             
             // Initialize array for getting store's robot appliance map keys
@@ -849,7 +850,7 @@ public class Controller implements Observer
                 Appliance appliance = (Appliance) store.getDevices().get(robotKeys.get(0));                
                                                                    
                 System.out.println(appliance.getName() + ": Cleaning broken glass in " + store.getAisles().get(aisleNumber).getName() + " aisle");
-                appliance.getRobot(myAuthToken).brokenGlass(aisleNumber);                
+                appliance.getRobot(new AuthTokenTuple(myAuthToken)).brokenGlass(aisleNumber);                
             }
             
             // Else if store doesn't have a robot; cancel actions
@@ -898,7 +899,7 @@ public class Controller implements Observer
         public void execute()
         {
             // Get the source store
-            LinkedHashMap<String, Store> stores = modeler.getStores(myAuthToken);
+            LinkedHashMap<String, Store> stores = modeler.getStores(new AuthTokenTuple(myAuthToken));
             Store store = stores.get(sourceDevice.getLocation().split(":")[0]);
             
             // Initialize string for getting store's speaker that's nearest customer
@@ -926,7 +927,7 @@ public class Controller implements Observer
                 String announcement = "Customer " + customerId + " is in " + store.getCustomers().get(customerId).getLocation().split(":")[1] + " aisle";
                                    
                 System.out.println(appliance.getName() + ": \"" + announcement + "\"");
-                appliance.getSpeaker(myAuthToken).announce(announcement);                              
+                appliance.getSpeaker(new AuthTokenTuple(myAuthToken)).announce(announcement);                              
             }
             
             // Else if store didn't have a speaker
@@ -976,12 +977,12 @@ public class Controller implements Observer
         public void execute()
         {          
             // Get the source store
-            LinkedHashMap<String, Store> stores = modeler.getStores(myAuthToken);
+            LinkedHashMap<String, Store> stores = modeler.getStores(new AuthTokenTuple(myAuthToken));
             Store store = stores.get(sourceDevice.getLocation().split(":")[0]);            
             
             // Update customer's location
             System.out.println("Controller Service: Updating customer " + customerId + "'s location");
-            modeler.updateCustomer(customerId, store.getId() + ":" + aisleId, dateTime, myAuthToken);            
+            modeler.updateCustomer(customerId, store.getId() + ":" + aisleId, dateTime, new AuthTokenTuple(myAuthToken));            
         }        
     }
     
@@ -1021,7 +1022,7 @@ public class Controller implements Observer
         public void execute()
         {
             // Get the source store
-            LinkedHashMap<String, Store> stores = modeler.getStores(myAuthToken);
+            LinkedHashMap<String, Store> stores = modeler.getStores(new AuthTokenTuple(myAuthToken));
             Store store = stores.get(sourceDevice.getLocation().split(":")[0]);                
             
             // Initialize array for getting store's robot appliance map keys
@@ -1059,14 +1060,15 @@ public class Controller implements Observer
                     return;                
                 
                 // Get customer's location
-                String customerAisleLoc = modeler.getCustomers(myAuthToken).get(customerId).getLocation().split(":")[1];       
+                String customerAisleLoc = modeler.getCustomers(new AuthTokenTuple(myAuthToken)).get(customerId).getLocation().split(":")[1];       
                 
                 // Have robot fetch product using customer's AuthToken
                 System.out.println(appliance.getName() + ": Fetching " + number + " of product " + productId + " from " + aisleShelfLoc
                         + " for customer " + customerId + " in " + customerAisleLoc + " aisle");
                 
-                if (appliance.getRobot(customerAuthToken) != null)
-                    appliance.getRobot(customerAuthToken).fetchProduct(productId, number, aisleShelfLoc, customerId, customerAisleLoc);
+                // If user's permission checks out; include source store in AuthTokenTuple passed in
+                if (appliance.getRobot(new AuthTokenTuple(customerAuthToken, store.getId())) != null)
+                    appliance.getRobot(new AuthTokenTuple(customerAuthToken, store.getId())).fetchProduct(productId, number, aisleShelfLoc, customerId, customerAisleLoc);
                 
                 else
                     return;
@@ -1089,7 +1091,7 @@ public class Controller implements Observer
                 {
                     // Update inventory by decrementing product count on the shelf
                     System.out.println("Controller Service: Updating inventory " + inventory.getInventoryId() + "'s count by " + (number * (-1)));
-                    modeler.updateInventory(inventory.getInventoryId(), (number * (-1)), myAuthToken);                                                
+                    modeler.updateInventory(inventory.getInventoryId(), (number * (-1)), new AuthTokenTuple(myAuthToken));                                                
                 }
                 
                 // Else inventory wasn't found; can't update it
@@ -1109,12 +1111,12 @@ public class Controller implements Observer
                 }              
                 
                 // Get customer's virtual basket (to update their basket items)
-                modeler.getCustomerBasket(customerId, myAuthToken);
+                modeler.getCustomerBasket(customerId, new AuthTokenTuple(myAuthToken));
                 
                 // Update customer's virtual basket items by adding item(s) to it
                 System.out.println("Controller Service: Adding " + number + " of " + productId + " to customer "
                         + customerId + "'s virtual basket");
-                modeler.addBasketItem(customerId, productId, number, myAuthToken);        
+                modeler.addBasketItem(customerId, productId, number, new AuthTokenTuple(myAuthToken));        
             }
             
             // Else if store doesn't have a robot; cancel actions
@@ -1163,18 +1165,18 @@ public class Controller implements Observer
             System.out.println("Controller Service: Computing the value of items in customer " + customerId + "'s basket");
             
             // Calculate the total value of the customer's basket items
-            Basket basket = modeler.getCustomerBasket(customerId, null);
+            Basket basket = modeler.getCustomerBasket(customerId, new AuthTokenTuple(myAuthToken));
             LinkedHashMap<String, Integer> basketItems = basket.getBasketItems();
             Integer itemsTotValue = 0;
             for (Entry<String, Integer> integerEntry : basketItems.entrySet())
             {
-                itemsTotValue += (integerEntry.getValue() * (modeler.getProducts(null).get(integerEntry.getKey()).getUnitPrice()));
+                itemsTotValue += (integerEntry.getValue() * (modeler.getProducts(new AuthTokenTuple(myAuthToken)).get(integerEntry.getKey()).getUnitPrice()));
             }            
             
             System.out.println("Controller Service: Checking customer " + customerId + "'s account balance");           
             
             // Get the customer's account balance            
-            String customerBalance = ledgerCp.getAccountBalance(modeler.getCustomers(null).get(customerId).getAccount());
+            String customerBalance = ledgerCp.getAccountBalance(modeler.getCustomers(new AuthTokenTuple(myAuthToken)).get(customerId).getAccount());
             
             // Output aesthetics
             if (customerBalance == null)
@@ -1207,7 +1209,7 @@ public class Controller implements Observer
             }
             
             // Get the source store
-            LinkedHashMap<String, Store> stores = modeler.getStores(null);
+            LinkedHashMap<String, Store> stores = modeler.getStores(new AuthTokenTuple(myAuthToken));
             Store store = stores.get(sourceDevice.getLocation().split(":")[0]);
             
             // Initialize string for getting store's speaker that's nearest customer
@@ -1233,7 +1235,7 @@ public class Controller implements Observer
                 Appliance appliance = (Appliance) store.getDevices().get(speakerKey);       
                                           
                 System.out.println(appliance.getName() + ": \"" + announcement + "\"");
-                appliance.getSpeaker().announce(announcement);                               
+                appliance.getSpeaker(new AuthTokenTuple(myAuthToken)).announce(announcement);                               
             }
             
             // Else if store didn't have a speaker
@@ -1279,7 +1281,7 @@ public class Controller implements Observer
         public void execute()
         {
             // Get customer's basket
-            Basket basket = modeler.getCustomerBasket(customerId, null);
+            Basket basket = modeler.getCustomerBasket(customerId, new AuthTokenTuple(myAuthToken));
             
             // If basket returned null, return (Modeler's getCustomerBasket will thrown an exception)
             if (basket == null)            
@@ -1290,7 +1292,7 @@ public class Controller implements Observer
             Integer itemsTotWeight = 0;
             for (Entry<String, Integer> integerEntry : basketItems.entrySet())
             {
-                itemsTotWeight += (integerEntry.getValue() * Integer.parseInt(modeler.getProducts(null).get(integerEntry.getKey()).getSize().split(" ")[0]));
+                itemsTotWeight += (integerEntry.getValue() * Integer.parseInt(modeler.getProducts(new AuthTokenTuple(myAuthToken)).get(integerEntry.getKey()).getSize().split(" ")[0]));
             }
             
             // If weight of basket does not exceed 10 lbs
@@ -1312,7 +1314,7 @@ public class Controller implements Observer
             else
             {
              // Get the source store
-                LinkedHashMap<String, Store> stores = modeler.getStores(null);
+                LinkedHashMap<String, Store> stores = modeler.getStores(new AuthTokenTuple(myAuthToken));
                 Store store = stores.get(sourceDevice.getLocation().split(":")[0]);                
                 
                 // Initialize array for getting store's robot appliance map keys
@@ -1347,7 +1349,7 @@ public class Controller implements Observer
                     String customerLocation = store.getDevices().get(sourceDevice.getId()).getName();            
                                             
                     System.out.println(appliance.getName() + ": Assisting customer " + customerId + " at " + customerLocation + " to car");
-                    appliance.getRobot().carAssist(customerId, sourceDevice.getLocation());                    
+                    appliance.getRobot(new AuthTokenTuple(myAuthToken)).carAssist(customerId, sourceDevice.getLocation());                    
                 }
                 
                 // Else if store doesn't have a robot; cancel actions
@@ -1395,7 +1397,7 @@ public class Controller implements Observer
         public void execute()
         {
             // Get the source store
-            LinkedHashMap<String, Store> stores = modeler.getStores(null);
+            LinkedHashMap<String, Store> stores = modeler.getStores(new AuthTokenTuple(myAuthToken));
             Store store = stores.get(sourceDevice.getLocation().split(":")[0]);
                        
             // Identify customer and have turnstile speaker acknowledge them
@@ -1408,7 +1410,7 @@ public class Controller implements Observer
                 expression = "Hello";
             Appliance appliance = (Appliance) sourceDevice;
             System.out.println(appliance.getName() + ": \"" + expression + "\"");
-            appliance.getTurnstile().speak(expression);                           
+            appliance.getTurnstile(new AuthTokenTuple(myAuthToken)).speak(expression);                           
             
             // Initialize variables for customer's basket items (for registered customers)
             Integer itemsTotValue = 0;
@@ -1419,7 +1421,7 @@ public class Controller implements Observer
             if ((customer != null) && customer.getType().toString().equals("registered"))
             {
                 // Get the customer's basket
-                basket = modeler.getCustomerBasket(customerId, null);
+                basket = modeler.getCustomerBasket(customerId, new AuthTokenTuple(myAuthToken));
                 basketItems = basket.getBasketItems();
                 
                 // Calculate the cost of their basket items
@@ -1427,7 +1429,7 @@ public class Controller implements Observer
                                
                 for (Entry<String, Integer> integerEntry : basketItems.entrySet())
                 {
-                    itemsTotValue += (integerEntry.getValue() * (modeler.getProducts(null).get(integerEntry.getKey()).getUnitPrice()));
+                    itemsTotValue += (integerEntry.getValue() * (modeler.getProducts(new AuthTokenTuple(myAuthToken)).get(integerEntry.getKey()).getUnitPrice()));
                 }       
             }          
             
@@ -1454,7 +1456,7 @@ public class Controller implements Observer
                         System.out.println();
                         expression = "Transaction failed, " + store.getCustomers().get(customerId).getFirstName() + ". Please return items to store. Thank you!";                
                         System.out.println(appliance.getName() + ": \"" + expression + "\"");
-                        appliance.getTurnstile().speak(expression);
+                        appliance.getTurnstile(new AuthTokenTuple(myAuthToken)).speak(expression);
                         return;
                     }          
                 }
@@ -1476,7 +1478,7 @@ public class Controller implements Observer
                                 + ". Please return some or all items to store before checking out again. Thank you!";
                         
                         System.out.println(appliance.getName() + ": \"" + expression + "\"");
-                        appliance.getTurnstile().speak(expression);
+                        appliance.getTurnstile(new AuthTokenTuple(myAuthToken)).speak(expression);
                         return;
                     }            
                 }
@@ -1498,7 +1500,7 @@ public class Controller implements Observer
                                 + ". Please return items to store.";
                         
                         System.out.println(appliance.getName() + ": \"" + expression + "\"");
-                        appliance.getTurnstile().speak(expression);
+                        appliance.getTurnstile(new AuthTokenTuple(myAuthToken)).speak(expression);
                         return;
                     }                   
                 }           
@@ -1510,7 +1512,7 @@ public class Controller implements Observer
                     Integer itemsTotWeight = 0;
                     for (Entry<String, Integer> integerEntry : basketItems.entrySet())
                     {
-                        itemsTotWeight += (integerEntry.getValue() * Integer.parseInt(modeler.getProducts(null).get(integerEntry.getKey()).getSize().split(" ")[0]));
+                        itemsTotWeight += (integerEntry.getValue() * Integer.parseInt(modeler.getProducts(new AuthTokenTuple(myAuthToken)).get(integerEntry.getKey()).getSize().split(" ")[0]));
                     }
                     
                     // If weight of items is more than 10 lbs, command a robot to assist customer to car
@@ -1518,7 +1520,7 @@ public class Controller implements Observer
                     {
                         expression = "Your basket items weigh more than 10 pounds. Please wait for a robot to assist you to your car";
                         System.out.println(appliance.getName() + ": \"" + expression + "\"");
-                        appliance.getTurnstile().speak(expression);                            
+                        appliance.getTurnstile(new AuthTokenTuple(myAuthToken)).speak(expression);                            
                         
                         System.out.println(appliance.getName() + ": Calling for a robot to assist customer " + customerId + " to their car");                    
                         
@@ -1538,7 +1540,7 @@ public class Controller implements Observer
             else    
                 expression = "Customer " + store.getCustomers().get(customerId).getFirstName() + ", you may pass through turnstile";
             System.out.println(appliance.getName() + ": \"" + expression + "\"");
-            appliance.getTurnstile().speak(expression);                          
+            appliance.getTurnstile(new AuthTokenTuple(myAuthToken)).speak(expression);                          
             
             // Open turnstile
             if (customer == null)
@@ -1546,7 +1548,7 @@ public class Controller implements Observer
             else
                 expression = ": Customer " + customerId + " passed through turnstile";
             System.out.println(appliance.getName() + expression);
-            appliance.getTurnstile().letPersonPass();                
+            appliance.getTurnstile(new AuthTokenTuple(myAuthToken)).letPersonPass();                
             
             // Tell customer goodbye
             if (customer == null)
@@ -1555,13 +1557,13 @@ public class Controller implements Observer
                 expression = "Goodbye, customer " + store.getCustomers().get(customerId).getFirstName() + ". Thanks for shopping at "
                         + store.getName() + "!";
             System.out.println(appliance.getName() + ": \"" + expression + "\"");
-            appliance.getTurnstile().speak(expression);                
+            appliance.getTurnstile(new AuthTokenTuple(myAuthToken)).speak(expression);                
             
             // If customer was a registered customer, clear their basket
             if ((customer != null) && customer.getType().toString().equals("registered"))
             {
                 System.out.println("Controller Service: Clearing customer " + customerId + "'s basket");
-                modeler.clearBasket(customerId, null);
+                modeler.clearBasket(customerId, new AuthTokenTuple(myAuthToken));
             }
             
             // Update customer's location
@@ -1570,7 +1572,7 @@ public class Controller implements Observer
                 System.out.println("Controller Service: Updating customer " + customerId + "'s location");
                 DateTimeFormatter dtf = DateTimeFormatter.ofPattern("MMMM dd, yyyy HH:mm:ss");
                 LocalDateTime currentDateTime = LocalDateTime.now();
-                modeler.updateCustomer(customerId, "null", dtf.format(currentDateTime), null);
+                modeler.updateCustomer(customerId, "null", dtf.format(currentDateTime), new AuthTokenTuple(myAuthToken));
             }           
         }        
     }
@@ -1601,7 +1603,7 @@ public class Controller implements Observer
         public void execute()
         {
             // Get the source store
-            LinkedHashMap<String, Store> stores = modeler.getStores(myAuthToken);
+            LinkedHashMap<String, Store> stores = modeler.getStores(new AuthTokenTuple(myAuthToken));
             Store store = stores.get(sourceDevice.getLocation().split(":")[0]);
             
             // Access source turnstile
@@ -1612,7 +1614,7 @@ public class Controller implements Observer
             
             // Identify customer
             System.out.println("Controller Service: Identifying customer " + customerId);
-            Customer customer = modeler.getCustomers(myAuthToken).get(customerId);
+            Customer customer = modeler.getCustomers(new AuthTokenTuple(myAuthToken)).get(customerId);
             
             // If customer is not registered or not a guest
             if (customer == null)
@@ -1629,7 +1631,7 @@ public class Controller implements Observer
                     System.out.println();
                     expression = "You do not have a registered account with " + store.getName() + ". Please register one and come back later";
                     System.out.println(appliance.getName() + ": \"" + expression + "\"");
-                    appliance.getTurnstile(myAuthToken).speak(expression);
+                    appliance.getTurnstile(new AuthTokenTuple(myAuthToken)).speak(expression);
                     return;
                 }       
             }
@@ -1658,7 +1660,7 @@ public class Controller implements Observer
                         System.out.println();
                         expression = "Your account information is unavailable. Please come back at another time";
                         System.out.println(appliance.getName() + ": \"" + expression + "\"");
-                        appliance.getTurnstile(myAuthToken).speak(expression);
+                        appliance.getTurnstile(new AuthTokenTuple(myAuthToken)).speak(expression);
                         return;
                     }                    
                 }
@@ -1679,32 +1681,32 @@ public class Controller implements Observer
                     System.out.println();
                     expression = "You have no funds in your account. Please come back when you do";
                     System.out.println(appliance.getName() + ": \"" + expression + "\"");
-                    appliance.getTurnstile(myAuthToken).speak(expression);
+                    appliance.getTurnstile(new AuthTokenTuple(myAuthToken)).speak(expression);
                     return;
                 }                
             }          
             
             // Tell customer they can pass through turnstile and greet them
-            expression = "Hello, customer " + modeler.getCustomers(myAuthToken).get(customerId).getFirstName() + ", you may pass through the turnstile. "
+            expression = "Hello, customer " + modeler.getCustomers(new AuthTokenTuple(myAuthToken)).get(customerId).getFirstName() + ", you may pass through the turnstile. "
                     + "Welcome to " + store.getName() + "!";
             System.out.println(appliance.getName() + ": \"" + expression + "\"");
-            appliance.getTurnstile(myAuthToken).speak(expression);                          
+            appliance.getTurnstile(new AuthTokenTuple(myAuthToken)).speak(expression);                          
             
             // Open turnstile
             System.out.println(appliance.getName() + ": Customer " + customerId + " passed through turnstile");
-            appliance.getTurnstile(myAuthToken).letPersonPass();                
+            appliance.getTurnstile(new AuthTokenTuple(myAuthToken)).letPersonPass();                
             
             // Update customer's location
             System.out.println("Controller Service: Updating customer " + customerId + "'s location");
             DateTimeFormatter dtf = DateTimeFormatter.ofPattern("MMMM dd, yyyy HH:mm:ss");
             LocalDateTime currentDateTime = LocalDateTime.now();
-            modeler.updateCustomer(customerId, store.getId() + ":null", dtf.format(currentDateTime), myAuthToken);
+            modeler.updateCustomer(customerId, store.getId() + ":null", dtf.format(currentDateTime), new AuthTokenTuple(myAuthToken));
             
             // If customer is registered, assign them a virtual basket
             if ((customerBalance != null) && (Integer.parseInt(customerBalance) > 0))
             {             
                 System.out.println("Controller Service: Getting customer " + customerId + "'s virtual basket");
-                modeler.getCustomerBasket(customerId, myAuthToken);
+                modeler.getCustomerBasket(customerId, new AuthTokenTuple(myAuthToken));
             }
         }        
     }

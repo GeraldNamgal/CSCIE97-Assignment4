@@ -332,14 +332,14 @@ public class CommandProcessor
         if ((splitInputArr.length == 5) && splitInputArr[0].equalsIgnoreCase("define") && splitInputArr[1].equalsIgnoreCase("permission"))
         {
             System.out.println("-: " + trimmedInput);
-            authenticator.definePermission(splitInputArr[2], splitInputArr[3], splitInputArr[4], hardcodedUserAuthToken);
+            authenticator.definePermission(splitInputArr[2], splitInputArr[3], splitInputArr[4], new AuthTokenTuple(hardcodedUserAuthToken));
             System.out.println();
         }
         
         else if ((splitInputArr.length == 5) && splitInputArr[0].equalsIgnoreCase("define") && splitInputArr[1].equalsIgnoreCase("role"))
         {
             System.out.println("-: " + trimmedInput);
-            authenticator.defineRole(splitInputArr[2], splitInputArr[3], splitInputArr[4], hardcodedUserAuthToken);
+            authenticator.defineRole(splitInputArr[2], splitInputArr[3], splitInputArr[4], new AuthTokenTuple(hardcodedUserAuthToken));
             System.out.println();
         }
         
@@ -347,14 +347,14 @@ public class CommandProcessor
                 && splitInputArr[2].equalsIgnoreCase("to") && splitInputArr[3].equalsIgnoreCase("role"))
         {
             System.out.println("-: " + trimmedInput);
-            authenticator.addEntitlementToRole(splitInputArr[4], splitInputArr[5], hardcodedUserAuthToken);
+            authenticator.addEntitlementToRole(splitInputArr[4], splitInputArr[5], new AuthTokenTuple(hardcodedUserAuthToken));
             System.out.println();
         }
         
         else if((splitInputArr.length == 4) && splitInputArr[0].equalsIgnoreCase("define") && splitInputArr[1].equalsIgnoreCase("user"))
         {
             System.out.println("-: " + trimmedInput);
-            authenticator.defineUser(splitInputArr[2], splitInputArr[3], hardcodedUserAuthToken);
+            authenticator.defineUser(splitInputArr[2], splitInputArr[3], new AuthTokenTuple(hardcodedUserAuthToken));
             System.out.println();
         }
         
@@ -362,14 +362,14 @@ public class CommandProcessor
                 && splitInputArr[2].equalsIgnoreCase("credential"))
         {
             System.out.println("-: " + trimmedInput);
-            authenticator.addUserCredential(splitInputArr[3], splitInputArr[4], splitInputArr[5], hardcodedUserAuthToken);
+            authenticator.addUserCredential(splitInputArr[3], splitInputArr[4], splitInputArr[5], new AuthTokenTuple(hardcodedUserAuthToken));
             System.out.println();
         }
         
         else if((splitInputArr.length == 4) && splitInputArr[0].equalsIgnoreCase("define") && splitInputArr[1].equalsIgnoreCase("resource"))
         {
             System.out.println("-: " + trimmedInput);
-            authenticator.defineResource(splitInputArr[2], splitInputArr[3], hardcodedUserAuthToken);
+            authenticator.defineResource(splitInputArr[2], splitInputArr[3], new AuthTokenTuple(hardcodedUserAuthToken));
             System.out.println();
         }
         
@@ -377,7 +377,7 @@ public class CommandProcessor
                 && splitInputArr[2].equalsIgnoreCase("role"))
         {
             System.out.println("-: " + trimmedInput);
-            authenticator.defineResourceRole(splitInputArr[3], splitInputArr[4], splitInputArr[5], splitInputArr[6], splitInputArr[7], hardcodedUserAuthToken);
+            authenticator.defineResourceRole(splitInputArr[3], splitInputArr[4], splitInputArr[5], splitInputArr[6], splitInputArr[7], new AuthTokenTuple(hardcodedUserAuthToken));
             System.out.println();
         }
         
@@ -385,7 +385,7 @@ public class CommandProcessor
                 && splitInputArr[2].equalsIgnoreCase("to") && splitInputArr[3].equalsIgnoreCase("user"))
         {
             System.out.println("-: " + trimmedInput);
-            authenticator.addEntitlementToUser(splitInputArr[4], splitInputArr[5], hardcodedUserAuthToken);
+            authenticator.addEntitlementToUser(splitInputArr[4], splitInputArr[5], new AuthTokenTuple(hardcodedUserAuthToken));
             System.out.println();
         }
         

@@ -7,9 +7,8 @@
 
 package com.cscie97.store.model;
 
-import com.cscie97.store.authentication.AuthToken;
+import com.cscie97.store.authentication.AuthTokenTuple;
 import com.cscie97.store.authentication.GetPermissionsVisitor;
-import com.cscie97.store.authentication.PermissionTuple;
 import com.cscie97.store.authentication.StoreAuthenticationService;
 import com.cscie97.store.controller.UpdateEvent;
 
@@ -95,11 +94,11 @@ public class Modeler implements StoreModelService, Subject
      * @param simulatedEvent The event to be created 
      */
     @Override
-    public void createEvent(String id, String simulatedEvent, AuthToken authToken)
+    public void createEvent(String id, String simulatedEvent, AuthTokenTuple authTokenTuple)
     {
         // Check that given AuthToken has permission to access this method
-        GetPermissionsVisitor getPermissionsVisitor = authenticator.getUserPermissions(authToken);
-        if ((getPermissionsVisitor == null) || !getPermissionsVisitor.hasPermission(new PermissionTuple("use Modeler API")))
+        GetPermissionsVisitor getPermissionsVisitor = authenticator.getUserPermissions(authTokenTuple.getAuthToken());
+        if ((getPermissionsVisitor == null) || !getPermissionsVisitor.hasPermission(authTokenTuple.getPermissionTuple().setPermissionId("use Modeler API")))
             return;
         
         Sensor sourceDevice = devices.get(id);
@@ -135,11 +134,11 @@ public class Modeler implements StoreModelService, Subject
      * @return A Store object
      */
     @Override
-    public Store defineStore(String id, String name, String address, AuthToken authToken)
+    public Store defineStore(String id, String name, String address, AuthTokenTuple authTokenTuple)
     {
         // Check that given AuthToken has permission to access this method
-        GetPermissionsVisitor getPermissionsVisitor = authenticator.getUserPermissions(authToken);
-        if ((getPermissionsVisitor == null) || !getPermissionsVisitor.hasPermission(new PermissionTuple("use Modeler API")))
+        GetPermissionsVisitor getPermissionsVisitor = authenticator.getUserPermissions(authTokenTuple.getAuthToken());
+        if ((getPermissionsVisitor == null) || !getPermissionsVisitor.hasPermission(authTokenTuple.getPermissionTuple().setPermissionId("use Modeler API")))
             return null;           
                
         // Check that store id is unique
@@ -172,11 +171,11 @@ public class Modeler implements StoreModelService, Subject
      * @param storeId The unique id of the store
      */
     @Override
-    public void showStore(String storeId, AuthToken authToken)
+    public void showStore(String storeId, AuthTokenTuple authTokenTuple)
     {
         // Check that given AuthToken has permission to access this method
-        GetPermissionsVisitor getPermissionsVisitor = authenticator.getUserPermissions(authToken);
-        if ((getPermissionsVisitor == null) || !getPermissionsVisitor.hasPermission(new PermissionTuple("use Modeler API")))        
+        GetPermissionsVisitor getPermissionsVisitor = authenticator.getUserPermissions(authTokenTuple.getAuthToken());
+        if ((getPermissionsVisitor == null) || !getPermissionsVisitor.hasPermission(authTokenTuple.getPermissionTuple().setPermissionId("use Modeler API")))        
             return;        
         
         // Get store
@@ -338,11 +337,11 @@ public class Modeler implements StoreModelService, Subject
      * @return An Aisle object
      */
     @Override
-    public Aisle defineAisle(String storeAisleLoc, String name, String description, String location, AuthToken authToken)
+    public Aisle defineAisle(String storeAisleLoc, String name, String description, String location, AuthTokenTuple authTokenTuple)
     {
         // Check that given AuthToken has permission to access this method
-        GetPermissionsVisitor getPermissionsVisitor = authenticator.getUserPermissions(authToken);
-        if ((getPermissionsVisitor == null) || !getPermissionsVisitor.hasPermission(new PermissionTuple("use Modeler API")))        
+        GetPermissionsVisitor getPermissionsVisitor = authenticator.getUserPermissions(authTokenTuple.getAuthToken());
+        if ((getPermissionsVisitor == null) || !getPermissionsVisitor.hasPermission(authTokenTuple.getPermissionTuple().setPermissionId("use Modeler API")))        
             return null;        
         
         // Split storeAisleLoc on colon
@@ -415,11 +414,11 @@ public class Modeler implements StoreModelService, Subject
      * @param storeAisleLoc
      */
     @Override
-    public void showAisle(String storeAisleLoc, AuthToken authToken)
+    public void showAisle(String storeAisleLoc, AuthTokenTuple authTokenTuple)
     {        
         // Check that given AuthToken has permission to access this method
-        GetPermissionsVisitor getPermissionsVisitor = authenticator.getUserPermissions(authToken);
-        if ((getPermissionsVisitor == null) || !getPermissionsVisitor.hasPermission(new PermissionTuple("use Modeler API")))        
+        GetPermissionsVisitor getPermissionsVisitor = authenticator.getUserPermissions(authTokenTuple.getAuthToken());
+        if ((getPermissionsVisitor == null) || !getPermissionsVisitor.hasPermission(authTokenTuple.getPermissionTuple().setPermissionId("use Modeler API")))        
             return;
                 
         // Split storeAisleLoc on colon
@@ -505,11 +504,11 @@ public class Modeler implements StoreModelService, Subject
      * @return A Shelf object
      */
     @Override
-    public Shelf defineShelf(String storeAisleShelfLoc, String name, String level, String description, String temperature, AuthToken authToken)
+    public Shelf defineShelf(String storeAisleShelfLoc, String name, String level, String description, String temperature, AuthTokenTuple authTokenTuple)
     { 
         // Check that given AuthToken has permission to access this method
-        GetPermissionsVisitor getPermissionsVisitor = authenticator.getUserPermissions(authToken);
-        if ((getPermissionsVisitor == null) || !getPermissionsVisitor.hasPermission(new PermissionTuple("use Modeler API")))        
+        GetPermissionsVisitor getPermissionsVisitor = authenticator.getUserPermissions(authTokenTuple.getAuthToken());
+        if ((getPermissionsVisitor == null) || !getPermissionsVisitor.hasPermission(authTokenTuple.getPermissionTuple().setPermissionId("use Modeler API")))        
             return null;
                
         // Split storeAisleShelfLoc on colon
@@ -620,11 +619,11 @@ public class Modeler implements StoreModelService, Subject
      * @return A Shelf object
      */
     @Override
-    public Shelf defineShelf(String storeAisleShelfLoc, String name, String level, String description, AuthToken authToken)
+    public Shelf defineShelf(String storeAisleShelfLoc, String name, String level, String description, AuthTokenTuple authTokenTuple)
     {
         // Check that given AuthToken has permission to access this method
-        GetPermissionsVisitor getPermissionsVisitor = authenticator.getUserPermissions(authToken);
-        if ((getPermissionsVisitor == null) || !getPermissionsVisitor.hasPermission(new PermissionTuple("use Modeler API")))        
+        GetPermissionsVisitor getPermissionsVisitor = authenticator.getUserPermissions(authTokenTuple.getAuthToken());
+        if ((getPermissionsVisitor == null) || !getPermissionsVisitor.hasPermission(authTokenTuple.getPermissionTuple().setPermissionId("use Modeler API")))        
             return null;
         
         // Split storeAisleShelfLoc on colon
@@ -717,11 +716,11 @@ public class Modeler implements StoreModelService, Subject
      * @param storeAisleShelfLoc The unique id of the shelf
      */
     @Override
-    public void showShelf(String storeAisleShelfLoc, AuthToken authToken)
+    public void showShelf(String storeAisleShelfLoc, AuthTokenTuple authTokenTuple)
     {      
         // Check that given AuthToken has permission to access this method
-        GetPermissionsVisitor getPermissionsVisitor = authenticator.getUserPermissions(authToken);
-        if ((getPermissionsVisitor == null) || !getPermissionsVisitor.hasPermission(new PermissionTuple("use Modeler API")))        
+        GetPermissionsVisitor getPermissionsVisitor = authenticator.getUserPermissions(authTokenTuple.getAuthToken());
+        if ((getPermissionsVisitor == null) || !getPermissionsVisitor.hasPermission(authTokenTuple.getPermissionTuple().setPermissionId("use Modeler API")))        
             return;
         
         // Split storeAisleShelfLoc on colon
@@ -838,11 +837,11 @@ public class Modeler implements StoreModelService, Subject
      * @return An Inventory object
      */
     @Override
-    public Inventory defineInventory(String id, String storeAisleShelfLoc, Integer capacity, Integer count, String productId, AuthToken authToken)
+    public Inventory defineInventory(String id, String storeAisleShelfLoc, Integer capacity, Integer count, String productId, AuthTokenTuple authTokenTuple)
     {        
         // Check that given AuthToken has permission to access this method
-        GetPermissionsVisitor getPermissionsVisitor = authenticator.getUserPermissions(authToken);
-        if ((getPermissionsVisitor == null) || !getPermissionsVisitor.hasPermission(new PermissionTuple("use Modeler API")))        
+        GetPermissionsVisitor getPermissionsVisitor = authenticator.getUserPermissions(authTokenTuple.getAuthToken());
+        if ((getPermissionsVisitor == null) || !getPermissionsVisitor.hasPermission(authTokenTuple.getPermissionTuple().setPermissionId("use Modeler API")))        
             return null;
         
         // Check that count is within valid range
@@ -1006,11 +1005,11 @@ public class Modeler implements StoreModelService, Subject
      * @param id The inventory's unique id
      */
     @Override
-    public void showInventory(String id, AuthToken authToken)
+    public void showInventory(String id, AuthTokenTuple authTokenTuple)
     {         
         // Check that given AuthToken has permission to access this method
-        GetPermissionsVisitor getPermissionsVisitor = authenticator.getUserPermissions(authToken);
-        if ((getPermissionsVisitor == null) || !getPermissionsVisitor.hasPermission(new PermissionTuple("use Modeler API")))        
+        GetPermissionsVisitor getPermissionsVisitor = authenticator.getUserPermissions(authTokenTuple.getAuthToken());
+        if ((getPermissionsVisitor == null) || !getPermissionsVisitor.hasPermission(authTokenTuple.getPermissionTuple().setPermissionId("use Modeler API")))        
             return;
         
         // Retrieve inventory
@@ -1047,11 +1046,11 @@ public class Modeler implements StoreModelService, Subject
      * @param amount The amount to increment or decrement by, a positive or negative value, respectively 
      */
     @Override
-    public void updateInventory(String id, Integer amount, AuthToken authToken)
+    public void updateInventory(String id, Integer amount, AuthTokenTuple authTokenTuple)
     {       
         // Check that given AuthToken has permission to access this method
-        GetPermissionsVisitor getPermissionsVisitor = authenticator.getUserPermissions(authToken);
-        if ((getPermissionsVisitor == null) || !getPermissionsVisitor.hasPermission(new PermissionTuple("use Modeler API")))        
+        GetPermissionsVisitor getPermissionsVisitor = authenticator.getUserPermissions(authTokenTuple.getAuthToken());
+        if ((getPermissionsVisitor == null) || !getPermissionsVisitor.hasPermission(authTokenTuple.getPermissionTuple().setPermissionId("use Modeler API")))        
             return;
         
         Inventory inventory = inventories.get(id);
@@ -1097,11 +1096,11 @@ public class Modeler implements StoreModelService, Subject
      */
     @Override
     public Product defineProduct(String productId, String name, String description, String size, String category, Integer unitPrice
-            , String temperature, AuthToken authToken)
+            , String temperature, AuthTokenTuple authTokenTuple)
     {
         // Check that given AuthToken has permission to access this method
-        GetPermissionsVisitor getPermissionsVisitor = authenticator.getUserPermissions(authToken);
-        if ((getPermissionsVisitor == null) || !getPermissionsVisitor.hasPermission(new PermissionTuple("use Modeler API")))        
+        GetPermissionsVisitor getPermissionsVisitor = authenticator.getUserPermissions(authTokenTuple.getAuthToken());
+        if ((getPermissionsVisitor == null) || !getPermissionsVisitor.hasPermission(authTokenTuple.getPermissionTuple().setPermissionId("use Modeler API")))        
             return null;
         
         // Check that productId is unique
@@ -1154,11 +1153,11 @@ public class Modeler implements StoreModelService, Subject
      */
     @Override
     public Product defineProduct(String productId, String name, String description, String size, String category, Integer unitPrice
-            , AuthToken authToken)
+            , AuthTokenTuple authTokenTuple)
     {
         // Check that given AuthToken has permission to access this method
-        GetPermissionsVisitor getPermissionsVisitor = authenticator.getUserPermissions(authToken);
-        if ((getPermissionsVisitor == null) || !getPermissionsVisitor.hasPermission(new PermissionTuple("use Modeler API")))        
+        GetPermissionsVisitor getPermissionsVisitor = authenticator.getUserPermissions(authTokenTuple.getAuthToken());
+        if ((getPermissionsVisitor == null) || !getPermissionsVisitor.hasPermission(authTokenTuple.getPermissionTuple().setPermissionId("use Modeler API")))        
             return null;
         
         // Check that productId is unique
@@ -1194,11 +1193,11 @@ public class Modeler implements StoreModelService, Subject
      * @param id The product's unique id
      */
     @Override
-    public void showProduct(String id, AuthToken authToken)
+    public void showProduct(String id, AuthTokenTuple authTokenTuple)
     {
         // Check that given AuthToken has permission to access this method
-        GetPermissionsVisitor getPermissionsVisitor = authenticator.getUserPermissions(authToken);
-        if ((getPermissionsVisitor == null) || !getPermissionsVisitor.hasPermission(new PermissionTuple("use Modeler API")))        
+        GetPermissionsVisitor getPermissionsVisitor = authenticator.getUserPermissions(authTokenTuple.getAuthToken());
+        if ((getPermissionsVisitor == null) || !getPermissionsVisitor.hasPermission(authTokenTuple.getPermissionTuple().setPermissionId("use Modeler API")))        
             return;
         
         // Get product
@@ -1237,11 +1236,11 @@ public class Modeler implements StoreModelService, Subject
      */
     @Override
     public Customer defineCustomer(String id, String firstName, String lastName, String ageGroup, String type, String emailAddress
-            , String account, AuthToken authToken)
+            , String account, AuthTokenTuple authTokenTuple)
     {
         // Check that given AuthToken has permission to access this method
-        GetPermissionsVisitor getPermissionsVisitor = authenticator.getUserPermissions(authToken);
-        if ((getPermissionsVisitor == null) || !getPermissionsVisitor.hasPermission(new PermissionTuple("use Modeler API")))        
+        GetPermissionsVisitor getPermissionsVisitor = authenticator.getUserPermissions(authTokenTuple.getAuthToken());
+        if ((getPermissionsVisitor == null) || !getPermissionsVisitor.hasPermission(authTokenTuple.getPermissionTuple().setPermissionId("use Modeler API")))        
             return null;
         
         // Check if customer id is unique
@@ -1312,11 +1311,11 @@ public class Modeler implements StoreModelService, Subject
      * @param id The customer's unique id
      */
     @Override
-    public void showCustomer(String id, AuthToken authToken)
+    public void showCustomer(String id, AuthTokenTuple authTokenTuple)
     {
         // Check that given AuthToken has permission to access this method
-        GetPermissionsVisitor getPermissionsVisitor = authenticator.getUserPermissions(authToken);
-        if ((getPermissionsVisitor == null) || !getPermissionsVisitor.hasPermission(new PermissionTuple("use Modeler API")))        
+        GetPermissionsVisitor getPermissionsVisitor = authenticator.getUserPermissions(authTokenTuple.getAuthToken());
+        if ((getPermissionsVisitor == null) || !getPermissionsVisitor.hasPermission(authTokenTuple.getPermissionTuple().setPermissionId("use Modeler API")))        
             return;
         
         Customer customer = customers.get(id);
@@ -1355,11 +1354,11 @@ public class Modeler implements StoreModelService, Subject
      * Referenced https://compiler.javatpoint.com/opr/test.jsp?filename=CurrentDateTimeExample1
      */
     @Override
-    public void updateCustomer(String id, String storeAisleLoc, String dateTime, AuthToken authToken)
+    public void updateCustomer(String id, String storeAisleLoc, String dateTime, AuthTokenTuple authTokenTuple)
     {
         // Check that given AuthToken has permission to access this method
-        GetPermissionsVisitor getPermissionsVisitor = authenticator.getUserPermissions(authToken);
-        if ((getPermissionsVisitor == null) || !getPermissionsVisitor.hasPermission(new PermissionTuple("use Modeler API")))        
+        GetPermissionsVisitor getPermissionsVisitor = authenticator.getUserPermissions(authTokenTuple.getAuthToken());
+        if ((getPermissionsVisitor == null) || !getPermissionsVisitor.hasPermission(authTokenTuple.getPermissionTuple().setPermissionId("use Modeler API")))        
             return;
         
         // Check that customer exists
@@ -1457,11 +1456,11 @@ public class Modeler implements StoreModelService, Subject
      * @return A Basket object
      */
     @Override
-    public Basket getCustomerBasket(String customerId, AuthToken authToken)
+    public Basket getCustomerBasket(String customerId, AuthTokenTuple authTokenTuple)
     {
         // Check that given AuthToken has permission to access this method
-        GetPermissionsVisitor getPermissionsVisitor = authenticator.getUserPermissions(authToken);
-        if ((getPermissionsVisitor == null) || !getPermissionsVisitor.hasPermission(new PermissionTuple("use Modeler API")))        
+        GetPermissionsVisitor getPermissionsVisitor = authenticator.getUserPermissions(authTokenTuple.getAuthToken());
+        if ((getPermissionsVisitor == null) || !getPermissionsVisitor.hasPermission(authTokenTuple.getPermissionTuple().setPermissionId("use Modeler API")))        
             return null;
         
         Customer customer = customers.get(customerId);
@@ -1536,11 +1535,11 @@ public class Modeler implements StoreModelService, Subject
      * @param itemCount The amount of the product to add
      */
     @Override
-    public void addBasketItem(String customerId, String productId, Integer itemCount, AuthToken authToken)
+    public void addBasketItem(String customerId, String productId, Integer itemCount, AuthTokenTuple authTokenTuple)
     {
         // Check that given AuthToken has permission to access this method
-        GetPermissionsVisitor getPermissionsVisitor = authenticator.getUserPermissions(authToken);
-        if ((getPermissionsVisitor == null) || !getPermissionsVisitor.hasPermission(new PermissionTuple("use Modeler API")))        
+        GetPermissionsVisitor getPermissionsVisitor = authenticator.getUserPermissions(authTokenTuple.getAuthToken());
+        if ((getPermissionsVisitor == null) || !getPermissionsVisitor.hasPermission(authTokenTuple.getPermissionTuple().setPermissionId("use Modeler API")))        
             return;
         
         // Check that itemCount is greater than 0
@@ -1663,11 +1662,11 @@ public class Modeler implements StoreModelService, Subject
      * @param itemCount The amount of the product to remove
      */
     @Override
-    public void removeBasketItem(String customerId, String productId, Integer itemCount, AuthToken authToken)
+    public void removeBasketItem(String customerId, String productId, Integer itemCount, AuthTokenTuple authTokenTuple)
     {
         // Check that given AuthToken has permission to access this method
-        GetPermissionsVisitor getPermissionsVisitor = authenticator.getUserPermissions(authToken);
-        if ((getPermissionsVisitor == null) || !getPermissionsVisitor.hasPermission(new PermissionTuple("use Modeler API")))        
+        GetPermissionsVisitor getPermissionsVisitor = authenticator.getUserPermissions(authTokenTuple.getAuthToken());
+        if ((getPermissionsVisitor == null) || !getPermissionsVisitor.hasPermission(authTokenTuple.getPermissionTuple().setPermissionId("use Modeler API")))        
             return;
         
         // Check that itemCount is greater than 0
@@ -1775,11 +1774,11 @@ public class Modeler implements StoreModelService, Subject
      * @param customerId The basket's unique id (same as customer's id)
      */
     @Override
-    public void clearBasket(String customerId, AuthToken authToken)
+    public void clearBasket(String customerId, AuthTokenTuple authTokenTuple)
     {
         // Check that given AuthToken has permission to access this method
-        GetPermissionsVisitor getPermissionsVisitor = authenticator.getUserPermissions(authToken);
-        if ((getPermissionsVisitor == null) || !getPermissionsVisitor.hasPermission(new PermissionTuple("use Modeler API")))        
+        GetPermissionsVisitor getPermissionsVisitor = authenticator.getUserPermissions(authTokenTuple.getAuthToken());
+        if ((getPermissionsVisitor == null) || !getPermissionsVisitor.hasPermission(authTokenTuple.getPermissionTuple().setPermissionId("use Modeler API")))        
             return;
         
         // Check if basket exists
@@ -1807,11 +1806,11 @@ public class Modeler implements StoreModelService, Subject
      * @param customerId The basket's unique id (same as customer's id)
      */
     @Override
-    public void showBasketItems(String customerId, AuthToken authToken)
+    public void showBasketItems(String customerId, AuthTokenTuple authTokenTuple)
     {
         // Check that given AuthToken has permission to access this method
-        GetPermissionsVisitor getPermissionsVisitor = authenticator.getUserPermissions(authToken);
-        if ((getPermissionsVisitor == null) || !getPermissionsVisitor.hasPermission(new PermissionTuple("use Modeler API")))        
+        GetPermissionsVisitor getPermissionsVisitor = authenticator.getUserPermissions(authTokenTuple.getAuthToken());
+        if ((getPermissionsVisitor == null) || !getPermissionsVisitor.hasPermission(authTokenTuple.getPermissionTuple().setPermissionId("use Modeler API")))        
             return;
         
         Basket basket = activeBaskets.get(customerId);
@@ -1868,11 +1867,11 @@ public class Modeler implements StoreModelService, Subject
      * @return A Sensor object (Appliance class extends Sensor)
      */
     @Override
-    public Sensor defineDevice(String id, String name, String type, String storeAisleLoc, AuthToken authToken)
+    public Sensor defineDevice(String id, String name, String type, String storeAisleLoc, AuthTokenTuple authTokenTuple)
     {
         // Check that given AuthToken has permission to access this method
-        GetPermissionsVisitor getPermissionsVisitor = authenticator.getUserPermissions(authToken);
-        if ((getPermissionsVisitor == null) || !getPermissionsVisitor.hasPermission(new PermissionTuple("use Modeler API")))        
+        GetPermissionsVisitor getPermissionsVisitor = authenticator.getUserPermissions(authTokenTuple.getAuthToken());
+        if ((getPermissionsVisitor == null) || !getPermissionsVisitor.hasPermission(authTokenTuple.getPermissionTuple().setPermissionId("use Modeler API")))        
             return null;
         
         // Check that id is unique
@@ -1980,11 +1979,11 @@ public class Modeler implements StoreModelService, Subject
      * @param id The device's unique id
      */
     @Override
-    public void showDevice(String id, AuthToken authToken)
+    public void showDevice(String id, AuthTokenTuple authTokenTuple)
     {
         // Check that given AuthToken has permission to access this method
-        GetPermissionsVisitor getPermissionsVisitor = authenticator.getUserPermissions(authToken);
-        if ((getPermissionsVisitor == null) || !getPermissionsVisitor.hasPermission(new PermissionTuple("use Modeler API")))        
+        GetPermissionsVisitor getPermissionsVisitor = authenticator.getUserPermissions(authTokenTuple.getAuthToken());
+        if ((getPermissionsVisitor == null) || !getPermissionsVisitor.hasPermission(authTokenTuple.getPermissionTuple().setPermissionId("use Modeler API")))        
             return;
         
         Sensor device = devices.get(id);
@@ -2021,11 +2020,11 @@ public class Modeler implements StoreModelService, Subject
      * @param command The command to be sent
      */
     @Override
-    public void createCommand(String id, String command, AuthToken authToken)
+    public void createCommand(String id, String command, AuthTokenTuple authTokenTuple)
     {
         // Check that given AuthToken has permission to access this method
-        GetPermissionsVisitor getPermissionsVisitor = authenticator.getUserPermissions(authToken);
-        if ((getPermissionsVisitor == null) || !getPermissionsVisitor.hasPermission(new PermissionTuple("use Modeler API")))        
+        GetPermissionsVisitor getPermissionsVisitor = authenticator.getUserPermissions(authTokenTuple.getAuthToken());
+        if ((getPermissionsVisitor == null) || !getPermissionsVisitor.hasPermission(authTokenTuple.getPermissionTuple().setPermissionId("use Modeler API")))        
             return;
         
         Sensor device = devices.get(id);
@@ -2064,33 +2063,33 @@ public class Modeler implements StoreModelService, Subject
     }    
     
     @Override
-    public LinkedHashMap<String, Store> getStores(AuthToken authToken)
+    public LinkedHashMap<String, Store> getStores(AuthTokenTuple authTokenTuple)
     {
         // Check that given AuthToken has permission to access this method
-        GetPermissionsVisitor getPermissionsVisitor = authenticator.getUserPermissions(authToken);
-        if ((getPermissionsVisitor == null) || !getPermissionsVisitor.hasPermission(new PermissionTuple("use Modeler API")))        
+        GetPermissionsVisitor getPermissionsVisitor = authenticator.getUserPermissions(authTokenTuple.getAuthToken());
+        if ((getPermissionsVisitor == null) || !getPermissionsVisitor.hasPermission(authTokenTuple.getPermissionTuple().setPermissionId("use Modeler API")))        
             return null;
         
         return stores;
     }    
 
     @Override
-    public LinkedHashMap<String, Product> getProducts(AuthToken authToken)
+    public LinkedHashMap<String, Product> getProducts(AuthTokenTuple authTokenTuple)
     {
         // Check that given AuthToken has permission to access this method
-        GetPermissionsVisitor getPermissionsVisitor = authenticator.getUserPermissions(authToken);
-        if ((getPermissionsVisitor == null) || !getPermissionsVisitor.hasPermission(new PermissionTuple("use Modeler API")))        
+        GetPermissionsVisitor getPermissionsVisitor = authenticator.getUserPermissions(authTokenTuple.getAuthToken());
+        if ((getPermissionsVisitor == null) || !getPermissionsVisitor.hasPermission(authTokenTuple.getPermissionTuple().setPermissionId("use Modeler API")))        
             return null;
         
         return products;
     }    
 
     @Override
-    public LinkedHashMap<String, Customer> getCustomers(AuthToken authToken)
+    public LinkedHashMap<String, Customer> getCustomers(AuthTokenTuple authTokenTuple)
     {
         // Check that given AuthToken has permission to access this method
-        GetPermissionsVisitor getPermissionsVisitor = authenticator.getUserPermissions(authToken);
-        if ((getPermissionsVisitor == null) || !getPermissionsVisitor.hasPermission(new PermissionTuple("use Modeler API")))        
+        GetPermissionsVisitor getPermissionsVisitor = authenticator.getUserPermissions(authTokenTuple.getAuthToken());
+        if ((getPermissionsVisitor == null) || !getPermissionsVisitor.hasPermission(authTokenTuple.getPermissionTuple().setPermissionId("use Modeler API")))        
             return null;
         
         return customers;

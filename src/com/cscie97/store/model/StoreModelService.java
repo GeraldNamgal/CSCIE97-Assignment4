@@ -9,7 +9,7 @@ package com.cscie97.store.model;
 
 import java.util.LinkedHashMap;
 
-import com.cscie97.store.authentication.AuthToken;
+import com.cscie97.store.authentication.AuthTokenTuple;
 
 /* *
  * The Store Model Service API interface that defines the methods for creating, maintaining, and updating stores
@@ -17,37 +17,37 @@ import com.cscie97.store.authentication.AuthToken;
  */
 public interface StoreModelService
 {
-    Store defineStore(String id, String name, String address, AuthToken authToken);
-    void showStore(String storeId, AuthToken authToken);
-    Aisle defineAisle(String storeAisleLoc, String name, String description, String location, AuthToken authToken);
-    void showAisle(String storeAisleLoc, AuthToken authToken);
-    Shelf defineShelf(String storeAisleShelfLoc, String name, String level, String description, String temperature, AuthToken authToken);
-    Shelf defineShelf(String storeAisleShelfLoc, String name, String level, String description, AuthToken authToken);
-    void showShelf(String storeAisleShelfLoc, AuthToken authToken);
-    Inventory defineInventory(String id, String storeAisleShelfLoc, Integer capacity, Integer count, String productId, AuthToken authToken);
-    void showInventory(String id, AuthToken authToken);
-    void updateInventory(String id, Integer amount, AuthToken authToken);
+    Store defineStore(String id, String name, String address, AuthTokenTuple authTokenTuple);
+    void showStore(String storeId, AuthTokenTuple authTokenTuple);
+    Aisle defineAisle(String storeAisleLoc, String name, String description, String location, AuthTokenTuple authTokenTuple);
+    void showAisle(String storeAisleLoc, AuthTokenTuple authTokenTuple);
+    Shelf defineShelf(String storeAisleShelfLoc, String name, String level, String description, String temperature, AuthTokenTuple authTokenTuple);
+    Shelf defineShelf(String storeAisleShelfLoc, String name, String level, String description, AuthTokenTuple authTokenTuple);
+    void showShelf(String storeAisleShelfLoc, AuthTokenTuple authTokenTuple);
+    Inventory defineInventory(String id, String storeAisleShelfLoc, Integer capacity, Integer count, String productId, AuthTokenTuple authTokenTuple);
+    void showInventory(String id, AuthTokenTuple authTokenTuple);
+    void updateInventory(String id, Integer amount, AuthTokenTuple authTokenTuple);
     Product defineProduct(String productId, String name, String description, String size, String category, Integer unitPrice
-                , String temperature, AuthToken authToken);
+                , String temperature, AuthTokenTuple authTokenTuple);
     Product defineProduct(String productId, String name, String description, String size, String category, Integer unitPrice
-                , AuthToken authToken);
-    void showProduct(String id, AuthToken authToken);
+                , AuthTokenTuple authTokenTuple);
+    void showProduct(String id, AuthTokenTuple authTokenTuple);
     Customer defineCustomer(String id, String firstName, String lastName, String ageGroup, String type, String emailAddress
-                , String account, AuthToken authToken);
-    void showCustomer(String id, AuthToken authToken);
-    void updateCustomer(String id, String storeAisleLoc, String dateTime, AuthToken authToken);
-    Basket getCustomerBasket(String customerId, AuthToken authToken);
-    void addBasketItem(String customerId, String productId, Integer itemCount, AuthToken authToken);
-    void removeBasketItem(String customerId, String productId, Integer itemCount, AuthToken authToken);
-    void clearBasket(String customerId, AuthToken authToken);
-    void showBasketItems(String customerId, AuthToken authToken);
-    Sensor defineDevice(String id, String name, String type, String storeAisleLoc, AuthToken authToken);
-    void showDevice(String id, AuthToken authToken);
-    void createEvent(String id, String event, AuthToken authToken);
-    void createCommand(String id, String command, AuthToken authToken);
+                , String account, AuthTokenTuple authTokenTuple);
+    void showCustomer(String id, AuthTokenTuple authTokenTuple);
+    void updateCustomer(String id, String storeAisleLoc, String dateTime, AuthTokenTuple authTokenTuple);
+    Basket getCustomerBasket(String customerId, AuthTokenTuple authTokenTuple);
+    void addBasketItem(String customerId, String productId, Integer itemCount, AuthTokenTuple authTokenTuple);
+    void removeBasketItem(String customerId, String productId, Integer itemCount, AuthTokenTuple authTokenTuple);
+    void clearBasket(String customerId, AuthTokenTuple authTokenTuple);
+    void showBasketItems(String customerId, AuthTokenTuple authTokenTuple);
+    Sensor defineDevice(String id, String name, String type, String storeAisleLoc, AuthTokenTuple authTokenTuple);
+    void showDevice(String id, AuthTokenTuple authTokenTuple);
+    void createEvent(String id, String event, AuthTokenTuple authTokenTuple);
+    void createCommand(String id, String command, AuthTokenTuple authTokenTuple);
     
     // Getters and Setters
-    LinkedHashMap<String, Store> getStores(AuthToken authToken);
-    LinkedHashMap<String, Product> getProducts(AuthToken authToken);
-    LinkedHashMap<String, Customer> getCustomers(AuthToken authToken);
+    LinkedHashMap<String, Store> getStores(AuthTokenTuple authTokenTuple);
+    LinkedHashMap<String, Product> getProducts(AuthTokenTuple authTokenTuple);
+    LinkedHashMap<String, Customer> getCustomers(AuthTokenTuple authTokenTuple);
 }

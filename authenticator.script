@@ -219,3 +219,39 @@ show store store1
 
 # Show customer 1's basket items (should have 6 of product2)
 show basket_items customer1
+
+# Account Balance event for customer1
+create event microphone3 event "account_balance customer1"
+
+# Show product2 (unit price should be 1/6 of total value of customer 1's basket items)
+show product product2
+
+# Checkout event for customer 1 (a registered customer with basket items)
+create event turnstile1 event "checkout customer1"
+
+# Checkout event for customer 2 (a guest)
+create event turnstile1 event "checkout customer2"
+
+# Checkout event for customer 3 (a registered customer with no basket items)
+create event turnstile2 event "checkout customer3"
+
+# Show customer 1 (should be out of store1 ["null" location])
+show customer customer1
+
+# Show customer 2 (should be out of store1 ["null" location])
+show customer customer2
+
+# Show store 1 (should have no "active customers")
+show store store1
+
+# Show block 2 from ledger (customer 1's transaction should be reflected)
+get-block 2
+
+# Exception: Attempt to have an unregistered person enter the store
+create event turnstile2 event "enter_store unknownPerson"
+
+# Exception: Attempt to have a registered customer with no Blockchain funds (customer 4) enter store
+create event turnstile3 event "enter_store customer4"
+
+# Checkout event for an unregistered person (any person who doesn't have unpaid items should be able to exit store [fire hazard, etc.])
+create event turnstile1 event "checkout unknownPerson"
