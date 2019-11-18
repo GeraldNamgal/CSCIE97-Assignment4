@@ -24,6 +24,7 @@ public class CommandProcessor
     private com.cscie97.store.authentication.CommandProcessor authenticatorCp;
     private com.cscie97.ledger.CommandProcessor ledgerCp;
     private StoreModelService modeler;
+    private Controller controller;
     private AuthToken hardcodedUserAuthToken;    
     
     /* Constructor */
@@ -37,7 +38,7 @@ public class CommandProcessor
         ledgerCp = new com.cscie97.ledger.CommandProcessor(authenticatorCp);
         
         // Create Controller 
-        new Controller((Subject) modeler, ledgerCp, authenticator);
+        controller = new Controller((Subject) modeler, ledgerCp, authenticator);
         
         this.authenticatorCp = authenticatorCp;
         
@@ -780,6 +781,14 @@ public class CommandProcessor
             System.out.println();
         }        
     	
+        else if ((splitInputArr.length == 4) && splitInputArr[0].equalsIgnoreCase("login") && splitInputArr[1].equalsIgnoreCase("to")
+                && splitInputArr[2].equalsIgnoreCase("authenticator") && splitInputArr[3].equalsIgnoreCase("controller"))
+        {
+            System.out.println("-: " + trimmedInput);
+            controller.loginToAuthenticator();
+            System.out.println();
+        }
+        
     	// Else route the command to the Ledger Service's command processor
         else
         {            

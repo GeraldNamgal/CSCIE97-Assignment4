@@ -14,7 +14,7 @@ public interface StoreAuthenticationService
     void addUserCredential(String userId, String type, String value, AuthToken authTokenForMethod);      
     AuthToken obtainAuthToken(String credentialId, String credentialValue);
     void logout(AuthToken authToken);
-    GetPermissionVisitor hasPermission(PermissionTuple permissionTuple, AuthToken authToken);
+    GetPermissionsVisitor getUserPermissions(AuthToken authToken);
     void printInventory();
     
     // Getters and Setters

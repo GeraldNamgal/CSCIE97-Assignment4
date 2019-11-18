@@ -35,8 +35,8 @@ public class AuthToken
     public void setActive(Boolean trueOrFalse, AuthToken authTokenForMethod)
     {
         // Check that given authToken has "updateAuthTokenValidity" Permission first
-        GetPermissionVisitor getPermission = authenticator.hasPermission(new PermissionTuple("updateAuthTokenValidity"), authTokenForMethod);
-        if ((getPermission != null) && getPermission.getHasPermission())
+        GetPermissionsVisitor getPermissionVisitor = authenticator.getUserPermissions(authTokenForMethod);
+        if ((getPermissionVisitor != null) && getPermissionVisitor.hasPermission(new PermissionTuple("update AuthToken validity")))
             this.active = trueOrFalse;     
     }
     

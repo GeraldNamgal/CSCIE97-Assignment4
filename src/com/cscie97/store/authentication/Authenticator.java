@@ -9,9 +9,8 @@ import java.util.Map.Entry;
 public class Authenticator implements StoreAuthenticationService, Visitable
 {
     /* VARIABLES */
-    
-    private static final String HARDCODED_USER_ID = "hardcodedUser";
-    private static final String HARDCODED_USER_USERNAME = HARDCODED_USER_ID + "-pwd";
+
+    private static final String HARDCODED_USER_USERNAME = "hardcodedUser";
     private static final String HARDCODED_USER_PASSWORD = "password";
     private final String MY_AUTHTOKEN_ID = "authenticatorAuthTokenId";
     private int suggestedId = 0;
@@ -33,22 +32,22 @@ public class Authenticator implements StoreAuthenticationService, Visitable
         credentialUserIndexes = new LinkedHashMap<String, User>();
         
         // Create a hardcoded User, add it to list of Users, and give it Credentials
-        User hardcodedUser = new User(HARDCODED_USER_ID, "Hardcoded User");
+        User hardcodedUser = new User("hardcodedUser", "Hardcoded User");
         users.put(hardcodedUser.getId(), hardcodedUser);
         Credential credential = new Credential(HARDCODED_USER_USERNAME, "password", hashCalculator(HARDCODED_USER_PASSWORD));
         hardcodedUser.addCredential(credential);
         credentialUserIndexes.put(credential.getId() + credential.getValue(), hardcodedUser);
-        credential = new Credential(hardcodedUser.getId() + "-vp", "voiceprint", hashCalculator("--voice:" + hardcodedUser.getId() + "--"));
+        credential = new Credential(hardcodedUser.getId(), "voiceprint", hashCalculator("--voice:" + hardcodedUser.getId() + "--"));
         hardcodedUser.addCredential(credential);
         credentialUserIndexes.put(credential.getId() + credential.getValue(), hardcodedUser);
-        credential = new Credential(hardcodedUser.getId() + "-fp", "faceprint", hashCalculator("--face:" + hardcodedUser.getId() + "--"));
+        credential = new Credential(hardcodedUser.getId(), "faceprint", hashCalculator("--face:" + hardcodedUser.getId() + "--"));
         hardcodedUser.addCredential(credential);
         credentialUserIndexes.put(credential.getId() + credential.getValue(), hardcodedUser);
         
-        // Create Permission to use Authenticator API methods, and a Role for Authenticator API Users, and add both to entitlements list
-        Permission permission = new Permission("useAuthenticatorAPI", "Use Authenticator API", "Use any of the restricted Authenticator API methods");
+        // Create Permission to use Authenticator API methods, and a Role for Authenticator Admin Users, and add both to entitlements list
+        Permission permission = new Permission("use Authenticator API", "Use Authenticator API", "Use any of the Authenticator API methods");
         entitlements.put(permission.getId(), permission);
-        Role role = new Role("authenticatorAPIUserRole", "Authenticator API User Role", "Has all permissions of an Authenticator API user");
+        Role role = new Role("authenticator API Admin", "Authenticator API User Admin Role", "Has all permissions of an Authenticator API admin");
         entitlements.put(role.getId(), role);
         
         // Add permission to role and role to hardcodedUser 
@@ -58,24 +57,24 @@ public class Authenticator implements StoreAuthenticationService, Visitable
         // Create a User for the Authenticator itself, add it to list of Users, and give it Credentials
         User authenticatorUser = new User("authenticator", "The Authenticator");
         users.put(authenticatorUser.getId(), authenticatorUser);
-        credential = new Credential(authenticatorUser.getId() + "-pwd", "password", hashCalculator("password"));
+        credential = new Credential(authenticatorUser.getId(), "password", hashCalculator("password"));
         authenticatorUser.addCredential(credential);
         credentialUserIndexes.put(credential.getId() + credential.getValue(), authenticatorUser);
-        credential = new Credential(authenticatorUser.getId() + "-vp", "voiceprint", hashCalculator("--voice:" + authenticatorUser.getId() + "--"));
+        credential = new Credential(authenticatorUser.getId(), "voiceprint", hashCalculator("--voice:" + authenticatorUser.getId() + "--"));
         authenticatorUser.addCredential(credential);
         credentialUserIndexes.put(credential.getId() + credential.getValue(), authenticatorUser);
-        credential = new Credential(authenticatorUser.getId() + "-fp", "faceprint", hashCalculator("--face:" + authenticatorUser.getId() + "--"));
+        credential = new Credential(authenticatorUser.getId(), "faceprint", hashCalculator("--face:" + authenticatorUser.getId() + "--"));
         authenticatorUser.addCredential(credential);
         credentialUserIndexes.put(credential.getId() + credential.getValue(), authenticatorUser);
         
         // Create permission to modify AuthToken's "active" attribute and add it to entitlements list 
-        Permission authTokenPermission = new Permission("updateAuthTokenValidity", "Update Valid on AuthToken", "Has permission to validate/invalidate AuthTokens");
+        Permission authTokenPermission = new Permission("update AuthToken validity", "Update Valid on AuthToken", "Has permission to validate/invalidate AuthTokens");
         entitlements.put(authTokenPermission.getId(), authTokenPermission);
         
         // Give authTokenPermission to Authenticator User (only it has this special permission)
         authenticatorUser.addEntitlement(authTokenPermission);
                 
-        // Get Authenticator its special AuthToken
+        // Login authenticator (so service can modify AuthTokens)
         myAuthToken = new AuthToken(MY_AUTHTOKEN_ID, authenticatorUser, this);
         authenticatorUser.addAuthToken(myAuthToken);
         
@@ -89,8 +88,8 @@ public class Authenticator implements StoreAuthenticationService, Visitable
     public Permission definePermission(String id, String name, String description, AuthToken authTokenForMethod)
     {
         // Check that given AuthToken has permission to access this method
-        GetPermissionVisitor getPermission = hasPermission(new PermissionTuple("useAuthenticatorAPI"), authTokenForMethod);
-        if ((getPermission == null) || !getPermission.getHasPermission())
+        GetPermissionsVisitor getPermissionsVisitor = getUserPermissions(authTokenForMethod);
+        if ((getPermissionsVisitor == null) || !getPermissionsVisitor.hasPermission(new PermissionTuple("use Authenticator API")))
             return null;
                 
         // Create Permission and add it to entitlements
@@ -104,8 +103,8 @@ public class Authenticator implements StoreAuthenticationService, Visitable
     public Role defineRole(String id, String name, String description, AuthToken authTokenForMethod)
     {
         // Check that given AuthToken has permission to access this method
-        GetPermissionVisitor getPermission = hasPermission(new PermissionTuple("useAuthenticatorAPI"), authTokenForMethod);
-        if ((getPermission == null) || !getPermission.getHasPermission())
+        GetPermissionsVisitor getPermissionsVisitor = getUserPermissions(authTokenForMethod);
+        if ((getPermissionsVisitor == null) || !getPermissionsVisitor.hasPermission(new PermissionTuple("use Authenticator API")))
             return null;
                 
         // Create Role and add it to entitlements
@@ -119,8 +118,8 @@ public class Authenticator implements StoreAuthenticationService, Visitable
     public void addEntitlementToRole(String roleId, String entitlementId, AuthToken authTokenForMethod)
     {
         // Check that given AuthToken has permission to access this method
-        GetPermissionVisitor getPermission = hasPermission(new PermissionTuple("useAuthenticatorAPI"), authTokenForMethod);
-        if ((getPermission == null) || !getPermission.getHasPermission())
+        GetPermissionsVisitor getPermissionsVisitor = getUserPermissions(authTokenForMethod);
+        if ((getPermissionsVisitor == null) || !getPermissionsVisitor.hasPermission(new PermissionTuple("use Authenticator API")))
             return;
                 
         // TODO (if have time): Check that given Permission and Role are valid objects         
@@ -135,8 +134,8 @@ public class Authenticator implements StoreAuthenticationService, Visitable
     public User defineUser(String userId, String name, AuthToken authTokenForMethod)
     {       
         // Check that given AuthToken has permission to access this method
-        GetPermissionVisitor getPermission = hasPermission(new PermissionTuple("useAuthenticatorAPI"), authTokenForMethod);
-        if ((getPermission == null) || !getPermission.getHasPermission())
+        GetPermissionsVisitor getPermissionsVisitor = getUserPermissions(authTokenForMethod);
+        if ((getPermissionsVisitor == null) || !getPermissionsVisitor.hasPermission(new PermissionTuple("use Authenticator API")))
             return null;
                 
         // TODO (if have time): Check for duplicates before creating new User or nah (so can rewrite User easily)?
@@ -154,20 +153,14 @@ public class Authenticator implements StoreAuthenticationService, Visitable
     public void addUserCredential(String userId, String type, String value, AuthToken authTokenForMethod)
     {
         // Check that given AuthToken has permission to access this method
-        GetPermissionVisitor getPermission = hasPermission(new PermissionTuple("useAuthenticatorAPI"), authTokenForMethod);
-        if ((getPermission == null) || !getPermission.getHasPermission())
+        GetPermissionsVisitor getPermissionsVisitor = getUserPermissions(authTokenForMethod);
+        if ((getPermissionsVisitor == null) || !getPermissionsVisitor.hasPermission(new PermissionTuple("use Authenticator API")))
             return;
                 
         // TODO (if have time): Check that given User is valid
         
         // Create Credential
-        Credential credential = null;        
-        if(type.equals("password"))
-            credential = new Credential(userId + "-pwd", type, hashCalculator(value));
-        if(type.equals("voiceprint"))
-            credential = new Credential(userId + "-vp", type, hashCalculator(value));
-        if(type.equals("faceprint"))
-            credential = new Credential(userId + "-fp", type, hashCalculator(value));
+        Credential credential = new Credential(userId, type, hashCalculator(value));        
                 
         // Add Credential to User's Credentials and to credentialUserIndexes list
         if (credential != null)
@@ -181,8 +174,8 @@ public class Authenticator implements StoreAuthenticationService, Visitable
     public void addEntitlementToUser(String userId, String entitlementId, AuthToken authTokenForMethod)
     {
         // Check that given AuthToken has permission to access this method
-        GetPermissionVisitor getPermission = hasPermission(new PermissionTuple("useAuthenticatorAPI"), authTokenForMethod);
-        if ((getPermission == null) || !getPermission.getHasPermission())
+        GetPermissionsVisitor getPermissionsVisitor = getUserPermissions(authTokenForMethod);
+        if ((getPermissionsVisitor == null) || !getPermissionsVisitor.hasPermission(new PermissionTuple("use Authenticator API")))
             return;
                 
         // TODO (if have time): Check that given User and Role are valid
@@ -196,8 +189,8 @@ public class Authenticator implements StoreAuthenticationService, Visitable
     public Resource defineResource(String id, String description, AuthToken authTokenForMethod)
     {
         // Check that given AuthToken has permission to access this method
-        GetPermissionVisitor getPermission = hasPermission(new PermissionTuple("useAuthenticatorAPI"), authTokenForMethod);
-        if ((getPermission == null) || !getPermission.getHasPermission())
+        GetPermissionsVisitor getPermissionsVisitor = getUserPermissions(authTokenForMethod);
+        if ((getPermissionsVisitor == null) || !getPermissionsVisitor.hasPermission(new PermissionTuple("use Authenticator API")))
             return null;
                 
         Resource resource = new Resource(id, description);
@@ -210,8 +203,8 @@ public class Authenticator implements StoreAuthenticationService, Visitable
     public ResourceRole defineResourceRole(String id, String name, String description, String entitlementId, String resourceId, AuthToken authTokenForMethod)
     {
         // Check that given AuthToken has permission to access this method
-        GetPermissionVisitor getPermission = hasPermission(new PermissionTuple("useAuthenticatorAPI"), authTokenForMethod);
-        if ((getPermission == null) || !getPermission.getHasPermission())
+        GetPermissionsVisitor getPermissionsVisitor = getUserPermissions(authTokenForMethod);
+        if ((getPermissionsVisitor == null) || !getPermissionsVisitor.hasPermission(new PermissionTuple("use Authenticator API")))
             return null;
                 
         // TODO (if have time): Check that given Resource and Entitlement are valid
@@ -308,14 +301,14 @@ public class Authenticator implements StoreAuthenticationService, Visitable
     }
     
     @Override
-    public GetPermissionVisitor hasPermission(PermissionTuple permissionTuple, AuthToken authToken)
+    public GetPermissionsVisitor getUserPermissions(AuthToken authToken)
     {
         // Throw InvalidAuthTokenException if AuthToken is null or inactive
         if (authToken == null || authToken.isActive().equals(false))
         {
             try
             {
-                throw new AuthenticatorException("InvalidAuthTokenException", "check for \""+ permissionTuple.getPermissionId() +"\" permission", "invalid AuthToken");
+                throw new AuthenticatorException("InvalidAuthTokenException", "get user permissions", "invalid AuthToken");
             }
             
             catch (AuthenticatorException exception)
@@ -334,7 +327,7 @@ public class Authenticator implements StoreAuthenticationService, Visitable
         {
             try
             {
-                throw new AuthenticatorException("InvalidAuthTokenException", "check for \""+ permissionTuple.getPermissionId() +"\" permission", "user of AuthToken not found");
+                throw new AuthenticatorException("InvalidAuthTokenException", "get user permissions", "user of AuthToken not found");
             }
             
             catch (AuthenticatorException exception)
@@ -346,26 +339,10 @@ public class Authenticator implements StoreAuthenticationService, Visitable
         }
         
         // Check if User of AuthToken has permission
-        GetPermissionVisitor getPermission = new GetPermissionVisitor(permissionTuple);        
-        userOfAuthToken.acceptVisitor(getPermission);
+        GetPermissionsVisitor getPermissionsVisitor = new GetPermissionsVisitor(userOfAuthToken);        
+        userOfAuthToken.acceptVisitor(getPermissionsVisitor);
         
-        // Throw exception if User doesn't have the Permission
-        if ((getPermission == null) || !getPermission.getHasPermission())
-        {
-            try
-            {
-                throw new AuthenticatorException("AccessDeniedException", "check for \""+ permissionTuple.getPermissionId() +"\" permission", "user does not have permission");
-            }
-            
-            catch (AuthenticatorException exception)
-            {
-                System.out.println();
-                System.out.print(exception.getMessage());
-                return null;
-            }
-        }
-        
-        return getPermission;
+        return getPermissionsVisitor;
     }  
     
     @Override

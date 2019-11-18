@@ -4,9 +4,13 @@ import java.util.ArrayList;
 
 public class PermissionTuple
 {
+    /* Variables */
+    
     private String permissionId;
     private ArrayList<String> resourceIds;
     private ArrayList<String> roleIds;
+    
+    /* Constructors */
     
     public PermissionTuple(String permissionId)
     {
@@ -14,6 +18,14 @@ public class PermissionTuple
         resourceIds = new ArrayList<String>();
         roleIds = new ArrayList<String>();
     }
+    
+    public PermissionTuple()
+    {
+        resourceIds = new ArrayList<String>();
+        roleIds = new ArrayList<String>();
+    }
+    
+    /* Methods */
     
     public void addResourceId(String resourceId)
     {
@@ -30,7 +42,13 @@ public class PermissionTuple
     public String getPermissionId()
     {
         return permissionId;
-    }    
+    }
+    
+    public PermissionTuple setPermissionId(String id)
+    {
+        permissionId = id;
+        return this;
+    }
 
     public ArrayList<String> getResourceIds()
     {

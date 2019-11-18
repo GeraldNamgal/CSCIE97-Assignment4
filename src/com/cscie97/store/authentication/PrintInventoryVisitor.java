@@ -68,7 +68,7 @@ public class PrintInventoryVisitor implements Visitor
     {
         Integer level = levelPtr + 1;
         
-        System.out.println("ResourceRole: id = \"" + rRole.getId() + "\"; name = \"" + rRole.getName() + "\"; description = \"" + rRole.getDescription() + "\"");
+        System.out.println("ResourceRole: id = \"" + rRole.getId()); //+ "\"; name = \"" + rRole.getName() + "\"; description = \"" + rRole.getDescription() + "\"");
         for (int i = 0; i < level * tabSpace; i++)
             System.out.print(" ");
         System.out.println("|Resource: id = \"" + rRole.getResource().getId() + "\"");        

@@ -7,6 +7,11 @@
 
 package com.cscie97.store.model;
 
+import com.cscie97.store.authentication.AuthToken;
+import com.cscie97.store.authentication.GetPermissionsVisitor;
+import com.cscie97.store.authentication.PermissionTuple;
+import com.cscie97.store.authentication.StoreAuthenticationService;
+
 /* *
  * Appliance class that represents an appliance in a store. Extends Sensor class
  */
@@ -25,6 +30,7 @@ public class Appliance extends Sensor
     private Turnstile turnstile;
     private Speaker speaker;
     private Robot robot;
+    private StoreAuthenticationService authenticator;
         
     /* Constructor */
     
@@ -33,9 +39,11 @@ public class Appliance extends Sensor
      * @param type Type of appliance (e.g., speaker, robot, turnstile; enum of valid appliances shown above)
      * @param location The location of the appliance (e.g., aisle 2 in store 1)
      */
-    public Appliance(String id, String name, String type, String storeAisleLoc)
+    public Appliance(String id, String name, String type, String storeAisleLoc, StoreAuthenticationService authenticator)
     {
         super(id, name, type, storeAisleLoc);
+        
+        this.authenticator = authenticator;
         
         if (type.equals("turnstile"))
         {
@@ -171,18 +179,33 @@ public class Appliance extends Sensor
 
     /* Getters and Setters */
     
-    public Turnstile getTurnstile()
+    public Turnstile getTurnstile(AuthToken authTokenForMethod)
     {
-        return turnstile;
+        // TODO: Check that given authToken has "control turnstile" Permission first
+        GetPermissionsVisitor getPermissionVisitor = authenticator.getUserPermissions(authTokenForMethod);
+        if ((getPermissionVisitor != null) && getPermissionVisitor.hasPermission(new PermissionTuple("control turnstile")))        
+            return turnstile;
+       
+        return null;
     }    
 
-    public Speaker getSpeaker()
+    public Speaker getSpeaker(AuthToken authTokenForMethod)
     {
-        return speaker;
+        // TODO: Check that given authToken has "control speaker" Permission first
+        GetPermissionsVisitor getPermissionVisitor = authenticator.getUserPermissions(authTokenForMethod);
+        if ((getPermissionVisitor != null) && getPermissionVisitor.hasPermission(new PermissionTuple("control speaker")))     
+            return speaker;
+        
+        return null;
     }    
 
-    public Robot getRobot()
+    public Robot getRobot(AuthToken authTokenForMethod)
     {
-        return robot;
+        // TODO: Check that given authToken has "control robot" Permission first
+        GetPermissionsVisitor getPermissionVisitor = authenticator.getUserPermissions(authTokenForMethod);
+        if ((getPermissionVisitor != null) && getPermissionVisitor.hasPermission(new PermissionTuple("control robot"))) 
+            return robot;
+        
+        return null;
     }           
 }
