@@ -1,23 +1,33 @@
 package com.cscie97.store.authentication;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+
 public class AuthToken
 {
     /* Variables */
     
+    private Integer daysValid = 5;
     private String id;
     private Boolean active;
     private User userOfAuthToken;
+    private String expirationDate;
+    private String lastUsedDate;
     private StoreAuthenticationService authenticator;    
     
     /* Constructor */
-    
-    // TODO: Add a lastUsed parameter and/or attribute
+   
     public AuthToken(String id, User userOfAuthToken, StoreAuthenticationService authenticator)
     {
         this.id = id;
         this.active = true;
         this.userOfAuthToken = userOfAuthToken;
-        this.authenticator = authenticator;        
+        this.authenticator = authenticator;
+        
+        // Set expirationDate
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("MMMM dd, yyyy HH:mm:ss");
+        LocalDateTime currentDateTime = LocalDateTime.now().plusDays(daysValid);
+        expirationDate = dtf.format(currentDateTime);
     }
     
     /* Getters and Setters */
@@ -44,4 +54,24 @@ public class AuthToken
     {
         return userOfAuthToken;
     }
+
+    public String getExpirationDate()
+    {
+        return expirationDate;
+    }
+    
+    public void setExpirationDate(String expirationDate)
+    {
+        this.expirationDate = expirationDate;
+    }
+
+    public String getLastUsedDate()
+    {
+        return lastUsedDate;
+    }
+
+    public void setLastUsedDate(String lastUsedDate)
+    {
+        this.lastUsedDate = lastUsedDate;
+    }    
 }

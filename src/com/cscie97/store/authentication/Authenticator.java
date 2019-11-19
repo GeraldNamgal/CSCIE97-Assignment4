@@ -2,6 +2,12 @@ package com.cscie97.store.authentication;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map.Entry;
@@ -11,8 +17,7 @@ public class Authenticator implements StoreAuthenticationService, Visitable
     /* VARIABLES */
 
     private static final String HARDCODED_USER_USERNAME = "hardcodedUser";
-    private static final String HARDCODED_USER_PASSWORD = "password";
-    private final String MY_AUTHTOKEN_ID = "authenticatorAuthTokenId";
+    private static final String HARDCODED_USER_PASSWORD = "password";    
     private int suggestedId = 0;
     private HashSet<String> authTokenIdsUsed;
     private LinkedHashMap<String, User> users;
@@ -20,16 +25,20 @@ public class Authenticator implements StoreAuthenticationService, Visitable
     private LinkedHashMap<String, Entitlement> entitlements;
     private LinkedHashMap<String, Resource> resources;
     private LinkedHashMap<String, User> credentialUserIndexes;
+    private Integer daysTimeLimit = 5;
    
     /* CONSTRUCTOR */
     
     public Authenticator()
     {      
-        // Create list of Users, Entitlements, and Resources
+        // Create new Map of Users, Entitlements, and Resources
         users = new LinkedHashMap<String, User>();
         entitlements = new LinkedHashMap<String, Entitlement>();
         resources = new LinkedHashMap<String, Resource>();
         credentialUserIndexes = new LinkedHashMap<String, User>();
+        
+        // Create new HashSet to store and track used/processed AuthToken id's for managing AuthTokens
+        authTokenIdsUsed = new HashSet<String>();
         
         // Create a hardcoded User, add it to list of Users, and give it Credentials
         User hardcodedUser = new User("hardcodedUser", "Hardcoded User");
@@ -74,12 +83,8 @@ public class Authenticator implements StoreAuthenticationService, Visitable
         // Give authTokenPermission to Authenticator User (only it has this special permission)
         authenticatorUser.addEntitlement(authTokenPermission);
                 
-        // Login authenticator (so service can modify AuthTokens)
-        myAuthToken = new AuthToken(MY_AUTHTOKEN_ID, authenticatorUser, this);
-        authenticatorUser.addAuthToken(myAuthToken);
-        
-        // Create a new HashSet to store and track used/processed AuthToken id's for managing AuthTokens
-        authTokenIdsUsed = new HashSet<String>();
+        // Login authenticator (so it can modify AuthTokens)
+        myAuthToken = login("authenticator", "password");       
     }
     
     /* API METHODS */   
@@ -219,7 +224,7 @@ public class Authenticator implements StoreAuthenticationService, Visitable
     }
     
     @Override
-    public AuthToken obtainAuthToken(String credentialId, String credentialValue)
+    public AuthToken login(String credentialId, String credentialValue)
     {
         // Get the User of the Credential
         User userOfCredential = credentialUserIndexes.get(credentialId + hashCalculator(credentialValue));       
@@ -240,11 +245,62 @@ public class Authenticator implements StoreAuthenticationService, Visitable
             }           
         }
         
-        // If User has a valid AuthToken, retrieve it
+        // If User has a valid AuthToken and it's not expired, retrieve it
         AuthToken authToken = null;
         for (Entry<String, AuthToken> authTokenEntry : userOfCredential.getAuthTokens().entrySet())
-        {
-            if (authTokenEntry.getValue().isActive() == true)
+        {         
+            // TODO: Check that AuthToken isn't past expiration time
+            Boolean expirationPassed = false;
+            Date expirationDate = null;
+            
+            try
+            {
+                expirationDate = new SimpleDateFormat("MMMM dd, yyyy HH:mm:ss").parse(authTokenEntry.getValue().getExpirationDate());
+            }
+            
+            catch (ParseException e)
+            {
+                e.printStackTrace();
+            }
+            
+            Date todaysDate = Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant());
+            
+            if ((todaysDate != null) && todaysDate.after(expirationDate))
+            {
+                expirationPassed = true;
+                
+                // TODO: Invalidate authToken?
+                
+                // TODO: Throw exception?
+            }
+            
+            // TODO: Check if inactivity time elapsed (would need to create new one if did)
+            Boolean inactivityElapsed = false;
+            Date lastUsedDate = null;
+            
+            try
+            {
+                lastUsedDate = new SimpleDateFormat("MMMM dd, yyyy HH:mm:ss").parse(authTokenEntry.getValue().getLastUsedDate());
+            }
+            
+            catch (ParseException e)
+            {
+                e.printStackTrace();
+            }
+            
+            // referenced code from https://javarevisited.blogspot.com/2015/07/how-to-find-number-of-days-between-two-dates-in-java.html
+            long differenceInDays =  (todaysDate.getTime()-lastUsedDate.getTime())/86400000;
+            
+            if (Math.abs(differenceInDays) > daysTimeLimit)
+            {
+                inactivityElapsed = true;
+                
+                // TODO: Invalidate authToken?
+                
+                // TODO: Throw exception?
+            }
+            
+            if (authTokenEntry.getValue().isActive() == true && !expirationPassed && !inactivityElapsed)
             {
                 authToken = authTokenEntry.getValue();
             }
@@ -263,7 +319,12 @@ public class Authenticator implements StoreAuthenticationService, Visitable
             
             // Add newly created AuthToken to User's list of AuthTokens
             userOfCredential.addAuthToken(authToken);
-        }       
+        }
+        
+        // Update AuthToken's lastUsedDate
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("MMMM dd, yyyy HH:mm:ss");
+        LocalDateTime currentDateTime = LocalDateTime.now();
+        authToken.setLastUsedDate(dtf.format(currentDateTime));
         
         // Return AuthToken
         return authToken;
@@ -303,6 +364,11 @@ public class Authenticator implements StoreAuthenticationService, Visitable
     @Override
     public GetPermissionsVisitor getUserPermissions(AuthToken authToken)
     {
+        // TODO: Check that authToken's expiration date hasn't passed
+        
+        // TODO: Check that lastUsedDate isn't more than allowed limit
+        
+        
         // Throw InvalidAuthTokenException if AuthToken is null or inactive
         if (authToken == null || authToken.isActive().equals(false))
         {

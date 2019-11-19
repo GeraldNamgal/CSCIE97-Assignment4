@@ -41,10 +41,11 @@ public class CommandProcessor
         // Create Controller 
         controller = new Controller((Subject) modeler, ledgerCp, authenticator);
         
+        // Pointer to authenticator's CommandProcessor
         this.authenticatorCp = authenticatorCp;
         
         // Login CommandProcessor with hardcoded User credentials so can operate Modeler methods
-        hardcodedUserAuthToken = authenticator.obtainAuthToken(Authenticator.getHardcodedUserUsername(), Authenticator.getHardcodedUserPassword());
+        hardcodedUserAuthToken = authenticator.login(Authenticator.getHardcodedUserUsername(), Authenticator.getHardcodedUserPassword());
     }
     
     /* API Methods */

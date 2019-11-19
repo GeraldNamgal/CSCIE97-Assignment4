@@ -14,7 +14,7 @@ public class PrintInventoryVisitor implements Visitor
     /* API METHODS */
 
     @Override
-    public void visitAuthenticator(Authenticator authenticator)
+    public void visitAuthenticator(StoreAuthenticationService authenticator)
     {
         Integer level = baseLevel.intValue();        
         

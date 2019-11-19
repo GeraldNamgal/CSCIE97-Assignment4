@@ -1,4 +1,4 @@
-# Define permissions
+# Define Permissions
 define permission "use Modeler API" "User Modeler API" "Use any of the Model Service API methods"
 define permission "control robot" "Control Robot" "Full Control of Robots"
 define permission "control speaker" "Control Speaker" "Full Control of Speaker"
@@ -6,13 +6,13 @@ define permission "control turnstile" "Control Turnstile" "Full Control of Turns
 define permission "enter store" "Enter Store" "Can enter store(s)"
 define permission "checkout" "Checkout" "Can check out items from store(s)"
 
-# Define roles
+# Define Roles
 define role "adult consumer" "Adult Consumer Role" "Has all permissions of an adult consumer"
 define role "child consumer" "Child Consumer Role" "Has all permissions of a child consumer"
 define role guest "Guest Role" "Has all permissions of a guest"
 define role "Model Service API admin" "Store Model Service Admin Role" "Has all permissions of a Model Service admin"
 
-# Add permissions to roles
+# Add Permissions to Roles
 add entitlement to role "Model Service API admin" "use Modeler API"
 add entitlement to role "Model Service API admin" "control robot"
 add entitlement to role "Model Service API admin" "control speaker"
@@ -24,17 +24,26 @@ add entitlement to role "child consumer" "enter store"
 add entitlement to role "child consumer" checkout
 add entitlement to role guest "enter store"
 
-# Define Authenticator users
+# Define Users
 define user sam "Sam Davis"
 define user jimmy "Jimmy Jones"
 define user debra "Debra Smart"
 define user customer1 "Customer 1"
+define user customer2 "Customer 2"
+define user customer3 "Customer 3"
+define user customer5 "Customer 5"
 
-# Add credentials to Authenticator users
+# Add Credentials to Users
 add user credential sam voiceprint --voice:sam--
 add user credential jimmy faceprint --face:jimmy--
 add user credential debra password secret
 add user credential customer1 voiceprint --voice:customer1--
+add user credential customer1 faceprint --face:customer1--
+add user credential customer2 faceprint --face:customer2--
+add user credential customer3 faceprint --face:customer3--
+add user credential customer3 voiceprint --voice:customer3--
+add user credential customer5 faceprint --face:customer5--
+add user credential customer5 voiceprint --voice:customer5--
 
 # Define resource store 1
 define resource "store1" "Represents store1 Store of Model Service"
@@ -48,6 +57,8 @@ add entitlement to user debra "Model Service API admin"
 add entitlement to user sam "store1 adult consumer"
 add entitlement to user jimmy "store1 child consumer"
 add entitlement to user customer1 "store1 adult consumer"
+add entitlement to user customer2 guest
+add entitlement to user customer3 "store1 child consumer"
 
 # Print inventory
 print inventory
@@ -99,7 +110,7 @@ define device robot2 name "robot 2" type robot location store1:null
 define device robot3 name "robot 3" type robot location store1:null
 define customer customer1 first_name John last_name Jones age_group adult type registered email_address john.j@jmail.com account john
 define customer customer2 first_name Stephanie last_name Jones age_group child type guest email_address steph.j@jmail.com account stephanie
-define customer customer3 first_name Mark last_name Jones age_group adult type registered email_address mark.j@jmail.com account mark
+define customer customer3 first_name Mark last_name Jones age_group child type registered email_address mark.j@jmail.com account mark
 define customer customer4 first_name Mary last_name Stein age_group adult type registered email_address mary.s@jmail.com account mary
 define customer customer5 first_name Joseph last_name McAllister age_group adult type registered email_address joseph.m@jmail.com account joseph
 define customer customer6 first_name Stan last_name Jenkins age_group adult type registered email_address stan.j@jmail.com account stan
@@ -157,13 +168,15 @@ create event camera1 event "emergency fire aisle1"
 # Show store 1
 show store store1
 
-# Enter Store event for customer1 (registered customer)
+# Enter Store event for customer1 (registered adult customer)
 create event turnstile2 event "enter_store customer1"
+
+# TODO -- Exception: Have customer ... attempt to enter store 1 (only has permission to enter store 2, not store 1)
 
 # Enter Store event for customer2 (a guest)
 create event turnstile2 event "enter_store customer2"
 
-# Enter Store event for customer3 (registered customer)
+# Enter Store event for customer3 (registered child customer)
 create event turnstile3 event "enter_store customer3"
 
 # Customer Seen event for customer 1
@@ -211,8 +224,11 @@ show customer customer2
 # Fetch Product event
 create event microphone3 event "fetch_product product2 6 aisle1:shelf1 customer1 --voice:customer1--"
 
-# Exception: Simulate customer 1 commanding a robot to fetch a product with the wrong voiceprint
-create event microphone3 event "fetch_product product2 1 aisle1:shelf1 customer1 -+voice:customer1@-"
+# Exception: Customer 1 commands robot to fetch a product again with erroneous credential value
+create event microphone3 event "fetch_product product2 6 aisle1:shelf1 customer1 -+voice:customer1@-"
+
+# Exception: Have Customer 3 attempt to command a robot to fetch a product (doesn't have permission)
+create event microphone3 event "fetch_product product2 1 aisle1:shelf1 customer3 --voice:customer3--"
 
 # Show store (aisle1:shelf1 should have 34 of product2)
 show store store1
@@ -226,13 +242,13 @@ create event microphone3 event "account_balance customer1"
 # Show product2 (unit price should be 1/6 of total value of customer 1's basket items)
 show product product2
 
-# Checkout event for customer 1 (a registered customer with basket items)
+# Checkout event for customer 1 (a registered adult customer with basket items)
 create event turnstile1 event "checkout customer1"
 
 # Checkout event for customer 2 (a guest)
 create event turnstile1 event "checkout customer2"
 
-# Checkout event for customer 3 (a registered customer with no basket items)
+# Checkout event for customer 3 (a registered child customer with no basket items)
 create event turnstile2 event "checkout customer3"
 
 # Show customer 1 (should be out of store1 ["null" location])
@@ -247,11 +263,11 @@ show store store1
 # Show block 2 from ledger (customer 1's transaction should be reflected)
 get-block 2
 
-# Exception: Attempt to have an unregistered person enter the store
-create event turnstile2 event "enter_store unknownPerson"
+# TODO (???) -- Exception: Attempt to have an unregistered/unknown person enter the store
+# create event turnstile2 event "enter_store unknownPerson"
 
 # Exception: Attempt to have a registered customer with no Blockchain funds (customer 4) enter store
-create event turnstile3 event "enter_store customer4"
+# create event turnstile3 event "enter_store customer4"
 
-# Checkout event for an unregistered person (any person who doesn't have unpaid items should be able to exit store [fire hazard, etc.])
-create event turnstile1 event "checkout unknownPerson"
+# TODO: Make sense? -- Checkout event for an unregistered person (any person who doesn't have unpaid items should be able to exit store [fire hazard, etc.])
+# create event turnstile1 event "checkout unknownPerson"

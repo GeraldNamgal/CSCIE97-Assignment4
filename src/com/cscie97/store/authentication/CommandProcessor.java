@@ -26,7 +26,7 @@ public class CommandProcessor
         modelerCp = new com.cscie97.store.model.CommandProcessor(authenticator, this);
         
         // Login CommandProcessor with hardcoded User credentials so can operate Authenticator methods
-        hardcodedUserAuthToken = authenticator.obtainAuthToken(Authenticator.getHardcodedUserUsername(), Authenticator.getHardcodedUserPassword());
+        hardcodedUserAuthToken = authenticator.login(Authenticator.getHardcodedUserUsername(), Authenticator.getHardcodedUserPassword());
     }
     
     /* API Methods */

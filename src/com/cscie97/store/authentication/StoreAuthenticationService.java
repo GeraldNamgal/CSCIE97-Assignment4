@@ -12,7 +12,7 @@ public interface StoreAuthenticationService
     ResourceRole defineResourceRole(String id, String name, String description, String entitlementId, String resourceId, AuthTokenTuple authTokenTupleForMethod);    
     User defineUser(String id, String name, AuthTokenTuple authTokenTupleForMethod);
     void addUserCredential(String userId, String type, String value, AuthTokenTuple authTokenTupleForMethod);      
-    AuthToken obtainAuthToken(String credentialId, String credentialValue);
+    AuthToken login(String credentialId, String credentialValue);
     void logout(AuthToken authToken);
     GetPermissionsVisitor getUserPermissions(AuthToken authToken);
     void printInventory();

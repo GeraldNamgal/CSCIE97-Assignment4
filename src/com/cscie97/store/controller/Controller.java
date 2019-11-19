@@ -16,7 +16,7 @@ import java.util.Map.Entry;
 
 import com.cscie97.store.authentication.AuthToken;
 import com.cscie97.store.authentication.AuthTokenTuple;
-import com.cscie97.store.authentication.Authenticator;
+import com.cscie97.store.authentication.GetPermissionsVisitor;
 import com.cscie97.store.authentication.StoreAuthenticationService;
 import com.cscie97.store.model.Aisle;
 import com.cscie97.store.model.Appliance;
@@ -1051,13 +1051,7 @@ public class Controller implements Observer
             // If store has a robot, tell it to fetch the product
             if (robotKeys.size() > 0)
             {
-                Appliance appliance = (Appliance) store.getDevices().get(robotKeys.get(0));
-                
-                // Get customer's AuthToken
-                AuthToken customerAuthToken = authenticator.obtainAuthToken(customerId, voiceprintId);
-                
-                if (customerAuthToken == null)                
-                    return;                
+                Appliance appliance = (Appliance) store.getDevices().get(robotKeys.get(0));                              
                 
                 // Get customer's location
                 String customerAisleLoc = modeler.getCustomers(new AuthTokenTuple(myAuthToken)).get(customerId).getLocation().split(":")[1];       
@@ -1066,10 +1060,18 @@ public class Controller implements Observer
                 System.out.println(appliance.getName() + ": Fetching " + number + " of product " + productId + " from " + aisleShelfLoc
                         + " for customer " + customerId + " in " + customerAisleLoc + " aisle");
                 
-                // If user's permission checks out; include source store in AuthTokenTuple passed in
+                // Get customer's AuthToken
+                AuthToken customerAuthToken = authenticator.login(customerId, voiceprintId);
+                
+                // If AuthToken not cleared
+                if (customerAuthToken == null)                
+                    return; 
+                
+                // If user has permission; include source store in AuthTokenTuple passed in
                 if (appliance.getRobot(new AuthTokenTuple(customerAuthToken, store.getId())) != null)
                     appliance.getRobot(new AuthTokenTuple(customerAuthToken, store.getId())).fetchProduct(productId, number, aisleShelfLoc, customerId, customerAisleLoc);
                 
+                // If permission not found
                 else
                     return;
            
@@ -1424,18 +1426,45 @@ public class Controller implements Observer
                 basket = modeler.getCustomerBasket(customerId, new AuthTokenTuple(myAuthToken));
                 basketItems = basket.getBasketItems();
                 
-                // Calculate the cost of their basket items
-                System.out.println("Controller Service: Computing the value of items in customer " + customerId + "'s basket");              
-                               
-                for (Entry<String, Integer> integerEntry : basketItems.entrySet())
+                // If basket is not empty
+                if ((basket != null) && !basketItems.isEmpty())
                 {
-                    itemsTotValue += (integerEntry.getValue() * (modeler.getProducts(new AuthTokenTuple(myAuthToken)).get(integerEntry.getKey()).getUnitPrice()));
-                }       
+                    // TODO: Get customer's AuthToken to check that customer has permission at the source store to checkout
+                    AuthToken customerAuthToken = authenticator.login(customerId, "--face:" + customerId + "--");
+                    
+                    // Create AuthTokenTuple with customer's AuthToken, source store id as a resource            
+                    AuthTokenTuple customerAuthTokenTuple = new AuthTokenTuple(customerAuthToken, store.getId());
+                    
+                    // Check if customer has the "checkout" permission for the source store; return if permission doesn't checkout
+                    GetPermissionsVisitor getPermissionsVisitor = authenticator.getUserPermissions(customerAuthTokenTuple.getAuthToken());
+                    if ((getPermissionsVisitor == null) || !getPermissionsVisitor.hasPermission(customerAuthTokenTuple.getPermissionTuple().setPermissionId("checkout")))
+                    {
+                        // Have turnstile tell customer they can't enter (if customer is registered or a guest)
+                        if (customer != null)
+                        {
+                            expression = "Customer " + customer.getFirstName() + ", you do no have permission to checkout at " + store.getName()
+                                    + ". Please return items to store. Thank you!";
+                            System.out.println();
+                            System.out.println(appliance.getName() + ": \"" + expression + "\"");
+                            appliance.getTurnstile(new AuthTokenTuple(myAuthToken)).speak(expression);
+                        }
+                        
+                        return;
+                    }
+                    
+                    // Calculate the cost of their basket items
+                    System.out.println("Controller Service: Computing the value of items in customer " + customerId + "'s basket");              
+                                   
+                    for (Entry<String, Integer> integerEntry : basketItems.entrySet())
+                    {
+                        itemsTotValue += (integerEntry.getValue() * (modeler.getProducts(new AuthTokenTuple(myAuthToken)).get(integerEntry.getKey()).getUnitPrice()));
+                    }
+                }
             }          
             
             // If customer has a non-empty basket
             if ((basket != null) && !basket.getBasketItems().isEmpty())
-            {
+            {         
                 // Start Transaction
                 System.out.println("Controller Service: Starting transaction for " + customerId + "'s checkout");
                 String txnId = ledgerCp.processTransaction("0", itemsTotValue, 10, "checkout for " + customerId, customer.getAccount(), store.getId());
@@ -1616,6 +1645,28 @@ public class Controller implements Observer
             System.out.println("Controller Service: Identifying customer " + customerId);
             Customer customer = modeler.getCustomers(new AuthTokenTuple(myAuthToken)).get(customerId);
             
+            // Get customer's AuthToken
+            AuthToken customerAuthToken = authenticator.login(customerId, "--face:" + customerId + "--");
+            
+            // Create AuthTokenTuple with customer's AuthToken, source store id as a resource            
+            AuthTokenTuple customerAuthTokenTuple = new AuthTokenTuple(customerAuthToken, store.getId());
+            
+            // Check if customer has the "enter store" permission for the source store; return if permission doesn't checkout
+            GetPermissionsVisitor getPermissionsVisitor = authenticator.getUserPermissions(customerAuthTokenTuple.getAuthToken());
+            if ((getPermissionsVisitor == null) || !getPermissionsVisitor.hasPermission(customerAuthTokenTuple.getPermissionTuple().setPermissionId("enter store")))
+            {
+                // Have turnstile tell customer they can't enter (if customer is registered or a guest)
+                if (customer != null)
+                {
+                    expression = "Hello, customer " + customer.getFirstName() + ", you do no have permission to enter " + store.getName();
+                    System.out.println();
+                    System.out.println(appliance.getName() + ": \"" + expression + "\"");
+                    appliance.getTurnstile(new AuthTokenTuple(myAuthToken)).speak(expression);
+                }
+                
+                return;
+            }
+            
             // If customer is not registered or not a guest
             if (customer == null)
             {
@@ -1716,6 +1767,6 @@ public class Controller implements Observer
     public void loginToAuthenticator()
     {
         // Login Controller
-        myAuthToken = authenticator.obtainAuthToken("controller", "password");
+        myAuthToken = authenticator.login("controller", "password");
     }
 }

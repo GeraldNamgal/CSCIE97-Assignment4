@@ -24,7 +24,7 @@ public class GetPermissionsVisitor implements Visitor
     /* API METHODS */
 
     @Override
-    public void visitAuthenticator(Authenticator authenticator)
+    public void visitAuthenticator(StoreAuthenticationService authenticator)
     {
         // No action needed
     }
