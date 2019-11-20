@@ -16,7 +16,7 @@ public class Authenticator implements StoreAuthenticationService, Visitable
 {
     /* VARIABLES */
 
-    private static final String HARDCODED_USER_USERNAME = "hardcodedUser";
+    private static final String HARDCODED_USER_USERNAME = "hardcodedUser-pwd";
     private static final String HARDCODED_USER_PASSWORD = "password";    
     private int suggestedId = 0;
     private HashSet<String> authTokenIdsUsed;
@@ -46,10 +46,10 @@ public class Authenticator implements StoreAuthenticationService, Visitable
         Credential credential = new Credential(HARDCODED_USER_USERNAME, "password", hashCalculator(HARDCODED_USER_PASSWORD));
         hardcodedUser.addCredential(credential);
         credentialUserIndexes.put(credential.getId() + credential.getValue(), hardcodedUser);
-        credential = new Credential(hardcodedUser.getId(), "voiceprint", hashCalculator("--voice:" + hardcodedUser.getId() + "--"));
+        credential = new Credential(hardcodedUser.getId() + "-vp", "voiceprint", hashCalculator("--voice:" + hardcodedUser.getId() + "--"));
         hardcodedUser.addCredential(credential);
         credentialUserIndexes.put(credential.getId() + credential.getValue(), hardcodedUser);
-        credential = new Credential(hardcodedUser.getId(), "faceprint", hashCalculator("--face:" + hardcodedUser.getId() + "--"));
+        credential = new Credential(hardcodedUser.getId() + "-fp", "faceprint", hashCalculator("--face:" + hardcodedUser.getId() + "--"));
         hardcodedUser.addCredential(credential);
         credentialUserIndexes.put(credential.getId() + credential.getValue(), hardcodedUser);
         
@@ -66,13 +66,13 @@ public class Authenticator implements StoreAuthenticationService, Visitable
         // Create a User for the Authenticator itself, add it to list of Users, and give it Credentials
         User authenticatorUser = new User("authenticator", "The Authenticator");
         users.put(authenticatorUser.getId(), authenticatorUser);
-        credential = new Credential(authenticatorUser.getId(), "password", hashCalculator("password"));
+        credential = new Credential(authenticatorUser.getId() + "-pwd", "password", hashCalculator("password"));
         authenticatorUser.addCredential(credential);
         credentialUserIndexes.put(credential.getId() + credential.getValue(), authenticatorUser);
-        credential = new Credential(authenticatorUser.getId(), "voiceprint", hashCalculator("--voice:" + authenticatorUser.getId() + "--"));
+        credential = new Credential(authenticatorUser.getId() + "-vp", "voiceprint", hashCalculator("--voice:" + authenticatorUser.getId() + "--"));
         authenticatorUser.addCredential(credential);
         credentialUserIndexes.put(credential.getId() + credential.getValue(), authenticatorUser);
-        credential = new Credential(authenticatorUser.getId(), "faceprint", hashCalculator("--face:" + authenticatorUser.getId() + "--"));
+        credential = new Credential(authenticatorUser.getId() + "-fp", "faceprint", hashCalculator("--face:" + authenticatorUser.getId() + "--"));
         authenticatorUser.addCredential(credential);
         credentialUserIndexes.put(credential.getId() + credential.getValue(), authenticatorUser);
         
@@ -84,7 +84,7 @@ public class Authenticator implements StoreAuthenticationService, Visitable
         authenticatorUser.addEntitlement(authTokenPermission);
                 
         // Login authenticator (so it can modify AuthTokens)
-        myAuthToken = login("authenticator", "password");       
+        myAuthToken = login("authenticator-pwd", "password");       
     }
     
     /* API METHODS */   
@@ -165,7 +165,13 @@ public class Authenticator implements StoreAuthenticationService, Visitable
         // TODO (if have time): Check that given User is valid
         
         // Create Credential
-        Credential credential = new Credential(userId, type, hashCalculator(value));        
+        Credential credential = null;
+        if (type.equals("password"))
+            credential = new Credential(userId + "-pwd", type, hashCalculator(value));
+        if (type.equals("voiceprint"))
+            credential = new Credential(userId + "-vp", type, hashCalculator(value));
+        if (type.equals("faceprint"))
+            credential = new Credential(userId + "-fp", type, hashCalculator(value));        
                 
         // Add Credential to User's Credentials and to credentialUserIndexes list
         if (credential != null)

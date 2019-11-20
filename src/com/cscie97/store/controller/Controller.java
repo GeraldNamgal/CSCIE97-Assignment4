@@ -1061,7 +1061,7 @@ public class Controller implements Observer
                         + " for customer " + customerId + " in " + customerAisleLoc + " aisle");
                 
                 // Get customer's AuthToken
-                AuthToken customerAuthToken = authenticator.login(customerId, voiceprintId);
+                AuthToken customerAuthToken = authenticator.login(customerId + "-vp", voiceprintId);
                 
                 // If AuthToken not cleared
                 if (customerAuthToken == null)                
@@ -1430,7 +1430,7 @@ public class Controller implements Observer
                 if ((basket != null) && !basketItems.isEmpty())
                 {
                     // Get customer's AuthToken to check that customer has permission at the source store to checkout
-                    AuthToken customerAuthToken = authenticator.login(customerId, "--face:" + customerId + "--");
+                    AuthToken customerAuthToken = authenticator.login(customerId + "-fp", "--face:" + customerId + "--");
                     
                     // Create AuthTokenTuple with customer's AuthToken, source store id as a resource            
                     AuthTokenTuple customerAuthTokenTuple = new AuthTokenTuple(customerAuthToken, store.getId());
@@ -1646,7 +1646,7 @@ public class Controller implements Observer
             Customer customer = modeler.getCustomers(new AuthTokenTuple(myAuthToken)).get(customerId);
             
             // Get customer's AuthToken
-            AuthToken customerAuthToken = authenticator.login(customerId, "--face:" + customerId + "--");
+            AuthToken customerAuthToken = authenticator.login(customerId + "-fp", "--face:" + customerId + "--");
             
             // Create AuthTokenTuple with customer's AuthToken, source store id as a resource            
             AuthTokenTuple customerAuthTokenTuple = new AuthTokenTuple(customerAuthToken, store.getId());
@@ -1767,6 +1767,6 @@ public class Controller implements Observer
     public void loginToAuthenticator()
     {
         // Login Controller
-        myAuthToken = authenticator.login("controller", "password");
+        myAuthToken = authenticator.login("controller-pwd", "password");
     }
 }
