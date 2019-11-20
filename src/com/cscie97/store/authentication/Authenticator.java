@@ -25,7 +25,7 @@ public class Authenticator implements StoreAuthenticationService, Visitable
     private LinkedHashMap<String, Entitlement> entitlements;
     private LinkedHashMap<String, Resource> resources;
     private LinkedHashMap<String, User> credentialUserIndexes;
-    private Integer daysTimeLimit = 5;
+    private Integer daysTimeLimit = 1;
    
     /* CONSTRUCTOR */
     
@@ -221,7 +221,7 @@ public class Authenticator implements StoreAuthenticationService, Visitable
         entitlements.put(resourceRole.getId(), resourceRole);
         
         return resourceRole;
-    }
+    }   
     
     @Override
     public AuthToken login(String credentialId, String credentialValue)
@@ -248,61 +248,20 @@ public class Authenticator implements StoreAuthenticationService, Visitable
         // If User has a valid AuthToken and it's not expired, retrieve it
         AuthToken authToken = null;
         for (Entry<String, AuthToken> authTokenEntry : userOfCredential.getAuthTokens().entrySet())
-        {         
-            // TODO: Check that AuthToken isn't past expiration time
-            Boolean expirationPassed = false;
-            Date expirationDate = null;
+        {     
+            // Check authToken's inactivity and expiration
+            Boolean expirationPassed = checkIfExpired(authTokenEntry.getValue());
+            Boolean inactivityElapsed = checkIfInactivityPassed(authTokenEntry.getValue());
             
-            try
-            {
-                expirationDate = new SimpleDateFormat("MMMM dd, yyyy HH:mm:ss").parse(authTokenEntry.getValue().getExpirationDate());
-            }
+            // If authToken is past expiration time or its inactivity time limit elapsed, invalidate it 
+            if (expirationPassed || inactivityElapsed)
+                authTokenEntry.getValue().setActive(false, new AuthTokenTuple(myAuthToken));
             
-            catch (ParseException e)
-            {
-                e.printStackTrace();
-            }
-            
-            Date todaysDate = Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant());
-            
-            if ((todaysDate != null) && todaysDate.after(expirationDate))
-            {
-                expirationPassed = true;
-                
-                // TODO: Invalidate authToken?
-                
-                // TODO: Throw exception?
-            }
-            
-            // TODO: Check if inactivity time elapsed (would need to create new one if did)
-            Boolean inactivityElapsed = false;
-            Date lastUsedDate = null;
-            
-            try
-            {
-                lastUsedDate = new SimpleDateFormat("MMMM dd, yyyy HH:mm:ss").parse(authTokenEntry.getValue().getLastUsedDate());
-            }
-            
-            catch (ParseException e)
-            {
-                e.printStackTrace();
-            }
-            
-            // referenced code from https://javarevisited.blogspot.com/2015/07/how-to-find-number-of-days-between-two-dates-in-java.html
-            long differenceInDays =  (todaysDate.getTime()-lastUsedDate.getTime())/86400000;
-            
-            if (Math.abs(differenceInDays) > daysTimeLimit)
-            {
-                inactivityElapsed = true;
-                
-                // TODO: Invalidate authToken?
-                
-                // TODO: Throw exception?
-            }
-            
-            if (authTokenEntry.getValue().isActive() == true && !expirationPassed && !inactivityElapsed)
+            // Otherwise, if authToken is valid, retrieve it
+            else if (authTokenEntry.getValue().isActive() == true)
             {
                 authToken = authTokenEntry.getValue();
+                break;
             }
         }
         
@@ -333,8 +292,8 @@ public class Authenticator implements StoreAuthenticationService, Visitable
     @Override
     public void logout(AuthToken authToken)
     {       
-        // Throw InvalidAuthTokenException if AuthToken is null or inactive
-        if ((authToken == null) || (authToken.isActive() == false))
+        // Throw InvalidAuthTokenException if AuthToken is null or inactive, or user isn't found
+        if ((authToken == null) || (authToken.isActive() == false) || authToken.getUserOfAuthToken() == null)
         {
             try
             {              
@@ -349,8 +308,6 @@ public class Authenticator implements StoreAuthenticationService, Visitable
             }           
         }
         
-        // TODO: Necessary? -- Also check if authToken.getUserOfAuthToken() == null ^
-        
         // Invalidate AuthToken
         authToken.setActive(false, new AuthTokenTuple(myAuthToken));
     }
@@ -364,10 +321,25 @@ public class Authenticator implements StoreAuthenticationService, Visitable
     @Override
     public GetPermissionsVisitor getUserPermissions(AuthToken authToken)
     {
-        // TODO: Check that authToken's expiration date hasn't passed
-        
-        // TODO: Check that lastUsedDate isn't more than allowed limit
-        
+        // If authToken's expiration date has passed or its lastUsedDate is more than allowed limit, throw exception
+        if ((authToken != null) && (checkIfExpired(authToken) || checkIfInactivityPassed(authToken)))
+        {
+            // Inactivate authToken
+            authToken.setActive(false, new AuthTokenTuple(myAuthToken));
+            
+            try
+            {
+                throw new AuthenticatorException("InvalidAuthTokenException", "get user permissions",
+                        "AuthToken has expired or was too inactive; User \"" + authToken.getUserOfAuthToken() + "\" must login / renew AuthToken");
+            }
+            
+            catch (AuthenticatorException exception)
+            {
+                System.out.println();
+                System.out.print(exception.getMessage());      
+                return null;
+            }
+        }
         
         // Throw InvalidAuthTokenException if AuthToken is null or inactive
         if (authToken == null || authToken.isActive().equals(false))
@@ -388,7 +360,6 @@ public class Authenticator implements StoreAuthenticationService, Visitable
         // Get User associated with authToken
         User userOfAuthToken = authToken.getUserOfAuthToken();
         
-        // TODO: Necessary? -- Throw PermissionException if user of AuthToken wasn't found
         if (userOfAuthToken == null)
         {
             try
@@ -403,6 +374,11 @@ public class Authenticator implements StoreAuthenticationService, Visitable
                 return null;
             }           
         }
+        
+        // Update AuthToken's lastUsedDate
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("MMMM dd, yyyy HH:mm:ss");
+        LocalDateTime currentDateTime = LocalDateTime.now();
+        authToken.setLastUsedDate(dtf.format(currentDateTime));
         
         // Check if User of AuthToken has permission
         GetPermissionsVisitor getPermissionsVisitor = new GetPermissionsVisitor(userOfAuthToken);        
@@ -434,6 +410,57 @@ public class Authenticator implements StoreAuthenticationService, Visitable
     public static String getHardcodedUserPassword()
     {
         return HARDCODED_USER_PASSWORD;
+    }
+    
+    public Boolean checkIfExpired(AuthToken authToken)
+    {
+        Boolean expirationPassed = false;        
+        Date expirationDate = null;
+        Date todaysDate = Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant());
+        
+        try
+        {
+            expirationDate = new SimpleDateFormat("MMMM dd, yyyy HH:mm:ss").parse(authToken.getExpirationDate());
+        }
+        
+        catch (ParseException e)
+        {
+            e.printStackTrace();
+        } 
+        
+        if ((todaysDate != null) && todaysDate.after(expirationDate))        
+            expirationPassed = true;
+        
+        return expirationPassed;
+    }
+    
+    public Boolean checkIfInactivityPassed(AuthToken authToken)
+    {
+        Boolean inactivityElapsed = false;
+        Date lastUsedDate = null;
+        Date todaysDate = Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant());
+        
+        try
+        {
+            lastUsedDate = new SimpleDateFormat("MMMM dd, yyyy HH:mm:ss").parse(authToken.getLastUsedDate());
+        }
+        
+        catch (ParseException e)
+        {
+            e.printStackTrace();
+        }
+        
+        // referenced code from https://javarevisited.blogspot.com/2015/07/how-to-find-number-of-days-between-two-dates-in-java.html
+        if (todaysDate != null)
+        {
+            long differenceInDays =  (todaysDate.getTime()-lastUsedDate.getTime())/86400000;
+            
+            if (Math.abs(differenceInDays) > daysTimeLimit)            
+                inactivityElapsed = true;         
+            
+        }
+        
+        return inactivityElapsed;
     }
    
     // Method: Creates a hash from String input (referenced https://www.baeldung.com/sha-256-hashing-java)

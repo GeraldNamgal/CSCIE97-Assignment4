@@ -16,8 +16,6 @@ public class ResourceRole extends Role
         entitlements.put(entitlement.getId(), entitlement);
     }
     
-    // TODO: Make a constructor that doesn't take an Entitlement
-    
     /* Getters and Setters */
     
     public Resource getResource()

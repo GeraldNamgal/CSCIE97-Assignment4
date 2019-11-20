@@ -180,7 +180,7 @@ public class Appliance extends Sensor
     
     public Turnstile getTurnstile(AuthTokenTuple authTokenTupleForMethod)
     {
-        // TODO: Check that given authToken has "control turnstile" Permission first
+        // Check that given authToken has "control turnstile" Permission first
         GetPermissionsVisitor getPermissionVisitor = authenticator.getUserPermissions(authTokenTupleForMethod.getAuthToken());
         if ((getPermissionVisitor != null) && getPermissionVisitor.hasPermission(authTokenTupleForMethod.getPermissionTuple().setPermissionId("control turnstile")))        
             return turnstile;
@@ -190,7 +190,7 @@ public class Appliance extends Sensor
 
     public Speaker getSpeaker(AuthTokenTuple authTokenTupleForMethod)
     {
-        // TODO: Check that given authToken has "control speaker" Permission first
+        // Check that given authToken has "control speaker" Permission first
         GetPermissionsVisitor getPermissionVisitor = authenticator.getUserPermissions(authTokenTupleForMethod.getAuthToken());
         if ((getPermissionVisitor != null) && getPermissionVisitor.hasPermission(authTokenTupleForMethod.getPermissionTuple().setPermissionId("control speaker")))     
             return speaker;
@@ -200,7 +200,7 @@ public class Appliance extends Sensor
 
     public Robot getRobot(AuthTokenTuple authTokenTupleForMethod)
     {
-        // TODO: Check that given authToken has "control robot" Permission first
+        // Check that given authToken has "control robot" Permission first
         GetPermissionsVisitor getPermissionVisitor = authenticator.getUserPermissions(authTokenTupleForMethod.getAuthToken());
         if ((getPermissionVisitor != null) && getPermissionVisitor.hasPermission(authTokenTupleForMethod.getPermissionTuple().setPermissionId("control robot"))) 
             return robot;

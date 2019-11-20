@@ -1429,7 +1429,7 @@ public class Controller implements Observer
                 // If basket is not empty
                 if ((basket != null) && !basketItems.isEmpty())
                 {
-                    // TODO: Get customer's AuthToken to check that customer has permission at the source store to checkout
+                    // Get customer's AuthToken to check that customer has permission at the source store to checkout
                     AuthToken customerAuthToken = authenticator.login(customerId, "--face:" + customerId + "--");
                     
                     // Create AuthTokenTuple with customer's AuthToken, source store id as a resource            

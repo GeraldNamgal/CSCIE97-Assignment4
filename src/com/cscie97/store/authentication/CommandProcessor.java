@@ -401,45 +401,6 @@ public class CommandProcessor
         {            
             modelerCp.processCommand(input);
         }
-        
-        /*// TODO: Still need? -- Testing
-        authenticator.definePermission("permission 1", "name", "description", hardcodedUserAuthToken);
-        authenticator.definePermission("permission 2", "name", "description", hardcodedUserAuthToken);
-        authenticator.definePermission("permission 3", "name", "description", hardcodedUserAuthToken);
-        authenticator.definePermission("permission 4", "name", "description", hardcodedUserAuthToken);
-        authenticator.definePermission("permission 5", "name", "description", hardcodedUserAuthToken);
-        
-        authenticator.defineRole("role 1", "name", "description", hardcodedUserAuthToken);
-        authenticator.defineRole("role 2", "name", "description", hardcodedUserAuthToken);
-        authenticator.defineRole("role 3", "name", "description", hardcodedUserAuthToken);
-        authenticator.defineRole("role 4", "name", "description", hardcodedUserAuthToken);
-        
-        authenticator.defineResource("store 1", "description", hardcodedUserAuthToken);
-        authenticator.defineResource("store 2", "description", hardcodedUserAuthToken);
-        authenticator.defineResource("store 3", "description", hardcodedUserAuthToken);
-        
-        authenticator.defineResourceRole("resource role 1", "name", "description", "role 3", "store 1", hardcodedUserAuthToken);
-        authenticator.defineResourceRole("resource role 2", "name", "description", "role 1", "store 1", hardcodedUserAuthToken);
-        authenticator.defineResourceRole("resource role 3", "name", "description", "role 4", "store 2", hardcodedUserAuthToken);
-        authenticator.defineResourceRole("resource role 4", "name", "description", "role 2", "store 2", hardcodedUserAuthToken);
-        authenticator.defineResourceRole("resource role 5", "name", "description", "permission 2", "store 3", hardcodedUserAuthToken);
-        
-        authenticator.addEntitlementToRole("role 1", "permission 1", hardcodedUserAuthToken);
-        authenticator.addEntitlementToRole("role 1", "permission 5", hardcodedUserAuthToken);
-        authenticator.addEntitlementToRole("authenticatorAPIUserRole", "resource role 2", hardcodedUserAuthToken);
-        authenticator.addEntitlementToRole("role 2", "permission 2", hardcodedUserAuthToken);
-        authenticator.addEntitlementToRole("role 2", "permission 1", hardcodedUserAuthToken);
-        authenticator.addEntitlementToRole("authenticatorAPIUserRole", "resource role 4", hardcodedUserAuthToken);
-        authenticator.addEntitlementToRole("role 3", "permission 3", hardcodedUserAuthToken);
-        authenticator.addEntitlementToUser("hardcodedUser", "resource role 1", hardcodedUserAuthToken);
-        authenticator.addEntitlementToRole("role 4", "permission 4", hardcodedUserAuthToken);
-        authenticator.addEntitlementToRole("resource role 1", "resource role 3", hardcodedUserAuthToken);
-        authenticator.addEntitlementToUser("hardcodedUser", "resource role 5", hardcodedUserAuthToken);
-        authenticator.addEntitlementToRole("resource role 1", "useAuthenticatorAPI", hardcodedUserAuthToken);
-        authenticator.addEntitlementToRole("authenticatorAPIUserRole", "permission 3", hardcodedUserAuthToken);
-        authenticator.addEntitlementToUser("hardcodedUser", "permission 5", hardcodedUserAuthToken);
-        
-        authenticator.printInventory();*/
     }
     
     /* Getters and Setters */
