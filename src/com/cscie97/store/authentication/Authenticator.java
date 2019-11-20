@@ -382,7 +382,7 @@ public class Authenticator implements StoreAuthenticationService, Visitable
         
         // Check if User of AuthToken has permission
         GetPermissionsVisitor getPermissionsVisitor = new GetPermissionsVisitor(userOfAuthToken);        
-        userOfAuthToken.acceptVisitor(getPermissionsVisitor);
+        this.acceptVisitor(getPermissionsVisitor);
         
         return getPermissionsVisitor;
     }  

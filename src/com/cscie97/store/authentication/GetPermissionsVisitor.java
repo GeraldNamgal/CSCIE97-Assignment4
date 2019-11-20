@@ -26,7 +26,7 @@ public class GetPermissionsVisitor implements Visitor
     @Override
     public void visitAuthenticator(StoreAuthenticationService authenticator)
     {
-        // No action needed
+        user.acceptVisitor(this);
     }
     
     @Override
