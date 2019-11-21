@@ -323,7 +323,6 @@ public class Controller implements Observer
             // Get the source store
             LinkedHashMap<String, Store> stores = modeler.getStores(new AuthTokenTuple(myAuthToken));
             
-            // TODO: Handling correctly? Throw exception?
             if (stores == null)
             {
                 return;
@@ -1442,7 +1441,7 @@ public class Controller implements Observer
                         // Have turnstile tell customer they can't enter (if customer is registered or a guest)
                         if (customer != null)
                         {
-                            expression = "Customer " + customer.getFirstName() + ", you do no have permission to checkout at " + store.getName()
+                            expression = "Customer " + customer.getFirstName() + ", you do not have permission to checkout at " + store.getName()
                                     + ". Please return items to store. Thank you!";
                             System.out.println();
                             System.out.println(appliance.getName() + ": \"" + expression + "\"");
@@ -1648,6 +1647,15 @@ public class Controller implements Observer
             // Get customer's AuthToken
             AuthToken customerAuthToken = authenticator.login(customerId + "-fp", "--face:" + customerId + "--");
             
+            if (customerAuthToken == null)
+            {
+                expression = "Hello. You do not have permission to enter " + store.getName() + ". Please register an account first";
+                System.out.println();
+                System.out.println(appliance.getName() + ": \"" + expression + "\"");
+                appliance.getTurnstile(new AuthTokenTuple(myAuthToken)).speak(expression);
+                return;
+            }
+            
             // Create AuthTokenTuple with customer's AuthToken, source store id as a resource            
             AuthTokenTuple customerAuthTokenTuple = new AuthTokenTuple(customerAuthToken, store.getId());
             
@@ -1658,7 +1666,7 @@ public class Controller implements Observer
                 // Have turnstile tell customer they can't enter (if customer is registered or a guest)
                 if (customer != null)
                 {
-                    expression = "Hello, customer " + customer.getFirstName() + ", you do no have permission to enter " + store.getName();
+                    expression = "Hello, customer " + customer.getFirstName() + ", you do not have permission to enter " + store.getName();
                     System.out.println();
                     System.out.println(appliance.getName() + ": \"" + expression + "\"");
                     appliance.getTurnstile(new AuthTokenTuple(myAuthToken)).speak(expression);
@@ -1756,8 +1764,21 @@ public class Controller implements Observer
             // If customer is registered, assign them a virtual basket
             if ((customerBalance != null) && (Integer.parseInt(customerBalance) > 0))
             {             
-                System.out.println("Controller Service: Getting customer " + customerId + "'s virtual basket");
-                modeler.getCustomerBasket(customerId, new AuthTokenTuple(myAuthToken));
+                // If customer does not have the "checkout" permission for the source store, don't assign them a basket
+                if ((getPermissionsVisitor == null) || !getPermissionsVisitor.hasPermission(customerAuthTokenTuple.getPermissionTuple().setPermissionId("checkout")))
+                {
+                    expression = "Customer " + customer.getFirstName() + ", you do not have permission to checkout at " + store.getName()
+                            + ". You may not be assigned a basket";
+                    System.out.println();
+                    System.out.println(appliance.getName() + ": \"" + expression + "\"");
+                    appliance.getTurnstile(new AuthTokenTuple(myAuthToken)).speak(expression);
+                }
+                
+                else
+                {
+                    System.out.println("Controller Service: Getting customer " + customerId + "'s virtual basket");
+                    modeler.getCustomerBasket(customerId, new AuthTokenTuple(myAuthToken));
+                }
             }
         }        
     }

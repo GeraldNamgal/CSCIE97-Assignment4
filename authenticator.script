@@ -38,32 +38,40 @@ define user customer1 "Customer 1"
 define user customer2 "Customer 2"
 define user customer3 "Customer 3"
 define user customer5 "Customer 5"
+define user customer6 "Customer 6"
 
 # Add roles to users
 add entitlement to user customer1 "store1 adult consumer"
 add entitlement to user customer2 guest
 add entitlement to user customer3 "store1 child consumer"
 add entitlement to user customer5 "store2 adult consumer"
+add entitlement to user customer6 "store2 adult consumer"
+
+# Add permission to user
+add entitlement to user customer5 "enter store"
 
 # Add Credentials to Users
 add user credential customer1 voiceprint --voice:customer1--
 add user credential customer1 faceprint --face:customer1--
+add user credential customer2 voiceprint --voice:customer2--
 add user credential customer2 faceprint --face:customer2--
-add user credential customer3 faceprint --face:customer3--
 add user credential customer3 voiceprint --voice:customer3--
+add user credential customer3 faceprint --face:customer3--
 add user credential customer5 faceprint --face:customer5--
 add user credential customer5 voiceprint --voice:customer5--
-
-# Print inventory
-print inventory
+add user credential customer6 faceprint --face:customer6--
+add user credential customer6 voiceprint --voice:customer6--
 
 # Exception: Try to have CommandProcessor define store 1 (i.e., use Store Model Service) without required permission
 define store "store1" name "Harvard Square Store" address "1400 Mass Avenue, Cambridge, MA 02138"
 
-# Give hardcodedUser (user the CommandProcessor is signed in as) Model Service admin role
+# Give hardcodedUser (the User that CommandProcessor is logged in as) Model Service admin role
 add entitlement to user hardcodedUser "Model Service API admin"
 
-# Define store 1 (should now have permission to)
+# Print inventory (hardcodedUser should now have "Model Service API admin" role)
+print inventory
+
+# Define store 1 (CommandProcessor/hardcodedUser should now have permission to)
 define store "store1" name "Harvard Square Store" address "1400 Mass Avenue, Cambridge, MA 02138"
 
 # Define the rest of store 1's assets
@@ -153,19 +161,17 @@ add entitlement to user controller "Model Service API admin"
 # Login Controller user
 login to authenticator controller
 
-# Print inventory
+# Print inventory (Controller should be listed as a User with Permissions included)
 print inventory
 
 # Create an Emergency event (Controller now has permissions to handle the event appropriately)
 create event camera1 event "emergency fire aisle1"
 
-# Show store 1
-show store store1
-
 # Enter Store event for customer1 (registered adult customer)
 create event turnstile2 event "enter_store customer1"
 
-# TODO -- Exception: Have customer ... attempt to enter store 1 (only has permission to enter store 2, not store 1)
+# Exception: Have customer6 attempt to enter store 1 (only has permission to shop at store 2)
+create event turnstile1 event "enter_store customer6"
 
 # Enter Store event for customer2 (a guest)
 create event turnstile2 event "enter_store customer2"
@@ -173,47 +179,23 @@ create event turnstile2 event "enter_store customer2"
 # Enter Store event for customer3 (registered child customer)
 create event turnstile3 event "enter_store customer3"
 
-# Customer Seen event for customer 1
-create event camera1 event "customer_seen customer1 aisle1"
+# Exception: customer5 can enter store1 but can't checkout at store1 so isn't assigned a basket
+create event turnstile1 event "enter_store customer5"
+
+# Basket Items event (customer 3 adds 2 of product 1 to their basket)
+create event camera1 event "basket_items customer3 add product1 2 aisle1:shelf1"
 
 # Basket Items event (customer 1 adds 6 of product 1 to their basket)
 create event camera1 event "basket_items customer1 add product1 6 aisle1:shelf1"
 
-# Show store 1 (count for product 1's inventory [inventory2] in aisle 5 [storeroom] should be 24)
-show store store1
-
-# Show customer 1's basket items (should have 6 of product1)
-show basket_items customer1
-
 # Basket Items event (customer 1 removes 6 of product 1 from their basket)
 create event camera1 event "basket_items customer1 remove product1 6 aisle1:shelf1"
-
-# Show store 1 (count for product 1's inventory [inventory2] in aisle 5 [storeroom] should be back to 30)
-show store store1
-
-# Show customer 1's basket items (should be empty)
-show basket_items customer1
 
 # Clean event
 create event camera1 event "clean product1 aisle1"
 
-# Broken Glass event
-create event microphone2 event "broken_glass aisle2"
-
-# Customer Seen event for customer 2
-create event camera3 event "customer_seen customer2 aisle3"
-
-# Missing Person event
-create event microphone1 event "missing_person customer2"
-
 # Customer Seen event for customer 1
 create event camera3 event "customer_seen customer1 aisle3"
-
-# Show customer 1 (should be in aisle 3)
-show customer customer1
-
-# Show customer 2 (should be in aisle 3)
-show customer customer2
 
 # Fetch Product event
 create event microphone3 event "fetch_product product2 6 aisle1:shelf1 customer1 --voice:customer1--"
@@ -221,47 +203,20 @@ create event microphone3 event "fetch_product product2 6 aisle1:shelf1 customer1
 # Exception: Customer 1 commands robot to fetch a product again with erroneous credential value
 create event microphone3 event "fetch_product product2 6 aisle1:shelf1 customer1 -+voice:customer1@-"
 
-# Exception: Have Customer 3 attempt to command a robot to fetch a product (doesn't have permission)
+# Exception: Have Customer 3 attempt to command a robot to fetch a product (doesn't have permission as a child)
 create event microphone3 event "fetch_product product2 1 aisle1:shelf1 customer3 --voice:customer3--"
 
-# Show store (aisle1:shelf1 should have 34 of product2)
-show store store1
-
-# Show customer 1's basket items (should have 6 of product2)
-show basket_items customer1
-
-# Account Balance event for customer1
-create event microphone3 event "account_balance customer1"
-
-# Show product2 (unit price should be 1/6 of total value of customer 1's basket items)
-show product product2
-
-# Checkout event for customer 1 (a registered adult customer with basket items)
+# Checkout event for customer 1 (a registered adult customer)
 create event turnstile1 event "checkout customer1"
 
 # Checkout event for customer 2 (a guest)
 create event turnstile1 event "checkout customer2"
 
-# Checkout event for customer 3 (a registered child customer with no basket items)
+# Checkout event for customer 3 (a registered child customer)
 create event turnstile2 event "checkout customer3"
 
-# Show customer 1 (should be out of store1 ["null" location])
-show customer customer1
-
-# Show customer 2 (should be out of store1 ["null" location])
-show customer customer2
-
-# Show store 1 (should have no "active customers")
-show store store1
-
-# Show block 2 from ledger (customer 1's transaction should be reflected)
+# Show block 2 from ledger (customer transactions should be reflected)
 get-block 2
 
-# TODO (???) -- Exception: Attempt to have an unregistered/unknown person enter the store
-# create event turnstile2 event "enter_store unknownPerson"
-
-# Exception: Attempt to have a registered customer with no Blockchain funds (customer 4) enter store
-# create event turnstile3 event "enter_store customer4"
-
-# TODO: Make sense? -- Checkout event for an unregistered person (any person who doesn't have unpaid items should be able to exit store [fire hazard, etc.])
-# create event turnstile1 event "checkout unknownPerson"
+# Exception: Attempt to have an unregistered/unknown person enter the store
+create event turnstile2 event "enter_store unknownPerson"
