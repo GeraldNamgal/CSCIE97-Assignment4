@@ -19,8 +19,4 @@ public interface StoreAuthenticationService
     
     // Getters and Setters
     LinkedHashMap<String, User> getUsers(); // Used in PrintInventory
-    
-    // TODO: For debugging (can delete later)
-    AuthToken getMyAuthToken();
-    LinkedHashMap<String, Entitlement> getEntitlements();
 }

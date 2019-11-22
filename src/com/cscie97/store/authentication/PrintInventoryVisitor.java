@@ -53,7 +53,7 @@ public class PrintInventoryVisitor implements Visitor
         
         for (Entry<String, Entitlement> entitlementEntry : user.getEntitlements().entrySet())
         {       
-            traverseTreeGetPermissions(entitlementEntry.getValue(), level);              
+            traverseTreeAndPrint(entitlementEntry.getValue(), level);              
         }        
     }  
     
@@ -83,7 +83,7 @@ public class PrintInventoryVisitor implements Visitor
     
     /* UTILITY METHODS */
     
-    public void traverseTreeGetPermissions(Visitable entitlement, Integer level)
+    public void traverseTreeAndPrint(Visitable entitlement, Integer level)
     {
         levelPtr = level.intValue();
         
@@ -103,7 +103,7 @@ public class PrintInventoryVisitor implements Visitor
             LinkedHashMap<String, Entitlement> entitlements = role.getEntitlements();
             for (Entry<String, Entitlement> entitlementEntry : entitlements.entrySet())
             {       
-                traverseTreeGetPermissions(entitlementEntry.getValue(), newLevel);                
+                traverseTreeAndPrint(entitlementEntry.getValue(), newLevel);                
             }
         }              
     }      

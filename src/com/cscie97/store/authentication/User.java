@@ -36,6 +36,12 @@ public class User implements Visitable
         entitlements.put(entitlement.getId(), entitlement);
     }
     
+    @Override
+    public void acceptVisitor(Visitor visitor)
+    {
+        visitor.visitUser(this);
+    }  
+    
     /* Getters and Setters */
     
     public String getId()
@@ -61,11 +67,5 @@ public class User implements Visitable
     public LinkedHashMap<String, AuthToken> getAuthTokens()
     {
         return authTokens;
-    }
-
-    @Override
-    public void acceptVisitor(Visitor visitor)
-    {
-        visitor.visitUser(this);
-    }       
+    }        
 }

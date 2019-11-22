@@ -259,9 +259,9 @@ public class Authenticator implements StoreAuthenticationService, Visitable
             Boolean expirationPassed = checkIfExpired(authTokenEntry.getValue());
             Boolean inactivityElapsed = checkIfInactivityPassed(authTokenEntry.getValue());
             
-            // If authToken is past expiration time or its inactivity time limit elapsed, invalidate it 
+            // If authToken is past expiration time or its inactivity time limit elapsed, invalidate it / log it out
             if (expirationPassed || inactivityElapsed)
-                authTokenEntry.getValue().setActive(false, new AuthTokenTuple(myAuthToken));
+                logout(authTokenEntry.getValue());
             
             // Otherwise, if authToken is valid, retrieve it
             else if (authTokenEntry.getValue().isActive() == true)
@@ -303,7 +303,7 @@ public class Authenticator implements StoreAuthenticationService, Visitable
         {
             try
             {              
-                throw new AuthenticatorException("InvalidAuthTokenException", "logout", "invalid AuthToken; not logged out");
+                throw new AuthenticatorException("InvalidAuthTokenException", "logout", "invalid AuthToken");
             }
             
             catch (AuthenticatorException exception)
@@ -330,8 +330,8 @@ public class Authenticator implements StoreAuthenticationService, Visitable
         // If authToken's expiration date has passed or its lastUsedDate is more than allowed limit, throw exception
         if ((authToken != null) && (checkIfExpired(authToken) || checkIfInactivityPassed(authToken)))
         {
-            // Inactivate authToken
-            authToken.setActive(false, new AuthTokenTuple(myAuthToken));
+            // Inactivate/logout authToken
+            logout(authToken);
             
             try
             {
@@ -500,17 +500,5 @@ public class Authenticator implements StoreAuthenticationService, Visitable
             System.out.println(exception);            
             return null;
         }       
-    }
-    
-    // TODO: For debugging (can delete later)
-    public AuthToken getMyAuthToken()
-    {
-        return myAuthToken;
-    }
-    
-    // TODO: For debugging (can delete later)
-    public LinkedHashMap<String, Entitlement> getEntitlements()
-    {
-        return entitlements;
     }  
 }
