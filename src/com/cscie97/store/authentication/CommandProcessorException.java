@@ -1,5 +1,15 @@
+/* *
+ * Gerald Arocena
+ * CSCI E-97
+ * Professor: Eric Gieseke
+ * Assignment 4
+ */
+
 package com.cscie97.store.authentication;
 
+/* *
+ * Handles exceptions thrown by the CommandProcessor class in the store.authentication package. Extends Java's Exception class
+ */
 @SuppressWarnings("serial")
 public class CommandProcessorException extends java.lang.Exception
 {

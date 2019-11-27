@@ -1,7 +1,17 @@
+/* *
+ * Gerald Arocena
+ * CSCI E-97
+ * Professor: Eric Gieseke
+ * Assignment 4
+ */
+
 package com.cscie97.store.authentication;
 
 import java.util.LinkedHashMap;
 
+/* *
+ * Represents a user of the Store 24X7 System and their associated data. Implements Visitable (for usage in Visitor design pattern)
+ */
 public class User implements Visitable
 {
     private String id;

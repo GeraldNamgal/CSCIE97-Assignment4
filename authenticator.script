@@ -161,13 +161,13 @@ add entitlement to user controller "Model Service API admin"
 # Login Controller user
 login to authenticator controller
 
-# Print inventory (Controller should be listed as a User with Permissions included)
+# Print inventory (controller should be listed as a User with Permissions included)
 print inventory
 
 # Create an Emergency event (Controller now has permissions to handle the event appropriately)
 create event camera1 event "emergency fire aisle1"
 
-# Enter Store event for customer1 (registered adult customer)
+# Enter Store event for customer1 (registered adult customer at store1 aka "Harvard Square Store")
 create event turnstile2 event "enter_store customer1"
 
 # Exception: Have customer6 attempt to enter store 1 (only has permission to shop at store 2)
@@ -176,7 +176,7 @@ create event turnstile1 event "enter_store customer6"
 # Enter Store event for customer2 (a guest)
 create event turnstile2 event "enter_store customer2"
 
-# Enter Store event for customer3 (registered child customer)
+# Enter Store event for customer3 (registered child customer at store1)
 create event turnstile3 event "enter_store customer3"
 
 # Exception: customer5 can enter store1 but can't checkout at store1 so isn't assigned a basket

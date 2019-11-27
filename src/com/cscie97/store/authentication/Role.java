@@ -1,7 +1,17 @@
+/* *
+ * Gerald Arocena
+ * CSCI E-97
+ * Professor: Eric Gieseke
+ * Assignment 4
+ */
+
 package com.cscie97.store.authentication;
 
 import java.util.LinkedHashMap;
 
+/* *
+ * Represents a Role, e.g., that Users can have. Extends Entitlement (so can be used in a Composite design pattern as a composite)
+ */
 public class Role extends Entitlement
 {
     /* Variables */

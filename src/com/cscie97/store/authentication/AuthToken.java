@@ -1,8 +1,18 @@
+/* *
+ * Gerald Arocena
+ * CSCI E-97
+ * Professor: Eric Gieseke
+ * Assignment 4
+ */
+
 package com.cscie97.store.authentication;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
+/* *
+ * Represents an Auth Token that verifies and associates to a User (and their permissions)
+ */
 public class AuthToken
 {
     /* Variables */

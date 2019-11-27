@@ -1,3 +1,10 @@
+/* *
+ * Gerald Arocena
+ * CSCI E-97
+ * Professor: Eric Gieseke
+ * Assignment 4
+ */
+
 package com.cscie97.store.authentication;
 
 import java.nio.charset.StandardCharsets;
@@ -12,6 +19,9 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map.Entry;
 
+/* *
+ * Authenticator class implements the StoreAuthentication and Visitable interfaces
+ */
 public class Authenticator implements StoreAuthenticationService, Visitable
 {
     /* VARIABLES */
@@ -29,9 +39,16 @@ public class Authenticator implements StoreAuthenticationService, Visitable
    
     /* CONSTRUCTOR */
     
+    /* *
+     * Creates a new Authenticator. In its constructor, an initial hardcoded user is defined so that a client (e.g., the CommandProcessor)
+     * can perform an initial login to obtain the permissions required to actually use the Authentication Service API methods since most
+     * methods require an appropriate AuthToken to be used 
+     * @param credentialUserIndexes The mapping from a User's credential id and value to the User object that contains their corresponding
+     *                              Credential object
+     */
     public Authenticator()
     {      
-        // Create new Map of Users, Entitlements, and Resources
+        // Create new Map of Users, Entitlements, and Resources managed by the Authentication Service
         users = new LinkedHashMap<String, User>();
         entitlements = new LinkedHashMap<String, Entitlement>();
         resources = new LinkedHashMap<String, Resource>();
@@ -83,12 +100,15 @@ public class Authenticator implements StoreAuthenticationService, Visitable
         // Give authTokenPermission to Authenticator User (only it has this special permission)
         authenticatorUser.addEntitlement(authTokenPermission);
                 
-        // Login authenticator (so it can modify AuthTokens)
+        // Login authenticator (so it can modify AuthTokens) and save the AuthToken
         myAuthToken = login("authenticator-pwd", "password");       
     }
     
     /* API METHODS */   
     
+    /* *
+     * Defines a permission to access a particular behavior or aspect of the Store 24X7 System
+     */
     @Override
     public Permission definePermission(String id, String name, String description, AuthTokenTuple authTokenTupleForMethod)
     {
@@ -104,6 +124,9 @@ public class Authenticator implements StoreAuthenticationService, Visitable
         return permission;
     }
 
+    /* *
+     * Defines a role a user can have in relation to the Store 24X7 System
+     */
     @Override
     public Role defineRole(String id, String name, String description, AuthTokenTuple authTokenTupleForMethod)
     {
@@ -119,6 +142,9 @@ public class Authenticator implements StoreAuthenticationService, Visitable
         return role;
     }
 
+    /* *
+     * Adds an Entitlement (Role, ResourceRole, or Permission) to a Role (or ResourceRole)
+     */
     @Override
     public void addEntitlementToRole(String roleId, String entitlementId, AuthTokenTuple authTokenTupleForMethod)
     {
@@ -126,15 +152,16 @@ public class Authenticator implements StoreAuthenticationService, Visitable
         GetPermissionsVisitor getPermissionsVisitor = getUserPermissions(authTokenTupleForMethod.getAuthToken());
         if ((getPermissionsVisitor == null) || !getPermissionsVisitor.hasPermission(authTokenTupleForMethod.getPermissionTuple().setPermissionId("use Authenticator API")))
             return;
-                
-        // TODO (if have time): Check that given Permission and Role are valid objects         
-        
+                      
         // Get given Permission and Role and add the Permission to the Role
         Entitlement entitlement = entitlements.get(entitlementId);
         Role role = (Role) entitlements.get(roleId);
         role.addEntitlement(entitlement);
     }
 
+    /* *
+     * Defines a user of the Store 24X7 System
+     */
     @Override
     public User defineUser(String userId, String name, AuthTokenTuple authTokenTupleForMethod)
     {       
@@ -142,8 +169,6 @@ public class Authenticator implements StoreAuthenticationService, Visitable
         GetPermissionsVisitor getPermissionsVisitor = getUserPermissions(authTokenTupleForMethod.getAuthToken());
         if ((getPermissionsVisitor == null) || !getPermissionsVisitor.hasPermission(authTokenTupleForMethod.getPermissionTuple().setPermissionId("use Authenticator API")))
             return null;
-                
-        // TODO (if have time): Check for duplicates before creating new User or nah (so can rewrite User easily)?
         
         // Create a new User
         User user = new User(userId, name);
@@ -154,6 +179,9 @@ public class Authenticator implements StoreAuthenticationService, Visitable
         return user;
     }
 
+    /* *
+     * Gives the user a credential (e.g., to login / obtain an AuthToken)
+     */
     @Override
     public void addUserCredential(String userId, String type, String value, AuthTokenTuple authTokenTupleForMethod)
     {
@@ -161,8 +189,6 @@ public class Authenticator implements StoreAuthenticationService, Visitable
         GetPermissionsVisitor getPermissionsVisitor = getUserPermissions(authTokenTupleForMethod.getAuthToken());
         if ((getPermissionsVisitor == null) || !getPermissionsVisitor.hasPermission(authTokenTupleForMethod.getPermissionTuple().setPermissionId("use Authenticator API")))
             return;
-                
-        // TODO (if have time): Check that given User is valid
         
         // Create Credential
         Credential credential = null;
@@ -181,6 +207,9 @@ public class Authenticator implements StoreAuthenticationService, Visitable
         }
     }
 
+    /* *
+     * Adds an Entitlement (Role, ResourceRole, or Permission) to a User
+     */
     @Override
     public void addEntitlementToUser(String userId, String entitlementId, AuthTokenTuple authTokenTupleForMethod)
     {
@@ -188,14 +217,15 @@ public class Authenticator implements StoreAuthenticationService, Visitable
         GetPermissionsVisitor getPermissionsVisitor = getUserPermissions(authTokenTupleForMethod.getAuthToken());
         if ((getPermissionsVisitor == null) || !getPermissionsVisitor.hasPermission(authTokenTupleForMethod.getPermissionTuple().setPermissionId("use Authenticator API")))
             return;
-                
-        // TODO (if have time): Check that given User and Role are valid
         
         // Get given Role and User and add the Role to the User
         Entitlement entitlement = entitlements.get(entitlementId);
         users.get(userId).addEntitlement(entitlement);
     }
 
+    /* *
+     * Defines a resource in the Store 24X7 System (e.g., for ResourceRoles)
+     */
     @Override
     public Resource defineResource(String id, String description, AuthTokenTuple authTokenTupleForMethod)
     {
@@ -210,6 +240,11 @@ public class Authenticator implements StoreAuthenticationService, Visitable
         return resource;
     }
     
+    /* *
+     * Defines a ResourceRole
+     * @param resourceId The id of the Resource to be associated with
+     * @param entitlementId The id of the associated Entitlement (Role, ResourceRole, or Permission)
+     */
     @Override
     public ResourceRole defineResourceRole(String id, String name, String description, String entitlementId, String resourceId, AuthTokenTuple authTokenTupleForMethod)
     {
@@ -217,8 +252,6 @@ public class Authenticator implements StoreAuthenticationService, Visitable
         GetPermissionsVisitor getPermissionsVisitor = getUserPermissions(authTokenTupleForMethod.getAuthToken());
         if ((getPermissionsVisitor == null) || !getPermissionsVisitor.hasPermission(authTokenTupleForMethod.getPermissionTuple().setPermissionId("use Authenticator API")))
             return null;
-                
-        // TODO (if have time): Check that given Resource and Entitlement are valid
         
         // Get given Resource and Entitlement to add to the ResourceRole
         Resource resource = resources.get(resourceId);
@@ -229,6 +262,12 @@ public class Authenticator implements StoreAuthenticationService, Visitable
         return resourceRole;
     }   
     
+    /* *
+     * Logs a User in
+     * @param credentialId E.g., the username, voiceprint id, or faceprint id of the User
+     * @param credentialValue E.g., the password, voiceprint, or faceprint of the User
+     * @return An AuthToken
+     */
     @Override
     public AuthToken login(String credentialId, String credentialValue)
     {
@@ -295,6 +334,10 @@ public class Authenticator implements StoreAuthenticationService, Visitable
         return authToken;
     }
 
+    /* *
+     * Logs a User out (including invalidating their AuthToken)
+     * @param authToken The AuthToken of the User to be invalidated
+     */
     @Override
     public void logout(AuthToken authToken)
     {       
@@ -318,12 +361,20 @@ public class Authenticator implements StoreAuthenticationService, Visitable
         authToken.setActive(false, new AuthTokenTuple(myAuthToken));
     }
     
+    /* *
+     * Implements the one Visitable interface method (for using Visitor design pattern)
+     */
     @Override
     public void acceptVisitor(Visitor visitor)
     {        
         visitor.visitAuthenticator(this);
     }
     
+    /* *
+     * Retrieves a user's permissions
+     * @param authToken The authToken of the user
+     * @return A GetPermissionsVisitor object
+     */
     @Override
     public GetPermissionsVisitor getUserPermissions(AuthToken authToken)
     {
@@ -393,13 +444,20 @@ public class Authenticator implements StoreAuthenticationService, Visitable
         return getPermissionsVisitor;
     }  
     
+    /* *
+     * Prints to stdout objects and sub-objects of interest in the Authentication Service including Users, Credentials,
+     * AuthTokens, and Entitlements 
+     */
     @Override
     public void printInventory()
     {
-        PrintInventoryVisitor printInventory = new PrintInventoryVisitor();
-        this.acceptVisitor(printInventory);
+        PrintInventoryVisitor printInventoryVisitor = new PrintInventoryVisitor();
+        this.acceptVisitor(printInventoryVisitor);
     }
     
+    /* *
+     * Retrieves the Users in the Authentication Service
+     */
     @Override
     public LinkedHashMap<String, User> getUsers()
     {
@@ -408,16 +466,25 @@ public class Authenticator implements StoreAuthenticationService, Visitable
     
     /* UTILITY METHODS */
     
+    /* *
+     * Returns the username for the hardcoded user (used in initial startup of Authentication Service)
+     */
     public static String getHardcodedUserUsername()
     {
         return HARDCODED_USER_USERNAME;
     }    
     
+    /* *
+     * Returns the password for the hardcoded user (used in initial startup of Authentication Service)
+     */
     public static String getHardcodedUserPassword()
     {
         return HARDCODED_USER_PASSWORD;
     }
     
+    /* *
+     * Checks if an AuthToken is past its expiration date
+     */
     public Boolean checkIfExpired(AuthToken authToken)
     {
         Boolean expirationPassed = false;        
@@ -440,6 +507,9 @@ public class Authenticator implements StoreAuthenticationService, Visitable
         return expirationPassed;
     }
     
+    /* *
+     * Checks if an AuthToken is inactive for longer than it's allowed
+     */
     public Boolean checkIfInactivityPassed(AuthToken authToken)
     {
         Boolean inactivityElapsed = false;
@@ -469,7 +539,9 @@ public class Authenticator implements StoreAuthenticationService, Visitable
         return inactivityElapsed;
     }
    
-    // Method: Creates a hash from String input (referenced https://www.baeldung.com/sha-256-hashing-java)
+    /* *
+     * Creates a hash from String input (referenced https://www.baeldung.com/sha-256-hashing-java)
+     */
     public String hashCalculator(String originalString)
     {
         try

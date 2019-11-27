@@ -1,20 +1,34 @@
+/* *
+ * Gerald Arocena
+ * CSCI E-97
+ * Professor: Eric Gieseke
+ * Assignment 4
+ */
+
 package com.cscie97.store.authentication;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map.Entry;
 
+/* *
+ * Represents the visitor in the Visitor design pattern that gets and checks a User's permissions
+ */
 public class GetPermissionsVisitor implements Visitor
 {
     /* VARIABLES */
  
     private User user;
-    private ArrayList<PermissionTuple> permissionTuples;
+    private ArrayList<PermissionTuple> permissionTuples; // Stores the collected user's permissions
     private ArrayList<String> resourceIdsPtr;
     private ArrayList<String> roleIdsPtr;
     
     /* CONSTRUCTOR(S) */
-        
+    
+    /* *
+     * Creates a new GetPermissionsVisitor
+     * @param user The User from which to get all permissions
+     */
     public GetPermissionsVisitor(User user)
     {
         this.user = user;
@@ -38,6 +52,9 @@ public class GetPermissionsVisitor implements Visitor
         }        
     }  
     
+    /* *
+     * Collects Role id's (e.g., during traversal of the user's entitlements tree)
+     */
     @Override
     public void visitRole(Role role)
     {        
@@ -51,6 +68,9 @@ public class GetPermissionsVisitor implements Visitor
         roleIdsPtr = newTmpRoleIds;
     }
     
+    /* *
+     * Collects Resource id's (e.g., during traversal of the user's entitlements tree)
+     */
     @Override
     public void visitResourceRole(ResourceRole rRole)
     {
@@ -64,6 +84,9 @@ public class GetPermissionsVisitor implements Visitor
         resourceIdsPtr = newTmpResourceIds;   
     }
 
+    /* *
+     * Collects Permission id's (e.g., during traversal of the user's entitlements tree)
+     */
     @Override
     public void visitPermission(Permission permission)
     {   
@@ -84,6 +107,9 @@ public class GetPermissionsVisitor implements Visitor
     
     /* UTILITY METHODS */   
     
+    /* *
+     * "Visits" each of the User's entitlements (called recursively on Roles)
+     */
     public void traverseTreeGetPermissions(Visitable entitlement, ArrayList<String> tmpResourceIds, ArrayList<String> tmpRoleIds)
     {       
         // Point to the list of Resource id's passed in
@@ -124,6 +150,9 @@ public class GetPermissionsVisitor implements Visitor
         }              
     }
     
+    /* *
+     * Checks if the user has the given permission (contained in a PermissionTuple)
+     */
     public Boolean hasPermission(PermissionTuple permissionTupleToBeChecked)
     {
         // Search through user's permissions

@@ -1,3 +1,10 @@
+/* *
+ * Gerald Arocena
+ * CSCI E-97
+ * Professor: Eric Gieseke
+ * Assignment 4
+ */
+
 package com.cscie97.store.authentication;
 
 import java.io.BufferedReader;
@@ -6,6 +13,9 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 
+/* *
+ * Exercises the Authenticator and associates to Modeler, Controller, and Ledger's CommandProcessors
+ */
 public class CommandProcessor
 {
     /* Variables */

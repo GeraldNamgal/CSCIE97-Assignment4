@@ -1,5 +1,15 @@
-package com.cscie97.store.authentication;
+/* *
+ * Gerald Arocena
+ * CSCI E-97
+ * Professor: Eric Gieseke
+ * Assignment 4
+ */
 
+package com.cscie97.store.authentication;
+ 
+/* *
+  * Represents a credential of a User. Creates a representative subclass depending on the type of credential
+  */
 public class Credential
 {
     private String id;
@@ -7,8 +17,7 @@ public class Credential
     private Voiceprint voiceprint;
     private Faceprint faceprint;
     private Password password;
-    
-    // TODO: Store credential as a hash
+
     public Credential(String id, String type, String value)
     {
         this.id = id;

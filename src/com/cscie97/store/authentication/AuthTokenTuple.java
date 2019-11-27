@@ -1,5 +1,16 @@
+/* *
+ * Gerald Arocena
+ * CSCI E-97
+ * Professor: Eric Gieseke
+ * Assignment 4
+ */
+
 package com.cscie97.store.authentication;
 
+/* *
+ * Represents a "tuple" object that contains an AuthToken and a PermissionTuple for passing around AuthTokens and their
+ * associated permissions, resources, and roles
+ */
 public class AuthTokenTuple
 {
     /* Variables */

@@ -1,7 +1,17 @@
+/* *
+ * Gerald Arocena
+ * CSCI E-97
+ * Professor: Eric Gieseke
+ * Assignment 4
+ */
+
 package com.cscie97.store.authentication;
 
 import java.util.ArrayList;
 
+/* *
+ * Wraps a permission with its associated resources and roles in a container using their id's
+ */
 public class PermissionTuple
 {
     /* Variables */

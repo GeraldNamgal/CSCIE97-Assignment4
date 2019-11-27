@@ -1,5 +1,16 @@
+/* *
+ * Gerald Arocena
+ * CSCI E-97
+ * Professor: Eric Gieseke
+ * Assignment 4
+ */
+
 package com.cscie97.store.authentication;
 
+/* *
+ * Represents a ResourceRole, e.g., that Users can have. Extends Entitlement (so can be used in a Composite design pattern as a composite).
+ * Restricts an entitlement to a particular resource
+ */
 public class ResourceRole extends Role
 {
     /* Variables */

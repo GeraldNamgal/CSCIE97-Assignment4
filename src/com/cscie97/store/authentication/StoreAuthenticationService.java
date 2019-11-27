@@ -1,7 +1,17 @@
+/* *
+ * Gerald Arocena
+ * CSCI E-97
+ * Professor: Eric Gieseke
+ * Assignment 4
+ */
+
 package com.cscie97.store.authentication;
 
 import java.util.LinkedHashMap;
 
+/* *
+ * Defines the interface API for the Store Authentication Service
+ */
 public interface StoreAuthenticationService
 {
     Permission definePermission(String id, String name, String description, AuthTokenTuple authTokenTupleForMethod);

@@ -1,5 +1,16 @@
+/* *
+ * Gerald Arocena
+ * CSCI E-97
+ * Professor: Eric Gieseke
+ * Assignment 4
+ */
+
 package com.cscie97.store.authentication;
 
+/* *
+ * Class that Roles and Permissions extend. Allows for use of the Composite design pattern. Also extends Visitable
+ * so that a Visitor can visit it (as per the Visitor pattern)
+ */
 public abstract class Entitlement implements Visitable
 {
     /* Variables */

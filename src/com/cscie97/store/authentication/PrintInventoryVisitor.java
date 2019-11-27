@@ -1,8 +1,19 @@
+/* *
+ * Gerald Arocena
+ * CSCI E-97
+ * Professor: Eric Gieseke
+ * Assignment 4
+ */
+
 package com.cscie97.store.authentication;
 
 import java.util.LinkedHashMap;
 import java.util.Map.Entry;
 
+/* *
+ * Represents the Visitor in the Visitor design pattern that prints information on objects of interest in the Authentication
+ * Service to stdout
+ */
 public class PrintInventoryVisitor implements Visitor
 {      
     /* VARIABLES */
@@ -13,6 +24,9 @@ public class PrintInventoryVisitor implements Visitor
     
     /* API METHODS */
 
+    /* *
+     * Prints each Authentication Service User's id and name to stdout
+     */
     @Override
     public void visitAuthenticator(StoreAuthenticationService authenticator)
     {
@@ -30,6 +44,9 @@ public class PrintInventoryVisitor implements Visitor
         }
     }
     
+    /* *
+     * Prints information on objects that a User has to stdout
+     */
     @Override
     public void visitUser(User user)
     {
@@ -57,12 +74,18 @@ public class PrintInventoryVisitor implements Visitor
         }        
     }  
     
+    /* *
+     * Prints a Role's information of user to stdout
+     */
     @Override
     public void visitRole(Role role)
     {        
         System.out.println("Role: id = \"" + role.getId() + "\"; name = \"" + role.getName() + "\"; description = \"" + role.getDescription() + "\"");
     }
     
+    /* *
+     * Prints a ResourceRole's information of user to stdout
+     */
     @Override
     public void visitResourceRole(ResourceRole rRole)
     {
@@ -74,6 +97,9 @@ public class PrintInventoryVisitor implements Visitor
         System.out.println("|Resource: id = \"" + rRole.getResource().getId() + "\"");        
     }
 
+    /* *
+     * Prints a Permission's information of user to stdout
+     */
     @Override
     public void visitPermission(Permission permission)
     {
@@ -83,6 +109,9 @@ public class PrintInventoryVisitor implements Visitor
     
     /* UTILITY METHODS */
     
+    /* *
+     * "Visits" each of a user's entitlements (called recursively on Roles)
+     */
     public void traverseTreeAndPrint(Visitable entitlement, Integer level)
     {
         levelPtr = level.intValue();

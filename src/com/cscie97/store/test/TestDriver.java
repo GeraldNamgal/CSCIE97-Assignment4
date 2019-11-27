@@ -2,7 +2,7 @@
  * Gerald Arocena
  * CSCI E-97
  * Professor: Eric Gieseke
- * Assignment 3
+ * Assignment 4
  */
 
 package com.cscie97.store.test;
@@ -13,7 +13,7 @@ import com.cscie97.store.authentication.CommandProcessor;
 
 /* *
  * Test driver class that contains main method that calls the Store Authenticator CommandProcessor class to exercise the Authenticator
- * and Ledger services
+ * and other services
  */
 public class TestDriver
 {
